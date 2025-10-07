@@ -108,4 +108,6 @@
     </div>
 
 </div>
+{{-- Include Upload Modal --}}
+@include('admin.arsip.upload-modal')
 @endsection

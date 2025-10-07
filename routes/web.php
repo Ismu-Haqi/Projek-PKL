@@ -13,64 +13,76 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DispositionController; 
 use App\Http\Controllers\NotificationController; 
 
+// ... controller lainnya
 
-// Halaman Login dan Logout
+// ✅ Halaman Login (Tidak perlu auth)
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-// ====================================================================
-// RUTE ADMIN (FULL ACCESS)
-// ====================================================================
+// ✅ Redirect Root URL
+Route::get('/', function () {
+    // Jika sudah login, redirect sesuai role
+    if (auth()->check()) {
+        $role = auth()->user()->role;
+        
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($role === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+    }
+    
+    // ✅ Jika belum login, redirect ke login
+    return redirect()->route('login');
+});
+
+// ✅ Admin Routes - HARUS ada middleware auth
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // ARSIP (ArchiveController)
-    Route::get('arsip-digital', [ArchiveController::class, 'index'])->name('arsip.index');
-    Route::post('arsip-digital/upload', [ArchiveController::class, 'store'])->name('arsip.store');
-    Route::get('arsip/favorit', [ArchiveController::class, 'favorit'])->name('arsip.favorit');
-    Route::get('arsip/kategori', [CategoryController::class, 'index'])->name('category.index');
+    // Arsip routes...
+    Route::prefix('arsip')->name('arsip.')->group(function () {
+        Route::get('/', [ArchiveController::class, 'index'])->name('index');
+        Route::post('/', [ArchiveController::class, 'store'])->name('store');
+        Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
+        Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ArchiveController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
+        Route::get('/download/{id}', [ArchiveController::class, 'download'])->name('download');
+    });
     
-    // === RUTE AKSI ARSIP BARU (Lihat & Unduh) ===
-    Route::get('arsip/lihat/{id}', [ArchiveController::class, 'show'])->name('arsip.lihat');
-    Route::get('arsip/unduh/{id}', [ArchiveController::class, 'download'])->name('arsip.unduh');
-    
-    // DISPOSISI & NOTIFIKASI
-    Route::get('disposisi', [DispositionController::class, 'index'])->name('disposition.index');
-    Route::get('notifikasi', [NotificationController::class, 'index'])->name('notification.index');
-
-    // MANAJEMEN UMUM
-    Route::get('manajemen-aset', [AssetController::class, 'index'])->name('asset.index');
-    Route::post('manajemen-aset/store', [AssetController::class, 'store'])->name('asset.store');
+    // Routes lainnya...
+    Route::get('disposisi', [DispositionController::class, 'index'])->name('disposisi.index');
+    Route::get('notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::get('manajemen-aset', [AssetController::class, 'index'])->name('aset.index');
     Route::get('manajemen-user', [UserController::class, 'index'])->name('user.index');
-    Route::post('manajemen-user/store', [UserController::class, 'store'])->name('user.store');
-    Route::get('laporan', [ReportController::class, 'index'])->name('report.index');
-    Route::get('pengaturan', [SettingController::class, 'index'])->name('setting.index');
+    Route::get('laporan', [ReportController::class, 'index'])->name('laporan.index');
+    Route::get('pengaturan', [SettingController::class, 'index'])->name('pengaturan.index');
 });
 
-// ====================================================================
-// RUTE STAFF (LIMITED ACCESS)
-// ====================================================================
+// ✅ Staff Routes - HARUS ada middleware auth
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
     
-    // ARSIP
-    Route::get('arsip-digital', [ArchiveController::class, 'index'])->name('arsip.index');
-    Route::post('arsip-digital/upload', [ArchiveController::class, 'store'])->name('arsip.store'); 
-    Route::get('arsip/favorit', [ArchiveController::class, 'favorit'])->name('arsip.favorit');
-    Route::get('arsip/kategori', [CategoryController::class, 'index'])->name('category.index');
+    // Arsip routes (sama seperti admin)...
+    Route::prefix('arsip')->name('arsip.')->group(function () {
+        Route::get('/', [ArchiveController::class, 'index'])->name('index');
+        Route::post('/', [ArchiveController::class, 'store'])->name('store');
+        Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
+        Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ArchiveController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
+        Route::get('/download/{id}', [ArchiveController::class, 'download'])->name('download');
+    });
     
-    // === RUTE AKSI ARSIP BARU (Lihat & Unduh) ===
-    Route::get('arsip/lihat/{id}', [ArchiveController::class, 'show'])->name('arsip.lihat');
-    Route::get('arsip/unduh/{id}', [ArchiveController::class, 'download'])->name('arsip.unduh');
-    
-    // DISPOSISI & NOTIFIKASI
-    Route::get('disposisi', [DispositionController::class, 'index'])->name('disposition.index');
-    Route::get('notifikasi', [NotificationController::class, 'index'])->name('notification.index');
-    
-    // MANAJEMEN UMUM
-    Route::get('manajemen-aset', [AssetController::class, 'index'])->name('asset.index');
-    Route::get('laporan', [ReportController::class, 'index'])->name('report.index');
+    Route::get('disposisi', [DispositionController::class, 'index'])->name('disposisi.index');
+    Route::get('notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::get('manajemen-aset', [AssetController::class, 'index'])->name('aset.index');
 });
 
 // Redirect user yang mengakses root URL ('/')
@@ -81,7 +93,6 @@ Route::get('/', function () {
         if ($role === 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($role === 'staff') {
-            // Perlu menggunakan route staff di sini!
             return redirect()->route('staff.dashboard');
         }
     }

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,8 +18,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',  // TAMBAHAN: untuk login
         'email',
         'password',
+        'role',      // TAMBAHAN: admin atau staff
+        'unit',      // TAMBAHAN: unit/bidang kerja
+        'phone',     // TAMBAHAN: nomor telepon
+        'avatar',    // TAMBAHAN: foto profil
     ];
 
     /**
@@ -40,5 +44,22 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is staff
+     */
+    public function isStaff(): bool
+    {
+        return $this->role === 'staff';
+    }
 }

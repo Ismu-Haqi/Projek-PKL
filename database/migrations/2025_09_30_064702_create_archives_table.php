@@ -6,28 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('archives', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nomor_surat', 100)->unique();
             $table->string('judul');
-            $table->string('jenis_arsip', 100);
-            $table->date('tanggal_arsip');
-            $table->string('file_path'); // Path ke file yang diunggah
             $table->text('keterangan')->nullable();
-            // Foreign key ke tabel users (siapa yang mengunggah/bertanggung jawab)
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('jenis_arsip', 100); // Kategori
+            $table->string('unit', 100); // Unit/Bidang - KOLOM BARU
+            $table->date('tanggal_arsip');
+            $table->string('file_path');
+            $table->string('file_name')->nullable(); // Nama file original
+            $table->bigInteger('file_size')->nullable(); // Ukuran file dalam bytes
+            $table->string('file_type', 50)->nullable(); // PDF, DOCX, dll
+            $table->boolean('is_favorite')->default(false); // Toggle favorite
+            $table->integer('download_count')->default(0); // Hitung download
+            $table->integer('view_count')->default(0); // Hitung views
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('archives');

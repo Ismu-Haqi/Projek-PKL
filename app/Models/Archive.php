@@ -9,25 +9,49 @@ class Archive extends Model
 {
     use HasFactory;
 
-    // Pastikan nama tabel benar
-    protected $table = 'archives'; 
+    protected $table = 'archives';
 
-    /**
-     * The attributes that are mass assignable.
-     * Harus mencantumkan semua kolom yang diisi di ArchiveController::store().
-     */
     protected $fillable = [
         'user_id',
-        'nomor_surat', 
+        'nomor_surat',
+        'tanggal_surat',
+        'tanggal_arsip',
         'judul',
-        'keterangan',    // Untuk Deskripsi
-        'jenis_arsip',   // Untuk Kategori
-        'unit',          // Untuk Unit/Bidang
-        'tanggal_arsip', // Untuk Tanggal Dokumen
-        'file_path',     // Untuk Path File
-        'is_favorite',   // Jika Anda memiliki kolom ini
+        'pengirim',
+        'unit',
+        'jenis_arsip',
+        'category_id',
+        'priority',
+        'file_path',
+        'file_name',
+        'file_size',
+        'file_type',
+        'keterangan',
+        'tags',
+        'is_favorite'
     ];
 
-    // Kolom tanggal yang harus diubah ke instance Carbon
-    protected $dates = ['tanggal_arsip'];
+    protected $casts = [
+        'tanggal_surat' => 'date',
+        'tanggal_arsip' => 'date',
+        'is_favorite' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
+
+    /**
+     * ✅ TAMBAHKAN INI - Relasi ke Category
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Relasi ke User (uploader)
+     */
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
