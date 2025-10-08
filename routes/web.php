@@ -13,16 +13,13 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DispositionController; 
 use App\Http\Controllers\NotificationController; 
 
-// ... controller lainnya
+// ✅ Halaman Login
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
+Route::post('login', [LoginController::class, 'login'])->middleware('guest');
+Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ✅ Halaman Login (Tidak perlu auth)
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-// ✅ Redirect Root URL
+// ✅ Redirect Root URL - HANYA SATU KALI
 Route::get('/', function () {
-    // Jika sudah login, redirect sesuai role
     if (auth()->check()) {
         $role = auth()->user()->role;
         
@@ -33,15 +30,14 @@ Route::get('/', function () {
         }
     }
     
-    // ✅ Jika belum login, redirect ke login
     return redirect()->route('login');
 });
 
-// ✅ Admin Routes - HARUS ada middleware auth
+// ✅ Admin Routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // Arsip routes...
+    // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
@@ -54,7 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/download/{id}', [ArchiveController::class, 'download'])->name('download');
     });
     
-    // Routes lainnya...
+    // Menu Lainnya
     Route::get('disposisi', [DispositionController::class, 'index'])->name('disposisi.index');
     Route::get('notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
     Route::get('manajemen-aset', [AssetController::class, 'index'])->name('aset.index');
@@ -63,11 +59,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('pengaturan', [SettingController::class, 'index'])->name('pengaturan.index');
 });
 
-// ✅ Staff Routes - HARUS ada middleware auth
+// ✅ Staff Routes
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
     
-    // Arsip routes (sama seperti admin)...
+    // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
@@ -83,19 +79,4 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::get('disposisi', [DispositionController::class, 'index'])->name('disposisi.index');
     Route::get('notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
     Route::get('manajemen-aset', [AssetController::class, 'index'])->name('aset.index');
-});
-
-// Redirect user yang mengakses root URL ('/')
-Route::get('/', function () {
-    if (auth()->check()) {
-        $role = auth()->user()->role; 
-        
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($role === 'staff') {
-            return redirect()->route('staff.dashboard');
-        }
-    }
-    
-    return redirect()->route('login');
 });
