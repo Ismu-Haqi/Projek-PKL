@@ -31,4 +31,14 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password123'), // Kredensial: staff1 / password123
         ]);
     }
+    protected $fillable = [
+    'name',
+    'username',
+    'email',
+    'password',
+    'role',
+    'unit',
+    'phone',    // ✅ Tambahkan ini
+    'avatar',   // ✅ Tambahkan ini
+];
 }

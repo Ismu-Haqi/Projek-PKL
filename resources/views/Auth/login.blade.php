@@ -13,15 +13,15 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-white mb-2">GANDARIA</h1>
-            <p class="text-white text-lg">Gandeng Arsip Digital Barito Kuala</p>
-            <p class="text-blue-100 text-sm">Diskominfo Kabupaten Barito Kuala</p>
+            <p class="text-white text-lg">Gandaria Arsip Digital Barito Kuala</p>
+            <p class="text-blue-100 text-sm">Diskominfo Batola</p>
         </div>
 
         <!-- Card Login -->
         <div class="bg-white rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Selamat Datang</h2>
-                <p class="text-gray-600">Masukkan kredensial Anda untuk melanjutkan</p>
+                <p class="text-gray-600">Masukkan Data Anda untuk melanjutkan</p>
             </div>
 
             <!-- Alert Error -->
@@ -137,7 +137,7 @@
 
         <!-- Footer -->
         <p class="text-center text-white text-sm mt-6">
-            &copy; {{ date('Y') }} Diskominfo Kabupaten Barito Kuala. All rights reserved.
+            &copy; {{ date('Y') }} Diskominfo Kabupaten Barito Kuala.
         </p>
     </div>
 
