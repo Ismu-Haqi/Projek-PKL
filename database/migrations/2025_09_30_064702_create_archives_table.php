@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('file_path');
             $table->string('file_name')->nullable(); // Nama file original
             $table->bigInteger('file_size')->nullable(); // Ukuran file dalam bytes
-            $table->string('file_type', 50)->nullable(); // PDF, DOCX, dll
+            $table->string('file_type', 255)->nullable(); // PDF, DOCX, dll
             $table->boolean('is_favorite')->default(false); // Toggle favorite
             $table->integer('download_count')->default(0); // Hitung download
             $table->integer('view_count')->default(0); // Hitung views

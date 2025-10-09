@@ -44,6 +44,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
+    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
     
     // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
@@ -154,6 +155,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/', [DispositionController::class, 'index'])->name('index');
         Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
+        Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
     });
     
     // Notifikasi
