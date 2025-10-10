@@ -99,6 +99,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+        Route::put('/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggleStatus');
     });
     
     // Laporan
