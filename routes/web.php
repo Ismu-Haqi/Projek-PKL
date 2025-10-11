@@ -108,6 +108,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
         Route::get('/user', [ReportController::class, 'user'])->name('user');
+        Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
+        Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
