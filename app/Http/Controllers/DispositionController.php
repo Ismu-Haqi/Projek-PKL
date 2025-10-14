@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Disposition;
 use App\Models\Archive;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -115,7 +116,8 @@ class DispositionController extends Controller
         
         $disposition = Disposition::create($validated);
         
-        // TODO: Send notification to recipient
+        // ✅ SEND NOTIFICATION TO RECIPIENT
+        Notification::createDispositionNotification($disposition);
         
         return redirect()->route('admin.disposisi.index')
             ->with('success', 'Disposisi berhasil dibuat dan dikirim!');
@@ -139,6 +141,13 @@ class DispositionController extends Controller
         // Mark as read if staff and not read yet
         if ($role === 'staff' && !$disposition->isRead()) {
             $disposition->update(['read_at' => now()]);
+            
+            // ✅ MARK RELATED NOTIFICATION AS READ
+            Notification::forUser($user->id)
+                ->where('type', 'disposition')
+                ->whereJsonContains('data->disposition_id', $id)
+                ->unread()
+                ->update(['read_at' => now()]);
         }
         
         return view("{$role}.disposisi.show", compact('disposition'));
@@ -235,6 +244,9 @@ class DispositionController extends Controller
         
         if ($validated['status'] === 'completed') {
             $data['completed_at'] = now();
+            
+            // ✅ SEND NOTIFICATION TO ADMIN (SENDER)
+            Notification::createDispositionCompletedNotification($disposition);
         }
         
         $disposition->update($data);

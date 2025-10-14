@@ -51,10 +51,10 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Prioritas</label>
                 <select name="priority" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <option value="">Semua Prioritas</option>
-                    <option value="urgent" {{ request('priority') == 'urgent' ? 'selected' : '' }}>Sangat Urgent</option>
-                    <option value="high" {{ request('priority') == 'high' ? 'selected' : '' }}>Penting</option>
-                    <option value="normal" {{ request('priority') == 'normal' ? 'selected' : '' }}>Normal</option>
-                    <option value="low" {{ request('priority') == 'low' ? 'selected' : '' }}>Rendah</option>
+                    <option value="urgent" {{ request('priority') == 'urgent' ? 'selected' : '' }}>Sangat Mendesak</option>
+                    <option value="high" {{ request('priority') == 'high' ? 'selected' : '' }}>Mendesak</option>
+                    <option value="normal" {{ request('priority') == 'normal' ? 'selected' : '' }}>Biasa</option>
+                    <option value="low" {{ request('priority') == 'low' ? 'selected' : '' }}>Tidak Mendesak</option>
                 </select>
             </div>
             

@@ -62,4 +62,28 @@ class User extends Authenticatable
     {
         return $this->role === 'staff';
     }
+
+    /**
+     * Relasi ke Notifications
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Relasi ke unread notifications
+     */
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class)->whereNull('read_at');
+    }
+
+    /**
+     * Get unread notifications count
+     */
+    public function getUnreadNotificationsCountAttribute()
+    {
+        return $this->unreadNotifications()->count();
+    }
 }

@@ -13,7 +13,21 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('type'); // disposition, archive, user, system, warning
+            $table->string('title');
+            $table->text('message');
+            $table->json('data')->nullable(); // Data tambahan (ID, metadata, dll)
+            $table->string('icon')->nullable(); // Custom icon jika perlu
+            $table->string('url')->nullable(); // URL tujuan ketika notifikasi di-klik
+            $table->timestamp('read_at')->nullable(); // Waktu dibaca
             $table->timestamps();
+            
+            // Index untuk performa
+            $table->index('user_id');
+            $table->index('read_at');
+            $table->index('type');
+            $table->index(['user_id', 'read_at']);
         });
     }
 

@@ -72,9 +72,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
         Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
     });
     
     // Manajemen Aset

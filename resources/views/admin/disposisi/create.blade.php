@@ -96,10 +96,10 @@
                     </label>
                     <select name="priority" id="priority" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 @error('priority') border-red-500 @enderror">
-                        <option value="normal" {{ old('priority') == 'normal' ? 'selected' : '' }}>Normal</option>
-                        <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Rendah</option>
-                        <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>Penting</option>
-                        <option value="urgent" {{ old('priority') == 'urgent' ? 'selected' : '' }}>Sangat Urgent</option>
+                        <option value="normal" {{ old('priority') == 'normal' ? 'selected' : '' }}>Biasa</option>
+                        <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Tidak Mendesak</option>
+                        <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>Mendesak</option>
+                        <option value="urgent" {{ old('priority') == 'urgent' ? 'selected' : '' }}>Sangat Mendesak</option>
                     </select>
                     @error('priority')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

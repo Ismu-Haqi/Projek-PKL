@@ -300,65 +300,78 @@
             <div class="flex items-center gap-3">
                 <!-- Notifikasi -->
                 <div class="relative">
-                    <button onclick="toggleNotification()" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>
-                        <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
-                    </button>
+    <button onclick="toggleNotification()" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+        </svg>
+        
+        <!-- ✅ BADGE COUNTER REAL-TIME -->
+        @php
+            $unreadCount = Auth::user()->unreadNotifications()->count();
+        @endphp
+        @if($unreadCount > 0)
+        <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+        </span>
+        @endif
+    </button>
 
-                    <!-- Notification Dropdown -->
-                    <div id="notificationDropdown" class="dropdown-menu absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-                        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                            <div class="flex items-center justify-between">
-                                <h3 class="font-bold text-gray-800">Notifikasi</h3>
-                                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">3 Baru</span>
-                            </div>
-                        </div>
-                        <div class="max-h-96 overflow-y-auto">
-                            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3 flex-1">
-                                    <p class="text-sm font-medium text-gray-800">Arsip baru diunggah</p>
-                                    <p class="text-xs text-gray-500 mt-1">Surat Edaran COVID-19 telah ditambahkan</p>
-                                    <p class="text-xs text-blue-600 mt-1">5 menit lalu</p>
-                                </div>
-                            </a>
-                            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3 flex-1">
-                                    <p class="text-sm font-medium text-gray-800">User baru terdaftar</p>
-                                    <p class="text-xs text-gray-500 mt-1">Ahmad telah mendaftar ke sistem</p>
-                                    <p class="text-xs text-blue-600 mt-1">1 jam lalu</p>
-                                </div>
-                            </a>
-                            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="flex items-start p-4 hover:bg-gray-50 transition-colors">
-                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3 flex-1">
-                                    <p class="text-sm font-medium text-gray-800">Sistem Update</p>
-                                    <p class="text-xs text-gray-500 mt-1">Versi 1.0.1 tersedia</p>
-                                    <p class="text-xs text-blue-600 mt-1">3 jam lalu</p>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="p-3 bg-gray-50 text-center border-t">
-                            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Lihat Semua Notifikasi</a>
-                        </div>
-                    </div>
+    <!-- Notification Dropdown -->
+    <div id="notificationDropdown" class="dropdown-menu absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-gray-800">Notifikasi</h3>
+                @if($unreadCount > 0)
+                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }} Baru</span>
+                @endif
+            </div>
+        </div>
+        
+        <div class="max-h-96 overflow-y-auto">
+            @php
+                $recentNotifications = Auth::user()->notifications()
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->get();
+            @endphp
+            
+            @forelse($recentNotifications as $notif)
+            <a href="{{ $notif->url ? route(Auth::user()->role . '.notifikasi.read', $notif->id) : route(Auth::user()->role . '.notifikasi.index') }}" 
+               class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notif->isRead() ? '' : 'bg-blue-50' }}">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-{{ $notif->icon_class['color'] }}-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-{{ $notif->icon_class['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $notif->icon_class['icon'] }}"/>
+                    </svg>
                 </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium text-gray-800">
+                        {{ $notif->title }}
+                        @if(!$notif->isRead())
+                        <span class="inline-block w-1.5 h-1.5 bg-blue-600 rounded-full ml-1"></span>
+                        @endif
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">{{ Str::limit($notif->message, 50) }}</p>
+                    <p class="text-xs text-blue-600 mt-1">{{ $notif->time_ago }}</p>
+                </div>
+            </a>
+            @empty
+            <div class="p-8 text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <p class="text-sm text-gray-500 mt-2">Tidak ada notifikasi</p>
+            </div>
+            @endforelse
+        </div>
+        
+        <div class="p-3 bg-gray-50 text-center border-t">
+            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" 
+               class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Lihat Semua Notifikasi
+            </a>
+        </div>
+    </div>
+</div>
                 
                 <!-- Profile -->
                 <div class="relative">

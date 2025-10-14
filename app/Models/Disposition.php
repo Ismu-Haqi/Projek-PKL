@@ -156,10 +156,10 @@ class Disposition extends Model
     public function getPriorityLabelAttribute()
     {
         $labels = [
-            'urgent' => ['text' => 'Sangat Urgent', 'color' => 'red'],
-            'high' => ['text' => 'Penting', 'color' => 'orange'],
-            'normal' => ['text' => 'Normal', 'color' => 'blue'],
-            'low' => ['text' => 'Rendah', 'color' => 'gray'],
+            'urgent' => ['text' => 'Sangat Mendesak', 'color' => 'red'],
+            'high' => ['text' => 'Mendesak', 'color' => 'orange'],
+            'normal' => ['text' => 'Biasa', 'color' => 'blue'],
+            'low' => ['text' => 'Tidak Mendesak', 'color' => 'gray'],
         ];
 
         return $labels[$this->priority] ?? ['text' => 'Unknown', 'color' => 'gray'];

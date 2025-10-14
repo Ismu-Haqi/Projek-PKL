@@ -1,58 +1,171 @@
-@extends('staff.layouts.app')
-
-@section('title', 'Notifikasi')
+@extends('layouts.staff')
 
 @section('content')
-<div class="p-6">
+<div class="container mx-auto px-4 py-6">
     
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Notifikasi</h1>
-            <p class="text-sm text-gray-500">Daftar pemberitahuan dan aktivitas sistem terbaru</p>
-        </div>
-        
-        {{-- Tombol Mark All Read --}}
-        <button type="button" 
-                class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg shadow-md flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Tandai Semua Dibaca
-        </button>
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">🔔 Notifikasi Saya</h1>
+        <p class="text-gray-600 mt-2">Lihat semua notifikasi disposisi dan arsip</p>
     </div>
 
-    {{-- Daftar Notifikasi --}}
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-        <h3 class="text-xl font-semibold mb-4">Pemberitahuan Sistem</h3>
-        
-        <ul class="divide-y divide-gray-100">
-            @forelse ($notifications ?? [] as $notification)
-            <li class="p-4 flex justify-between items-center {{ ($notification->baca ?? false) ? 'bg-white' : 'bg-blue-50 border-l-4 border-blue-600' }}">
-                <div class="flex items-center">
-                    {{-- Ikon Status --}}
-                    <span class="mr-4 text-xl {{ ($notification->baca ?? false) ? 'text-gray-400' : 'text-blue-600' }}">
-                        @if ($notification->baca ?? false)
-                            &#9989; {{-- Checkmark --}}
-                        @else
-                            &#128276; {{-- Bell --}}
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Total Notifikasi</p>
+                    <h3 class="text-3xl font-bold mt-2">{{ $stats['total'] }}</h3>
+                </div>
+                <svg class="w-12 h-12 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Belum Dibaca</p>
+                    <h3 class="text-3xl font-bold mt-2">{{ $stats['unread'] }}</h3>
+                </div>
+                <svg class="w-12 h-12 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Sudah Dibaca</p>
+                    <h3 class="text-3xl font-bold mt-2">{{ $stats['read'] }}</h3>
+                </div>
+                <svg class="w-12 h-12 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Hari Ini</p>
+                    <h3 class="text-3xl font-bold mt-2">{{ $stats['today'] }}</h3>
+                </div>
+                <svg class="w-12 h-12 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between items-center mb-6">
+        <form action="{{ route('staff.notifikasi.read-all') }}" method="POST" class="inline">
+            @csrf
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Tandai Semua Sudah Dibaca
+            </button>
+        </form>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        @forelse($notifications as $notification)
+        <div class="flex items-start p-4 border-b hover:bg-gray-50 transition {{ $notification->isRead() ? 'bg-white' : 'bg-blue-50' }}">
+            <!-- Icon -->
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-{{ $notification->icon_class['color'] }}-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-{{ $notification->icon_class['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $notification->icon_class['icon'] }}"/>
+                </svg>
+            </div>
+
+            <!-- Content -->
+            <div class="ml-4 flex-1">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-gray-800 {{ !$notification->isRead() ? 'font-bold' : '' }}">
+                            {{ $notification->title }}
+                            @if(!$notification->isRead())
+                                <span class="inline-block w-2 h-2 bg-blue-600 rounded-full ml-2"></span>
+                            @endif
+                        </h4>
+                        <p class="text-sm text-gray-600 mt-1">{{ $notification->message }}</p>
+                        
+                        @if($notification->data)
+                        <div class="mt-2 text-xs text-gray-500">
+                            @if(isset($notification->data['from_user']))
+                            <span class="inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Dari: {{ $notification->data['from_user'] }}
+                            </span>
+                            @endif
+                            
+                            @if(isset($notification->data['priority']))
+                            <span class="ml-3 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
+                                {{ $notification->data['priority'] === 'urgent' ? 'bg-red-100 text-red-800' : '' }}
+                                {{ $notification->data['priority'] === 'high' ? 'bg-orange-100 text-orange-800' : '' }}
+                                {{ $notification->data['priority'] === 'normal' ? 'bg-blue-100 text-blue-800' : '' }}
+                                {{ $notification->data['priority'] === 'low' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                {{ strtoupper($notification->data['priority']) }}
+                            </span>
+                            @endif
+                        </div>
                         @endif
-                    </span>
-                    
-                    <div>
-                        <p class="font-medium {{ ($notification->baca ?? false) ? 'text-gray-600' : 'text-gray-900' }}">
-                            {{ $notification->pesan ?? 'Notifikasi baru.' }}
-                        </p>
-                        <p class="text-xs text-gray-500 mt-0.5">
-                            {{ $notification->waktu ?? 'Baru saja' }}
-                        </p>
+                        
+                        <p class="text-xs text-gray-400 mt-2">{{ $notification->time_ago }}</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 ml-4">
+                        @if($notification->url)
+                        <a href="{{ route('staff.notifikasi.read', $notification->id) }}" 
+                           class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Lihat
+                        </a>
+                        @endif
+
+                        @if(!$notification->isRead())
+                        <form action="{{ route('staff.notifikasi.read', $notification->id) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition" title="Tandai Sudah Dibaca">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </button>
+                        </form>
+                        @endif
                     </div>
                 </div>
-                
-                <a href="#" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Lihat Detail</a>
-            </li>
-            @empty
-            <li class="p-4 text-center text-gray-500">Tidak ada notifikasi baru.</li>
-            @endforelse
-        </ul>
-        
+            </div>
+        </div>
+        @empty
+        <div class="p-12 text-center">
+            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <p class="mt-4 text-gray-500 font-medium">Tidak ada notifikasi</p>
+            <p class="text-sm text-gray-400 mt-1">Notifikasi disposisi akan muncul di sini</p>
+        </div>
+        @endforelse
     </div>
+
+    <!-- Pagination -->
+    @if($notifications->hasPages())
+    <div class="mt-6">
+        {{ $notifications->links() }}
+    </div>
+    @endif
+
 </div>
 @endsection

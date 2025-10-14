@@ -131,7 +131,7 @@
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Timeline Disposisi
+                        Deadline Disposisi
                     </h2>
                 </div>
                 
@@ -229,10 +229,10 @@
                         <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Status</label>
                         @php
                             $statusColors = [
-                                'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                                'in_progress' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                'completed' => 'bg-green-100 text-green-700 border-green-200',
-                                'rejected' => 'bg-red-100 text-red-700 border-red-200'
+                                'Menunggu' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                                'Di Proses' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                'Selesai' => 'bg-green-100 text-green-700 border-green-200',
+                                'Di Tolak' => 'bg-red-100 text-red-700 border-red-200'
                             ];
                         @endphp
                         <div class="mt-2">
@@ -247,10 +247,10 @@
                         <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Prioritas</label>
                         @php
                             $priorityColors = [
-                                'urgent' => 'bg-red-100 text-red-700 border-red-200',
-                                'high' => 'bg-orange-100 text-orange-700 border-orange-200',
-                                'normal' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                'low' => 'bg-gray-100 text-gray-700 border-gray-200'
+                                'Sangat Mendesak' => 'bg-red-100 text-red-700 border-red-200',
+                                'Mendesak' => 'bg-orange-100 text-orange-700 border-orange-200',
+                                'Biasa' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                'Tidak Mendesak' => 'bg-gray-100 text-gray-700 border-gray-200'
                             ];
                         @endphp
                         <div class="mt-2">

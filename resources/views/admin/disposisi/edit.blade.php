@@ -94,10 +94,10 @@
                     </label>
                     <select name="priority" id="priority" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('priority') border-red-500 @enderror">
-                        <option value="normal" {{ old('priority', $disposition->priority) == 'normal' ? 'selected' : '' }}>Normal</option>
-                        <option value="low" {{ old('priority', $disposition->priority) == 'low' ? 'selected' : '' }}>Rendah</option>
-                        <option value="high" {{ old('priority', $disposition->priority) == 'high' ? 'selected' : '' }}>Penting</option>
-                        <option value="urgent" {{ old('priority', $disposition->priority) == 'urgent' ? 'selected' : '' }}>Sangat Urgent</option>
+                        <option value="normal" {{ old('priority', $disposition->priority) == 'normal' ? 'selected' : '' }}>Biasa</option>
+                        <option value="low" {{ old('priority', $disposition->priority) == 'low' ? 'selected' : '' }}>Tidak Mendesak</option>
+                        <option value="high" {{ old('priority', $disposition->priority) == 'high' ? 'selected' : '' }}>Mendesak</option>
+                        <option value="urgent" {{ old('priority', $disposition->priority) == 'urgent' ? 'selected' : '' }}>Sangat Mendesak</option>
                     </select>
                     @error('priority')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -138,7 +138,7 @@
                     </svg>
                     <div>
                         <h4 class="text-sm font-bold text-yellow-800 mb-1">⚠️ Perhatian</h4>
-                        <p class="text-sm text-yellow-700">Perubahan pada disposisi akan mempengaruhi tracking dan status yang sudah ada. Pastikan perubahan yang Anda lakukan sudah benar.</p>
+                        <p class="text-sm text-yellow-700">Perubahan pada disposisi akan mempengaruhi tracking dan status yang sudah ada. Pastikan perubahan yang Anda Lakukan sudah benar.</p>
                     </div>
                 </div>
             </div>
