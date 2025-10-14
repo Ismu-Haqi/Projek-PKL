@@ -18,21 +18,7 @@
             </div>
         </div>
         
-        <div class="flex space-x-2">
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                Print
-            </button>
-            <a href="{{ route(Auth::user()->role . '.laporan.export.pdf', ['type' => 'periode']) }}" 
-               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
-                Export PDF
-            </a>
-        </div>
+        
     </div>
 
     <!-- Toggle & Filter -->
@@ -90,6 +76,35 @@
         </form>
     </div>
 
+    <!-- Tombol Untuk Print dan Download -->
+    <div class="flex gap-2 mb-4">
+    <a href="{{ route(auth()->user()->role . '.laporan.print-pdf', [
+            'type' => 'periode',
+            'period_type' => request('type', 'monthly'),
+            'month' => request('month', now()->month),
+            'year' => request('year', now()->year)
+        ]) }}" 
+       target="_blank"
+       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print PDF
+    </a>
+    
+    <a href="{{ route(auth()->user()->role . '.laporan.export-pdf', [
+            'type' => 'periode',
+            'period_type' => request('type', 'monthly'),
+            'month' => request('month', now()->month),
+            'year' => request('year', now()->year)
+        ]) }}" 
+       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Download PDF
+    </a>
+</div>
     <!-- Period Info -->
     <div class="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-6 text-white">
         <div class="flex items-center justify-between">
@@ -183,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
+    <!-- Charts Section with Fixed Height -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Main Chart -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -193,7 +208,9 @@
                 </svg>
                 Tren Arsip {{ $type === 'monthly' ? 'per Hari' : 'per Bulan' }}
             </h3>
-            <canvas id="archivesTrendChart" height="300"></canvas>
+            <div class="relative" style="height: 300px;">
+                <canvas id="archivesTrendChart"></canvas>
+            </div>
         </div>
 
         <!-- Category Chart -->
@@ -205,7 +222,9 @@
                 </svg>
                 Arsip per Kategori
             </h3>
-            <canvas id="categoryChart" height="300"></canvas>
+            <div class="relative" style="height: 300px;">
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -222,7 +241,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y">
-                    @foreach($archiveStats['by_category'] as $item)
+                    @forelse($archiveStats['by_category'] as $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ $item->category }}</td>
                         <td class="px-6 py-4 text-center">
@@ -234,15 +253,24 @@
                             <div class="flex items-center">
                                 <div class="flex-1 bg-gray-200 rounded-full h-2 mr-3">
                                     <div class="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full" 
-                                         style="width: {{ ($item->total / $archiveStats['total']) * 100 }}%"></div>
+                                         style="width: {{ $archiveStats['total'] > 0 ? ($item->total / $archiveStats['total']) * 100 : 0 }}%"></div>
                                 </div>
                                 <span class="text-sm font-semibold text-gray-700">
-                                    {{ round(($item->total / $archiveStats['total']) * 100, 1) }}%
+                                    {{ $archiveStats['total'] > 0 ? round(($item->total / $archiveStats['total']) * 100, 1) : 0 }}%
                                 </span>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                            </svg>
+                            Tidak ada data untuk periode ini
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -252,60 +280,70 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Archives Trend Chart
-const archivesTrendCtx = document.getElementById('archivesTrendChart').getContext('2d');
-new Chart(archivesTrendCtx, {
-    type: 'line',
-    data: {
-        labels: @json(array_keys($chartData->toArray())),
-        datasets: [{
-            label: 'Arsip',
-            data: @json(array_values($chartData->toArray())),
-            borderColor: 'rgb(249, 115, 22)',
-            backgroundColor: 'rgba(249, 115, 22, 0.1)',
-            tension: 0.4,
-            fill: true,
-            borderWidth: 3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
-    }
-});
-
-// Category Chart
-const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-new Chart(categoryCtx, {
-    type: 'doughnut',
-    data: {
-        labels: @json($archiveStats['by_category']->pluck('category')->toArray()),
-        datasets: [{
-            data: @json($archiveStats['by_category']->pluck('total')->toArray()),
-            backgroundColor: [
-                'rgb(59, 130, 246)',
-                'rgb(168, 85, 247)',
-                'rgb(34, 197, 94)',
-                'rgb(249, 115, 22)',
-                'rgb(239, 68, 68)',
-                'rgb(236, 72, 153)'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
+// Prevent auto scroll - wrap in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Archives Trend Chart
+    const archivesTrendCtx = document.getElementById('archivesTrendChart');
+    if (archivesTrendCtx) {
+        new Chart(archivesTrendCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: @json(array_keys($chartData->toArray())),
+                datasets: [{
+                    label: 'Arsip',
+                    data: @json(array_values($chartData->toArray())),
+                    borderColor: 'rgb(249, 115, 22)',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
             }
-        }
+        });
+    }
+
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        new Chart(categoryCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($archiveStats['by_category']->pluck('category')->toArray()),
+                datasets: [{
+                    data: @json($archiveStats['by_category']->pluck('total')->toArray()),
+                    backgroundColor: [
+                        'rgb(59, 130, 246)',
+                        'rgb(168, 85, 247)',
+                        'rgb(34, 197, 94)',
+                        'rgb(249, 115, 22)',
+                        'rgb(239, 68, 68)',
+                        'rgb(236, 72, 153)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
     }
 });
 </script>

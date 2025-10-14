@@ -18,28 +18,7 @@
             </div>
         </div>
         
-        <div class="flex space-x-2">
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                Print
-            </button>
-            <a href="{{ route(Auth::user()->role . '.laporan.export.pdf', ['type' => 'unit']) }}" 
-               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
-                Export PDF
-            </a>
-            <a href="{{ route(Auth::user()->role . '.laporan.export.excel', ['type' => 'unit']) }}" 
-               class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Export Excel
-            </a>
-        </div>
+        
     </div>
 
     <!-- Filter -->
@@ -74,6 +53,27 @@
         </form>
     </div>
 
+    <!-- Tombol Untuk Print dan Download -->
+    @if(auth()->user()->role === 'admin')
+<div class="flex gap-2 mb-4">
+    <a href="{{ route('admin.laporan.print-pdf', ['type' => 'unit'] + request()->query()) }}" 
+       target="_blank"
+       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print PDF
+    </a>
+    
+    <a href="{{ route('admin.laporan.export-pdf', ['type' => 'unit'] + request()->query()) }}" 
+       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Download PDF
+    </a>
+</div>
+@endif
     <!-- Period Info -->
     <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-6 text-white">
         <div class="flex items-center justify-between">
@@ -117,7 +117,7 @@
 
             <div class="mb-4">
                 <p class="text-2xl font-bold text-gray-400">#{{ $index + 1 }}</p>
-                <h3 class="text-xl font-bold text-gray-800 mt-1">{{ $unit->unit_kerja }}</h3>
+                <h3 class="text-xl font-bold text-gray-800 mt-1">{{ $unit->unit }}</h3>
             </div>
 
             <div class="space-y-3">
@@ -146,40 +146,46 @@
         @endforeach
     </div>
 
-    <!-- Comparison Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Archives by Unit Chart -->
+    <!-- Simple Charts Section with Fixed Height -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart 1: Total Arsip per Unit -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
                 Total Arsip per Unit
             </h3>
-            <canvas id="archivesByUnitChart" height="300"></canvas>
+            <div class="relative" style="height: 280px;">
+                <canvas id="archivesChart"></canvas>
+            </div>
         </div>
 
-        <!-- Dispositions by Unit Chart -->
+        <!-- Chart 2: Total Disposisi per Unit -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Total Disposisi per Unit
             </h3>
-            <canvas id="dispositionsByUnitChart" height="300"></canvas>
+            <div class="relative" style="height: 280px;">
+                <canvas id="dispositionsChart"></canvas>
+            </div>
         </div>
-    </div>
 
-    <!-- Completion Rate Chart -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-            </svg>
-            Perbandingan Completion Rate
-        </h3>
-        <canvas id="completionRateChart" height="100"></canvas>
+        <!-- Chart 3: Completion Rate Comparison -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Completion Rate (%)
+            </h3>
+            <div class="relative" style="height: 280px;">
+                <canvas id="completionChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <!-- Detailed Table -->
@@ -199,7 +205,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y">
-                    @foreach($units as $index => $unit)
+                    @forelse($units as $index => $unit)
                     <tr class="hover:bg-purple-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
@@ -222,7 +228,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                     </svg>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-800">{{ $unit->unit_kerja }}</span>
+                                <span class="text-sm font-semibold text-gray-800">{{ $unit->unit }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">
@@ -283,7 +289,16 @@
                             @endif
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                            </svg>
+                            Tidak ada data untuk periode ini
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -305,7 +320,7 @@
         </div>
         <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl p-6 text-white">
             <p class="text-sm opacity-90 mb-1">Unit Terbaik</p>
-            <p class="text-xl font-bold truncate">{{ $units->first()->unit_kerja ?? '-' }}</p>
+            <p class="text-xl font-bold truncate">{{ $units->first()->unit ?? '-' }}</p>
         </div>
     </div>
 </div>
@@ -313,103 +328,133 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Archives by Unit Chart
-const archivesCtx = document.getElementById('archivesByUnitChart').getContext('2d');
-new Chart(archivesCtx, {
-    type: 'bar',
-    data: {
-        labels: @json($units->pluck('unit_kerja')->toArray()),
-        datasets: [{
-            label: 'Total Arsip',
-            data: @json($units->pluck('total_archives')->toArray()),
-            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-            borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 2,
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { 
-                beginAtZero: true,
-                ticks: { precision: 0 }
-            }
-        }
-    }
-});
-
-// Dispositions by Unit Chart
-const dispositionsCtx = document.getElementById('dispositionsByUnitChart').getContext('2d');
-new Chart(dispositionsCtx, {
-    type: 'bar',
-    data: {
-        labels: @json($units->pluck('unit_kerja')->toArray()),
-        datasets: [{
-            label: 'Total Disposisi',
-            data: @json($units->pluck('total_dispositions')->toArray()),
-            backgroundColor: 'rgba(168, 85, 247, 0.8)',
-            borderColor: 'rgb(168, 85, 247)',
-            borderWidth: 2,
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { 
-                beginAtZero: true,
-                ticks: { precision: 0 }
-            }
-        }
-    }
-});
-
-// Completion Rate Chart
-const completionCtx = document.getElementById('completionRateChart').getContext('2d');
-new Chart(completionCtx, {
-    type: 'line',
-    data: {
-        labels: @json($units->pluck('unit_kerja')->toArray()),
-        datasets: [{
-            label: 'Completion Rate (%)',
-            data: @json($units->pluck('completion_rate')->toArray()),
-            borderColor: 'rgb(236, 72, 153)',
-            backgroundColor: 'rgba(236, 72, 153, 0.1)',
-            tension: 0.4,
-            fill: true,
-            borderWidth: 3,
-            pointRadius: 5,
-            pointBackgroundColor: 'rgb(236, 72, 153)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: { 
-                beginAtZero: true,
-                max: 100,
-                ticks: {
-                    callback: function(value) {
-                        return value + '%';
+// Prevent auto-scroll issue - wrap in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart 1: Total Arsip per Unit (Horizontal Bar)
+    const archivesCtx = document.getElementById('archivesChart');
+    if (archivesCtx) {
+        new Chart(archivesCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: @json($units->pluck('unit')->toArray()),
+                datasets: [{
+                    label: 'Arsip',
+                    data: @json($units->pluck('total_archives')->toArray()),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Total: ' + context.parsed.x + ' arsip';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
                     }
                 }
             }
-        }
+        });
+    }
+
+    // Chart 2: Total Disposisi per Unit (Horizontal Bar)
+    const dispositionsCtx = document.getElementById('dispositionsChart');
+    if (dispositionsCtx) {
+        new Chart(dispositionsCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: @json($units->pluck('unit')->toArray()),
+                datasets: [{
+                    label: 'Disposisi',
+                    data: @json($units->pluck('total_dispositions')->toArray()),
+                    backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                    borderColor: 'rgb(168, 85, 247)',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Total: ' + context.parsed.x + ' disposisi';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 3: Completion Rate (Doughnut Chart - Simple & Clean)
+    const completionCtx = document.getElementById('completionChart');
+    if (completionCtx) {
+        new Chart(completionCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($units->pluck('unit')->toArray()),
+                datasets: [{
+                    data: @json($units->pluck('completion_rate')->toArray()),
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(14, 165, 233, 0.8)',
+                        'rgba(251, 146, 60, 0.8)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 });
 </script>

@@ -44,7 +44,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
-    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
     
     // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
@@ -110,6 +109,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/user', [ReportController::class, 'user'])->name('user');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
+        
+        // ✅ PRINT PDF - Preview di browser untuk print
+        Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
+        
+        // ✅ DOWNLOAD PDF - Download langsung
+        Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        
+        // Export Excel
+        Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+        
+        // DEPRECATED - Route lama masih disupport untuk backward compatibility
         Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
@@ -178,5 +188,16 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
+        Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
+        
+        // ✅ PRINT PDF - Preview di browser untuk print
+        Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
+        
+        // ✅ DOWNLOAD PDF - Download langsung
+        Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        
+        // Export Excel
+        Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
 });

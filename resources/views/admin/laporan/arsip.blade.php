@@ -18,21 +18,7 @@
             </div>
         </div>
         
-        <div class="flex space-x-2">
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                Print
-            </button>
-            <a href="{{ route(Auth::user()->role . '.laporan.export.pdf', ['type' => 'arsip']) }}" 
-               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
-                Export PDF
-            </a>
-        </div>
+        
     </div>
 
     <!-- Filters -->
@@ -79,6 +65,29 @@
         </form>
     </div>
 
+    <!-- Tombol Untuk Print dan Download -->
+<div class="flex gap-2 mb-4">
+    <!-- PRINT - Preview PDF -->
+    <a href="{{ route(auth()->user()->role . '.laporan.print-pdf', ['type' => 'arsip'] + request()->query()) }}" 
+       target="_blank"
+       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print PDF
+    </a>
+    
+    <!-- DOWNLOAD - Download PDF -->
+    <a href="{{ route(auth()->user()->role . '.laporan.export-pdf', ['type' => 'arsip'] + request()->query()) }}" 
+       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Download PDF
+    </a>
+</div>
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
@@ -187,5 +196,126 @@
         </div>
         @endif
     </div>
+</div>
+{{-- Print Styles --}}
+<style media="print">
+    /* Hide elements when printing */
+    @media print {
+        /* Hide navigation, sidebar, buttons */
+        nav, .sidebar, aside, header, footer,
+        button, .no-print, .print-hide,
+        a[href^="http"]:not(.print-show),
+        .bg-gradient-to-r.from-purple-500,
+        .bg-gradient-to-r.from-orange-500,
+        svg.w-6.h-6.text-gray-600,
+        .flex.items-center > a[href*="laporan.index"] {
+            display: none !important;
+        }
+
+        /* Reset page margins */
+        @page {
+            margin: 1cm;
+            size: A4;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+        }
+
+        /* Make tables fit on page */
+        table {
+            page-break-inside: auto;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        /* Add page header for print */
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #333;
+        }
+
+        .print-header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #333;
+        }
+
+        .print-header p {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #666;
+        }
+
+        /* Remove colors for black & white printing */
+        * {
+            color: #000 !important;
+            background: white !important;
+            box-shadow: none !important;
+        }
+
+        /* Keep badges visible */
+        .badge, span[class*="bg-"] {
+            border: 1px solid #333 !important;
+            padding: 2px 6px !important;
+            color: #000 !important;
+        }
+
+        /* Chart containers */
+        canvas {
+            max-height: 400px !important;
+        }
+
+        /* Remove shadows and gradients */
+        .shadow-sm, .shadow-lg, .shadow-xl {
+            box-shadow: none !important;
+        }
+
+        /* Adjust spacing */
+        .space-y-6 > * + * {
+            margin-top: 20px !important;
+        }
+
+        /* Footer for print */
+        .print-footer {
+            display: block !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+    }
+</style>
+
+{{-- Print Header (hidden on screen) --}}
+<div class="print-header" style="display: none;">
+    <h1>LAPORAN [NAMA LAPORAN]</h1>
+    <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
+    <p>Dinas Komunikasi dan Informatika</p>
+    <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
+</div>
+
+{{-- Print Footer (hidden on screen) --}}
+<div class="print-footer" style="display: none;">
+    <p>GANDARIA - Sistem Arsip Digital | Halaman [Page] dari [Total Pages]</p>
 </div>
 @endsection

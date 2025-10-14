@@ -157,6 +157,27 @@
         </div>
     </div>
 
+<!-- Tombol Untuk Print dan Download -->
+    @if(auth()->user()->role === 'admin')
+<div class="flex gap-2 mb-4">
+    <a href="{{ route('admin.laporan.print-pdf', ['type' => 'summary']) }}" 
+       target="_blank"
+       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        </svg>
+        Print PDF
+    </a>
+    
+    <a href="{{ route('admin.laporan.export-pdf', ['type' => 'summary']) }}" 
+       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Download PDF
+    </a>
+</div>
+@endif
     <!-- Charts Section with Fixed Height -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Archives by Category Chart -->
@@ -311,4 +332,125 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{{-- Print Styles --}}
+<style media="print">
+    /* Hide elements when printing */
+    @media print {
+        /* Hide navigation, sidebar, buttons */
+        nav, .sidebar, aside, header, footer,
+        button, .no-print, .print-hide,
+        a[href^="http"]:not(.print-show),
+        .bg-gradient-to-r.from-purple-500,
+        .bg-gradient-to-r.from-orange-500,
+        svg.w-6.h-6.text-gray-600,
+        .flex.items-center > a[href*="laporan.index"] {
+            display: none !important;
+        }
+
+        /* Reset page margins */
+        @page {
+            margin: 1cm;
+            size: A4;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+        }
+
+        /* Make tables fit on page */
+        table {
+            page-break-inside: auto;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        /* Add page header for print */
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #333;
+        }
+
+        .print-header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #333;
+        }
+
+        .print-header p {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #666;
+        }
+
+        /* Remove colors for black & white printing */
+        * {
+            color: #000 !important;
+            background: white !important;
+            box-shadow: none !important;
+        }
+
+        /* Keep badges visible */
+        .badge, span[class*="bg-"] {
+            border: 1px solid #333 !important;
+            padding: 2px 6px !important;
+            color: #000 !important;
+        }
+
+        /* Chart containers */
+        canvas {
+            max-height: 400px !important;
+        }
+
+        /* Remove shadows and gradients */
+        .shadow-sm, .shadow-lg, .shadow-xl {
+            box-shadow: none !important;
+        }
+
+        /* Adjust spacing */
+        .space-y-6 > * + * {
+            margin-top: 20px !important;
+        }
+
+        /* Footer for print */
+        .print-footer {
+            display: block !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+    }
+</style>
+
+{{-- Print Header (hidden on screen) --}}
+<div class="print-header" style="display: none;">
+    <h1>LAPORAN [NAMA LAPORAN]</h1>
+    <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
+    <p>Dinas Komunikasi dan Informatika</p>
+    <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
+</div>
+
+{{-- Print Footer (hidden on screen) --}}
+<div class="print-footer" style="display: none;">
+    <p>GANDARIA - Sistem Arsip Digital | Halaman [Page] dari [Total Pages]</p>
+</div>
 @endsection
