@@ -89,6 +89,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AssetController::class, 'update'])->name('update');
         Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/status', [AssetController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
     // Manajemen User
@@ -177,7 +179,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     });
     
