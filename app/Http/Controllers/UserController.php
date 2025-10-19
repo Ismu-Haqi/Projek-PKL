@@ -102,16 +102,55 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
-        // Get user statistics
+        // Get user statistics dengan pengecekan method exists
         $userStats = [
-            'dispositions_received' => $user->role === 'staff' 
-                ? $user->receivedDispositions()->count() 
-                : 0,
-            'dispositions_sent' => $user->role === 'admin' 
-                ? $user->sentDispositions()->count() 
-                : 0,
-            'archives_created' => $user->archives()->count(),
+            'dispositions_received' => 0,
+            'dispositions_sent' => 0,
+            'archives_created' => 0,
+            'incoming_letters' => 0,
+            'outgoing_letters' => 0,
         ];
+
+        // Check if methods exist before calling
+        if (method_exists($user, 'receivedDispositions') && $user->role === 'staff') {
+            try {
+                $userStats['dispositions_received'] = $user->receivedDispositions()->count();
+            } catch (\Exception $e) {
+                $userStats['dispositions_received'] = 0;
+            }
+        }
+
+        if (method_exists($user, 'sentDispositions') && $user->role === 'admin') {
+            try {
+                $userStats['dispositions_sent'] = $user->sentDispositions()->count();
+            } catch (\Exception $e) {
+                $userStats['dispositions_sent'] = 0;
+            }
+        }
+
+        if (method_exists($user, 'archives')) {
+            try {
+                $userStats['archives_created'] = $user->archives()->count();
+            } catch (\Exception $e) {
+                $userStats['archives_created'] = 0;
+            }
+        }
+
+        if (method_exists($user, 'incomingLetters')) {
+            try {
+                $userStats['incoming_letters'] = $user->incomingLetters()->count();
+            } catch (\Exception $e) {
+                $userStats['incoming_letters'] = 0;
+            }
+        }
+
+        if (method_exists($user, 'outgoingLetters')) {
+            try {
+                $userStats['outgoing_letters'] = $user->outgoingLetters()->count();
+            } catch (\Exception $e) {
+                $userStats['outgoing_letters'] = 0;
+            }
+        }
 
         return view('admin.user.show', compact('user', 'userStats'));
     }

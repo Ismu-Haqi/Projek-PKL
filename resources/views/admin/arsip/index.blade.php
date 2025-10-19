@@ -5,6 +5,29 @@
 @section('content')
 <div class="p-6">
 
+    {{-- Success Message --}}
+    @if(session('success'))
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg animate-fade-in">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg animate-fade-in">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-red-800 font-medium">{{ session('error') }}</p>
+        </div>
+    </div>
+    @endif
+
     {{-- Header Section --}}
     <div class="flex justify-between items-center mb-6">
         <div>
@@ -12,20 +35,21 @@
             <p class="text-sm text-gray-500 mt-1">Kelola dan organisir dokumen arsip digital Anda</p>
         </div>
         
-        {{-- Tombol Upload --}}
-        <button type="button" 
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center transition duration-200 transform hover:scale-105"
-                data-bs-toggle="modal" data-bs-target="#uploadModal">
+        {{-- Tombol Upload - REDIRECT KE HALAMAN CREATE --}}
+        @if(Auth::user()->role === 'admin')
+        <a href="{{ route('admin.arsip.create') }}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center transition duration-200 transform hover:scale-105">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
             Unggah Arsip
-        </button>
+        </a>
+        @endif
     </div>
 
     {{-- Statistics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Total Arsip</p>
@@ -39,7 +63,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Favorit</p>
@@ -53,7 +77,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Kategori</p>
@@ -67,7 +91,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Bulan Ini</p>
@@ -123,12 +147,12 @@
 
             {{-- Action Buttons --}}
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" title="Filter">
                     <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
                 </button>
-                <a href="{{ route('admin.arsip.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                <a href="{{ route('admin.arsip.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition" title="Reset">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -163,7 +187,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center">
-                                <svg class="w-8 h-8 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-8 h-8 text-red-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div>
@@ -182,14 +206,14 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-1">
-                                {{-- View --}}
-                                <button onclick="viewArchive({{ $archive->id }})" 
-                                        class="p-2 text-blue-600 hover:bg-blue-50 rounded transition" title="Lihat Detail">
+                                {{-- View - REDIRECT KE HALAMAN DETAIL --}}
+                                <a href="{{ route('admin.arsip.show', $archive->id) }}" 
+                                   class="p-2 text-blue-600 hover:bg-blue-50 rounded transition" title="Lihat Detail">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
-                                </button>
+                                </a>
 
                                 {{-- Download --}}
                                 <a href="{{ route('admin.arsip.download', $archive->id) }}" 
@@ -200,20 +224,23 @@
                                 </a>
 
                                 {{-- Favorite --}}
-                                <button onclick="toggleFavorite({{ $archive->id }})" 
-                                        class="p-2 text-yellow-600 hover:bg-yellow-50 rounded transition" title="Favorit">
-                                    <svg class="w-5 h-5 {{ $archive->is_favorite ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                    </svg>
-                                </button>
+                                <form action="{{ route('admin.arsip.favorite', $archive->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded transition" title="Favorit">
+                                        <svg class="w-5 h-5 {{ $archive->is_favorite ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                        </svg>
+                                    </button>
+                                </form>
 
-                                {{-- Edit --}}
-                                <button onclick="editArchive({{ $archive->id }})" 
-                                        class="p-2 text-orange-600 hover:bg-orange-50 rounded transition" title="Edit">
+                                @if(Auth::user()->role === 'admin')
+                                {{-- Edit - REDIRECT KE HALAMAN EDIT --}}
+                                <a href="{{ route('admin.arsip.edit', $archive->id) }}" 
+                                   class="p-2 text-orange-600 hover:bg-orange-50 rounded transition" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
-                                </button>
+                                </a>
 
                                 {{-- Delete --}}
                                 <form action="{{ route('admin.arsip.destroy', $archive->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus arsip ini?')">
@@ -225,6 +252,7 @@
                                         </svg>
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -257,139 +285,34 @@
         </svg>
         <h3 class="text-xl font-semibold text-gray-900 mb-2">Belum Ada Arsip</h3>
         <p class="text-gray-500 mb-6">Mulai unggah arsip digital Anda dengan klik tombol di atas</p>
-        <button type="button" 
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-                data-bs-toggle="modal" data-bs-target="#uploadModal">
+        @if(Auth::user()->role === 'admin')
+        <a href="{{ route('admin.arsip.create') }}" 
+           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             Unggah Arsip Pertama
-        </button>
+        </a>
+        @endif
     </div>
     @endif
 
 </div>
 
-{{-- View Modal --}}
-<div class="modal fade" id="viewModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-blue-600 text-white">
-                <h5 class="modal-title">📄 Detail Arsip</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="viewContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-blue-600" role="status"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Edit Modal --}}
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-orange-600 text-white">
-                <h5 class="modal-title">✏️ Edit Arsip</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="editContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-orange-600" role="status"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- TIDAK ADA MODAL LAGI! Semua sudah pakai halaman terpisah --}}
 
 @push('scripts')
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-function viewArchive(id) {
-    $('#viewModal').modal('show');
-    fetch(`/admin/arsip/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('viewContent').innerHTML = `
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
-                            <p class="mt-1 text-sm text-gray-900">${data.nomor_surat}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Tanggal Surat</label>
-                            <p class="mt-1 text-sm text-gray-900">${data.tanggal_surat}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Judul</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.judul}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Pengirim</label>
-                            <p class="mt-1 text-sm text-gray-900">${data.pengirim}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Unit</label>
-                            <p class="mt-1 text-sm text-gray-900">${data.unit}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Keterangan</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.keterangan}</p>
-                    </div>
-                    <div class="pt-4 border-t">
-                        <a href="${data.file_url}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Download File
-                        </a>
-                    </div>
-                </div>
-            `;
-        })
-        .catch(error => {
-            document.getElementById('viewContent').innerHTML = '<div class="alert alert-danger">Gagal memuat data</div>';
-        });
-}
-
-function editArchive(id) {
-    $('#editModal').modal('show');
-    fetch(`/admin/arsip/${id}/edit`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('editContent').innerHTML = data.html;
-        })
-        .catch(error => {
-            document.getElementById('editContent').innerHTML = '<div class="alert alert-danger">Gagal memuat form</div>';
-        });
-}
-
-function toggleFavorite(id) {
-    fetch(`/admin/arsip/${id}/favorite`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+// Auto-hide success/error message
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.animate-fade-in');
+    alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
 </script>
 @endpush
-{{-- Include Upload Modal --}}
-@include('admin.arsip.upload-modal')
+
 @endsection

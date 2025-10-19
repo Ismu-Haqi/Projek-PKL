@@ -90,8 +90,10 @@
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold text-gray-800">Tren Pengarsipan Bulanan</h3>
                     <select class="text-sm border border-gray-300 rounded-lg px-3 py-2">
+                        <option>1 Bulan Terakhir</option>
+                        <option>3 Bulan Terakhir</option>
                         <option>6 Bulan Terakhir</option>
-                        <option>12 Bulan Terakhir</option>
+                        <option>Tahun Ini</option>
                     </select>
                 </div>
                 <div style="position: relative; height: 300px;">

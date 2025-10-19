@@ -19,7 +19,7 @@ Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->m
 Route::post('login', [LoginController::class, 'login'])->middleware('guest');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ✅ Redirect Root URL - HANYA SATU KALI
+// ✅ Redirect Root URL
 Route::get('/', function () {
     if (auth()->check()) {
         $role = auth()->user()->role;
@@ -34,8 +34,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// ✅ Admin Routes
+// ==================================================
+// ✅ ADMIN ROUTES
+// ==================================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
@@ -48,14 +51,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
-        Route::post('/', [ArchiveController::class, 'store'])->name('store');
-        Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
+        Route::get('/create', [ArchiveController::class, 'create'])->name('create');
+        Route::post('/store', [ArchiveController::class, 'store'])->name('store');
+        
+        // Route spesifik HARUS SEBELUM route dynamic {id}
+        Route::get('/favorit/list', [ArchiveController::class, 'favorit'])->name('favorit');
+        
+        // Route dengan {id} parameter
         Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ArchiveController::class, 'update'])->name('update');
         Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy');
+        
+        // Preview & Download
+        Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
+        Route::get('/{id}/download', [ArchiveController::class, 'download'])->name('download');
+        
+        // Favorite
         Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
-        Route::get('/download/{id}', [ArchiveController::class, 'download'])->name('download');
     });
     
     // Disposisi
@@ -115,29 +128,29 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         
-        // ✅ PRINT PDF - Preview di browser untuk print
+        // Print & Export
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
-        
-        // ✅ DOWNLOAD PDF - Download langsung
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
-        
-        // Export Excel
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
         
-        // DEPRECATED - Route lama masih disupport untuk backward compatibility
+        // DEPRECATED - Backward compatibility
         Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
     
-    // Pengaturan (Settings)
+    // ✅ PENGATURAN (SETTINGS) - FIXED!
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        // Main page
         Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
         Route::put('/update', [SettingController::class, 'update'])->name('update');
-        Route::put('/logo', [SettingController::class, 'updateLogo'])->name('logo');
+        Route::post('/clear-cache', [SettingController::class, 'clearCache'])->name('clear-cache');
         Route::post('/backup', [SettingController::class, 'backup'])->name('backup');
+        Route::get('/backup-list', [SettingController::class, 'backupList'])->name('backup-list');
+        Route::get('/backup/download/{filename}', [SettingController::class, 'downloadBackup'])->name('backup-download');
     });
     
-    // Kategori (jika diperlukan sebagai submenu pengaturan)
+    // Kategori
     Route::prefix('kategori')->name('kategori.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
         Route::post('/', [CategoryController::class, 'store'])->name('store');
@@ -146,8 +159,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     });
 });
 
-// ✅ Staff Routes
+// ==================================================
+// ✅ STAFF ROUTES
+// ==================================================
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+    
     // Dashboard
     Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
     
@@ -167,6 +183,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
         Route::get('/download/{id}', [ArchiveController::class, 'download'])->name('download');
+        Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
     });
     
     // Disposisi
@@ -184,26 +201,37 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     });
     
-    // Manajemen Aset (Read Only untuk Staff)
+    // Manajemen Aset (Read Only)
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
     });
     
-    // Laporan (Read Only untuk Staff)
+    // Laporan (Read Only)
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         
-        // ✅ PRINT PDF - Preview di browser untuk print
+        // Print & Export
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
-        
-        // ✅ DOWNLOAD PDF - Download langsung
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
-        
-        // Export Excel
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+    });
+    
+    // ✅ PENGATURAN (SETTINGS) - Staff Version
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        // Main page
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        
+        // Profile Only
+        Route::put('/profile', [SettingController::class, 'updateProfile'])->name('profile');
+        Route::put('/password', [SettingController::class, 'updatePassword'])->name('password');
+        Route::post('/avatar', [SettingController::class, 'updateAvatar'])->name('avatar');
+        Route::delete('/avatar', [SettingController::class, 'removeAvatar'])->name('avatar.remove');
+        
+        // Appearance
+        Route::put('/appearance', [SettingController::class, 'updateAppearance'])->name('appearance');
     });
 });
