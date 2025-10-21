@@ -115,8 +115,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
-        Route::put('/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggleStatus');
+        Route::patch('/{id}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+        Route::patch('/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggleStatus');
     });
     
     // Laporan
@@ -138,13 +138,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
     
-    // ✅ PENGATURAN (SETTINGS) - FIXED!
+    // ✅ PENGATURAN (SETTINGS) - UPDATED WITH APPEARANCE!
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         // Main page
         Route::get('/', [SettingController::class, 'index'])->name('index');
+        
+        // Profile settings
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
+        
+        // System settings
         Route::put('/update', [SettingController::class, 'update'])->name('update');
+        
+        // Appearance settings ← NEW!
+        Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
+        
+        // Cache & Maintenance
         Route::post('/clear-cache', [SettingController::class, 'clearCache'])->name('clear-cache');
+        
+        // Backup
         Route::post('/backup', [SettingController::class, 'backup'])->name('backup');
         Route::get('/backup-list', [SettingController::class, 'backupList'])->name('backup-list');
         Route::get('/backup/download/{filename}', [SettingController::class, 'downloadBackup'])->name('backup-download');
@@ -220,7 +231,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
     
-    // ✅ PENGATURAN (SETTINGS) - Staff Version
+    // ✅ PENGATURAN (SETTINGS) - Staff Version (Updated)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         // Main page
         Route::get('/', [SettingController::class, 'index'])->name('index');
@@ -231,7 +242,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::post('/avatar', [SettingController::class, 'updateAvatar'])->name('avatar');
         Route::delete('/avatar', [SettingController::class, 'removeAvatar'])->name('avatar.remove');
         
-        // Appearance
-        Route::put('/appearance', [SettingController::class, 'updateAppearance'])->name('appearance');
+        // Appearance (Staff can also customize appearance) ← NEW!
+        Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
     });
 });

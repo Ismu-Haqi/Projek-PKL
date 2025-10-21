@@ -72,8 +72,8 @@
                         {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
                     </div>
                     <div class="hidden md:block text-left">
-                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Admin' }}</p>
-                        <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role ?? 'admin') }}</p>
+                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'staff' }}</p>
+                        <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role ?? 'staff') }}</p>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -88,8 +88,8 @@
                                 {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
                             </div>
                             <div>
-                                <p class="font-bold text-gray-800">{{ Auth::user()->name ?? 'Admin' }}</p>
-                                <p class="text-xs text-gray-600">{{ Auth::user()->email ?? 'admin@diskominfo.go.id' }}</p>
+                                <p class="font-bold text-gray-800">{{ Auth::user()->name ?? 'staff' }}</p>
+                                <p class="text-xs text-gray-600">{{ Auth::user()->email ?? 'staff@diskominfo.go.id' }}</p>
                             </div>
                         </div>
                     </div>

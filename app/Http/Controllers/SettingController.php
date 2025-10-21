@@ -264,6 +264,63 @@ class SettingController extends Controller
         }
     }
 
+/**
+ * Update appearance settings (Admin only)
+ */
+public function updateAppearance(Request $request)
+{
+    if (Auth::user()->role !== 'admin') {
+        return back()->with('error', 'Unauthorized access');
+    }
+
+    try {
+        $appearanceSettings = [
+            'theme',
+            'accent_color',
+            'sidebar_style',
+            'navbar_position',
+            'font_size',
+            'animation_speed',
+            'text_size', // NEW: Text size setting
+        ];
+
+        // Update regular settings
+        foreach ($appearanceSettings as $key) {
+            if ($request->has($key)) {
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $request->input($key)]
+                );
+            }
+        }
+
+        // Handle checkboxes (boolean settings)
+        $checkboxSettings = [
+            'show_breadcrumbs',
+            'show_notifications',
+            'compact_mode',
+            'smooth_scrolling',
+        ];
+
+        foreach ($checkboxSettings as $key) {
+            Setting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $request->has($key) ? '1' : '0']
+            );
+        }
+
+        // Clear appearance cache
+        cache()->forget('appearance_settings');
+        
+        // Clear other caches
+        \Artisan::call('view:clear');
+        \Artisan::call('cache:clear');
+
+        return back()->with('success', 'Pengaturan tampilan berhasil diperbarui! Refresh halaman (Ctrl+Shift+R) untuk melihat perubahan.');
+    } catch (\Exception $e) {
+        return back()->with('error', 'Gagal memperbarui pengaturan tampilan: ' . $e->getMessage());
+    }
+}
     /**
      * Download backup file (Admin only)
      */

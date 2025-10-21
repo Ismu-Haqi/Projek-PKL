@@ -90,7 +90,7 @@
         <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500 card-animate card-animate-delay-4">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Disposisi Pending</p>
+                    <p class="text-sm text-gray-500 font-medium mb-2">Disposisi </p>
                     <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="12">0</h3>
                     <p class="text-xs text-red-600 mt-2 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">

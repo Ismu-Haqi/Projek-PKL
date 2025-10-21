@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('staff.layouts.app')
 
 @section('title', 'Pengaturan Sistem')
 
@@ -33,7 +33,7 @@
                 Profil
             </button>
             
-            @if(Auth::user()->role === 'admin')
+            @if(Auth::user()->role === 'staff')
             <button onclick="switchTab('sistem')" 
                     id="tab-sistem" 
                     class="tab-button border-b-2 border-transparent py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
@@ -64,7 +64,7 @@
         <div id="content-profil" class="tab-content">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Profil Pengguna</h2>
             
-            <form action="{{ route('admin.pengaturan.update-profil') }}" method="POST" class="space-y-4">
+            <form action="{{ route('staff.pengaturan.update-profil') }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 
@@ -143,12 +143,12 @@
             </form>
         </div>
 
-        @if(Auth::user()->role === 'admin')
+        @if(Auth::user()->role === 'staff')
         {{-- Tab Sistem --}}
         <div id="content-sistem" class="tab-content hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Sistem</h2>
             
-            <form action="{{ route('admin.pengaturan.update') }}" method="POST" class="space-y-4">
+            <form action="{{ route('staff.pengaturan.update') }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 
@@ -259,7 +259,7 @@
         <div id="content-tampilan" class="tab-content hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Tampilan</h2>
             
-            <form action="{{ route('admin.pengaturan.update-appearance') }}" method="POST" class="space-y-6">
+            <form action="{{ route('staff.pengaturan.update-appearance') }}" method="POST" class="space-y-6">
                 @csrf
                 @method('PUT')
                 
@@ -668,7 +668,7 @@ function clearCache() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Membersihkan...';
         
-        fetch('{{ route("admin.pengaturan.clear-cache") }}', {
+        fetch('{{ route("staff.pengaturan.clear-cache") }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -704,7 +704,7 @@ function createBackup() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Membuat Backup...';
         
-        fetch('{{ route("admin.pengaturan.backup") }}', {
+        fetch('{{ route("staff.pengaturan.backup") }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -748,7 +748,7 @@ function loadBackupList() {
         </div>
     `;
     
-    fetch('{{ route("admin.pengaturan.backup-list") }}', {
+    fetch('{{ route("staff.pengaturan.backup-list") }}', {
         headers: {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -768,7 +768,7 @@ function loadBackupList() {
                                 <p class="text-sm text-gray-500">${backup.size} - ${backup.date}</p>
                             </div>
                         </div>
-                        <a href="/admin/pengaturan/backup/download/${backup.name}" 
+                        <a href="/staff/pengaturan/backup/download/${backup.name}" 
                            class="text-blue-500 hover:text-blue-700">
                             <i class="fas fa-download"></i>
                         </a>
