@@ -68,9 +68,19 @@
             <!-- Profile Dropdown -->
             <div class="relative">
                 <button onclick="toggleProfile()" class="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100 transition-all">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
-                        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                    {{-- Avatar dengan foto atau initial --}}
+                    <div class="w-10 h-10 rounded-full overflow-hidden shadow-md ring-2 ring-white">
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                 alt="{{ Auth::user()->name }}" 
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                            </div>
+                        @endif
                     </div>
+                    
                     <div class="hidden md:block text-left">
                         <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Admin' }}</p>
                         <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role ?? 'admin') }}</p>
@@ -84,9 +94,19 @@
                 <div id="profileDropdown" style="display: none;" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
                     <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
                         <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                                {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                            {{-- Avatar di dropdown --}}
+                            <div class="w-12 h-12 rounded-full overflow-hidden shadow-lg ring-2 ring-white">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                         alt="{{ Auth::user()->name }}" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                                    </div>
+                                @endif
                             </div>
+                            
                             <div>
                                 <p class="font-bold text-gray-800">{{ Auth::user()->name ?? 'Admin' }}</p>
                                 <p class="text-xs text-gray-600">{{ Auth::user()->email ?? 'admin@diskominfo.go.id' }}</p>
@@ -94,7 +114,7 @@
                         </div>
                     </div>
                     <div class="p-2">
-                        <a href="{{ route(Auth::user()->role . '.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                        <a href="{{ route(Auth::user()->role . '.profil') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
                             <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
