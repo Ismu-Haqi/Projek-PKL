@@ -11,11 +11,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'username',
@@ -25,24 +20,14 @@ class User extends Authenticatable
         'unit',
         'phone',
         'avatar',
-        'is_active',  // TAMBAHAN: status aktif user
+        'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -109,9 +94,8 @@ class User extends Authenticatable
      */
     public function sentDispositions()
     {
-        // Check if table exists to prevent error
         if (!\Schema::hasTable('dispositions')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0'); // Return empty relation
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
         }
         return $this->hasMany(Disposition::class, 'from_user_id');
     }
@@ -122,48 +106,42 @@ class User extends Authenticatable
      */
     public function receivedDispositions()
     {
-        // Check if table exists to prevent error
         if (!\Schema::hasTable('dispositions')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0'); // Return empty relation
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
         }
         return $this->hasMany(Disposition::class, 'to_user_id');
     }
 
     /**
-     * Archives created by this user
-     * Relasi ke arsip yang dibuat oleh user ini
+     * ✅ FIX: Archives created by this user
+     * Kolom yang benar adalah 'user_id', bukan 'created_by'
      */
     public function archives()
     {
-        // Check if table exists to prevent error
         if (!\Schema::hasTable('archives')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0'); // Return empty relation
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
         }
-        return $this->hasMany(Archive::class, 'created_by');
+        return $this->hasMany(Archive::class, 'user_id'); // ✅ FIXED: user_id
     }
 
     /**
      * Incoming letters handled by this user
-     * Relasi ke surat masuk yang ditangani user ini
      */
     public function incomingLetters()
     {
-        // Check if table exists to prevent error
         if (!\Schema::hasTable('incoming_letters')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0'); // Return empty relation
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
         }
         return $this->hasMany(IncomingLetter::class, 'received_by');
     }
 
     /**
      * Outgoing letters created by this user
-     * Relasi ke surat keluar yang dibuat user ini
      */
     public function outgoingLetters()
     {
-        // Check if table exists to prevent error
         if (!\Schema::hasTable('outgoing_letters')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0'); // Return empty relation
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
         }
         return $this->hasMany(OutgoingLetter::class, 'created_by');
     }

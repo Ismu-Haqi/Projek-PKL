@@ -3,243 +3,415 @@
 @section('title', 'Dashboard Staff')
 
 @section('content')
-<div class="p-6">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    {{-- MAIN HEADER DASHBOARD --}}
-    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl text-white mb-6 shadow-lg">
-        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name }}! 👋</h1>
-        <p class="text-yellow-100">GANDARIA Arsip Digital Diskominfo Kabupaten Barito Kuala</p>
-    </div>
-
-    {{-- STATISTIC CARDS --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {{-- Total Arsip --}}
-        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Total Arsip</p>
-                    <h3 class="text-4xl font-bold text-gray-800">2,847</h3>
-                    <p class="text-xs text-green-600 mt-2">+12% dari bulan lalu</p>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-xl">
-                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        {{-- Arsip Bulan Ini --}}
-        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-purple-500">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Arsip Bulan Ini</p>
-                    <h3 class="text-4xl font-bold text-gray-800">184</h3>
-                    <p class="text-xs text-green-600 mt-2">+8% dari bulan lalu</p>
-                </div>
-                <div class="bg-purple-100 p-3 rounded-xl">
-                    <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        {{-- Pengguna Aktif --}}
-        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Pengguna Aktif</p>
-                    <h3 class="text-4xl font-bold text-gray-800">45</h3>
-                    <p class="text-xs text-green-600 mt-2">+3% dari bulan lalu</p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-xl">
-                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        {{-- Disposisi Pending --}}
-        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Disposisi Pending</p>
-                    <h3 class="text-4xl font-bold text-gray-800">12</h3>
-                    <p class="text-xs text-red-600 mt-2">-5% dari bulan lalu</p>
-                </div>
-                <div class="bg-red-100 p-3 rounded-xl">
-                    <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- MAIN CONTENT GRID --}}
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    {{-- Welcome Header with Time-based Greeting --}}
+    <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-8 p-8">
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
         
-        {{-- LEFT COLUMN --}}
-        <div class="lg:col-span-8 space-y-6">
-            
-            {{-- CHART: Tren Pengarsipan --}}
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-800">Tren Pengarsipan Bulanan</h3>
-                    <select class="text-sm border border-gray-300 rounded-lg px-3 py-2">
-                        <option>1 Bulan Terakhir</option>
-                        <option>3 Bulan Terakhir</option>
-                        <option>6 Bulan Terakhir</option>
-                        <option>Tahun Ini</option>
-                    </select>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-lg mb-2">
+                        @php
+                            $hour = date('H');
+                            if ($hour < 12) echo 'Selamat Pagi';
+                            elseif ($hour < 15) echo 'Selamat Siang';
+                            elseif ($hour < 18) echo 'Selamat Sore';
+                            else echo 'Selamat Malam';
+                        @endphp
+                    </p>
+                    <h1 class="text-4xl font-bold text-white mb-2">{{ Auth::user()->name }} 👋</h1>
+                    <p class="text-blue-50 text-lg flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ Auth::user()->unit ?? 'Staff' }} - GANDARIA Arsip Digital
+                    </p>
                 </div>
-                <div style="position: relative; height: 300px;">
-                    <canvas id="barChart"></canvas>
-                </div>
-            </div>
-
-            {{-- ARSIP TERBARU --}}
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gray-800">Arsip Terbaru</h3>
-                    <a href="{{ route('staff.arsip.index') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-700">Lihat Semua →</a>
-                </div>
-                <div class="space-y-3">
-                    <div class="p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold text-gray-800">Surat Keputusan Bupati No. 001/2024</p>
-                                <p class="text-xs text-gray-500 mt-1">Surat Keputusan • 2024-01-15</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Tinggi</span>
-                                <span class="text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">Aktif</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold text-gray-800">Laporan Keuangan Q4 2023</p>
-                                <p class="text-xs text-gray-500 mt-1">Laporan • 2024-01-14</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <span class="text-xs font-medium text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">Sedang</span>
-                                <span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Review</span>
-                            </div>
-                        </div>
+                <div class="hidden md:block">
+                    <div class="bg-white/20 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/30">
+                        <p class="text-white/80 text-sm mb-1">Hari ini</p>
+                        <p class="text-3xl font-bold text-white">{{ date('d') }}</p>
+                        <p class="text-white/80 text-sm">{{ \Carbon\Carbon::now()->format('M Y') }}</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- RIGHT COLUMN --}}
-        <div class="lg:col-span-4 space-y-6">
+    {{-- Quick Stats Cards - Staff Focused --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {{-- Disposisi Saya --}}
+        <div class="group bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Disposisi Aktif</p>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $pendingDispositions ?? 5 }}</h3>
+                    <p class="text-xs text-orange-600 font-medium">Perlu ditindaklanjuti</p>
+                </div>
+                <div class="bg-gradient-to-br from-orange-100 to-orange-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('staff.disposisi.index') }}" class="text-sm text-orange-600 hover:text-orange-700 font-semibold flex items-center">
+                Lihat Detail
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        {{-- Arsip Saya --}}
+        <div class="group bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Arsip Saya</p>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $myArchivesCount ?? 128 }}</h3>
+                    <p class="text-xs text-green-600 font-medium">+12 bulan ini</p>
+                </div>
+                <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('staff.arsip.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold flex items-center">
+                Lihat Arsip
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        {{-- Arsip Favorit --}}
+        <div class="group bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Favorit</p>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $favoritesCount ?? 24 }}</h3>
+                    <p class="text-xs text-gray-600 font-medium">Dokumen tersimpan</p>
+                </div>
+                <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('staff.arsip.favorit') }}" class="text-sm text-yellow-600 hover:text-yellow-700 font-semibold flex items-center">
+                Lihat Favorit
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        {{-- Notifikasi Baru --}}
+        <div class="group bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Notifikasi</p>
+                    </div>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $unreadNotifications ?? 8 }}</h3>
+                    <p class="text-xs text-red-600 font-medium">Belum dibaca</p>
+                </div>
+                <div class="bg-gradient-to-br from-red-100 to-red-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('staff.notifikasi.index') }}" class="text-sm text-red-600 hover:text-red-700 font-semibold flex items-center">
+                Lihat Notifikasi
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    {{-- Main Content Grid --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {{-- Left Column (2/3) --}}
+        <div class="lg:col-span-2 space-y-6">
             
-            {{-- AKTIVITAS TERKINI --}}
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">Aktivitas Terkini</h3>
+            {{-- Disposisi yang Perlu Ditindaklanjuti --}}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Disposisi Perlu Tindakan</h3>
+                            <p class="text-sm text-gray-500">Segera selesaikan tugas berikut</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('staff.disposisi.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                        Lihat Semua →
+                    </a>
+                </div>
+                
+                <div class="space-y-3">
+                    @forelse($recentDispositions ?? [] as $disposition)
+                    <div class="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-l-4 border-orange-500 hover:shadow-md transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg mr-2">
+                                        URGENT
+                                    </span>
+                                    <span class="text-xs text-gray-500">{{ $disposition->created_at ?? '2 hari lalu' }}</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">{{ $disposition->title ?? 'Surat Keputusan Bupati No. 001/2024' }}</h4>
+                                <p class="text-sm text-gray-600 mb-2">{{ $disposition->instruction ?? 'Harap segera ditindaklanjuti dan dilaporkan hasilnya' }}</p>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Dari: Admin
+                                </div>
+                            </div>
+                            <a href="{{ route('staff.disposisi.show', 1) }}" class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                                Proses
+                            </a>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-gray-500 font-medium">Tidak ada disposisi yang perlu ditindaklanjuti</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            {{-- Arsip Terbaru yang Saya Upload --}}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Arsip Terbaru Saya</h3>
+                            <p class="text-sm text-gray-500">Dokumen yang baru Anda upload</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('staff.arsip.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                        Lihat Semua →
+                    </a>
+                </div>
+                
+                <div class="space-y-3">
+                    @forelse($recentArchives ?? [] as $archive)
+                    <div class="p-4 bg-gray-50 rounded-xl hover:bg-blue-50 border border-gray-100 hover:border-blue-200 transition-all">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-gray-800 truncate mb-1">{{ $archive->title ?? 'Laporan Keuangan Q4 2023' }}</h4>
+                                <div class="flex items-center text-xs text-gray-500 space-x-3">
+                                    <span class="flex items-center">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ $archive->created_at ?? '2 hari lalu' }}
+                                    </span>
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                        {{ $archive->category ?? 'Laporan' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 ml-4">
+                                <a href="{{ route('staff.arsip.show', 1) }}" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Lihat">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-gray-500 font-medium">Belum ada arsip yang diupload</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Right Column (1/3) --}}
+        <div class="space-y-6">
+            
+            {{-- Quick Actions --}}
+            <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Aksi Cepat
+                </h3>
+                <div class="space-y-3">
+                    <a href="{{ route('staff.arsip.index') }}" class="block w-full bg-white/20 hover:bg-white/30 backdrop-blur-lg p-4 rounded-xl transition-all transform hover:scale-105">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span class="font-semibold">Cari Arsip</span>
+                        </div>
+                    </a>
+                    <a href="{{ route('staff.arsip.favorit') }}" class="block w-full bg-white/20 hover:bg-white/30 backdrop-blur-lg p-4 rounded-xl transition-all transform hover:scale-105">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                            </svg>
+                            <span class="font-semibold">Lihat Favorit</span>
+                        </div>
+                    </a>
+                    <a href="{{ route('staff.laporan.index') }}" class="block w-full bg-white/20 hover:bg-white/30 backdrop-blur-lg p-4 rounded-xl transition-all transform hover:scale-105">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="font-semibold">Lihat Laporan</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Activity Timeline --}}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Aktivitas Terkini
+                </h3>
                 <div class="space-y-4">
-                    <div class="border-l-4 border-blue-500 pl-4 py-2">
-                        <p class="text-sm font-medium text-gray-800">Diah mengunggah arsip baru</p>
-                        <p class="text-sm text-blue-600 font-medium mt-1">Surat Edaran COVID-19</p>
+                    @forelse($recentActivities ?? [] as $activity)
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-800">{{ $activity->title ?? 'Anda mengunggah arsip baru' }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ $activity->time ?? '5 menit lalu' }}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r-lg">
+                        <p class="text-sm font-medium text-gray-800">Anda mengunggah arsip baru</p>
+                        <p class="text-xs text-blue-600 font-medium mt-1">Laporan Keuangan Q4 2023</p>
                         <p class="text-xs text-gray-500 mt-1">5 menit lalu</p>
                     </div>
-                    <div class="border-l-4 border-green-500 pl-4 py-2">
-                        <p class="text-sm font-medium text-gray-800">Aisyah memberikan disposisi</p>
-                        <p class="text-sm text-green-600 font-medium mt-1">Proposal Anggaran 2024</p>
-                        <p class="text-xs text-gray-500 mt-1">1 jam lalu</p>
+                    <div class="border-l-4 border-green-500 pl-4 py-3 bg-green-50 rounded-r-lg">
+                        <p class="text-sm font-medium text-gray-800">Disposisi selesai diproses</p>
+                        <p class="text-xs text-green-600 font-medium mt-1">SK Bupati No. 001/2024</p>
+                        <p class="text-xs text-gray-500 mt-1">2 jam lalu</p>
+                    </div>
+                    <div class="border-l-4 border-yellow-500 pl-4 py-3 bg-yellow-50 rounded-r-lg">
+                        <p class="text-sm font-medium text-gray-800">Arsip ditandai favorit</p>
+                        <p class="text-xs text-yellow-600 font-medium mt-1">Proposal Anggaran 2024</p>
+                        <p class="text-xs text-gray-500 mt-1">1 hari lalu</p>
+                    </div>
+                    @endforelse
+                </div>
+                <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-700 font-semibold mt-4">
+                    Lihat Semua Aktivitas →
+                </a>
+            </div>
+
+            {{-- Tips & Info --}}
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-lg border border-yellow-200 p-6">
+                <div class="flex items-start mb-4">
+                    <div class="flex-shrink-0 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-bold text-yellow-900 mb-2">💡 Tips Hari Ini</h4>
+                        <p class="text-sm text-yellow-800">Gunakan fitur <span class="font-semibold">Arsip Favorit</span> untuk menyimpan dokumen penting yang sering Anda akses!</p>
                     </div>
                 </div>
             </div>
 
-            {{-- CHART: Distribusi Kategori --}}
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">Distribusi Kategori Arsip</h3>
-                <div style="position: relative; height: 250px;">
-                    <canvas id="doughnutChart"></canvas>
+            {{-- Storage Info --}}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                    </svg>
+                    Penyimpanan
+                </h3>
+                <div class="mb-3">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600">Digunakan</span>
+                        <span class="font-semibold text-gray-800">2.8 GB / 10 GB</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: 28%"></div>
+                    </div>
                 </div>
-            </div>
-
-            {{-- AKSI CEPAT --}}
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">Aksi Cepat</h3>
-                <div class="space-y-3">
-                    <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"/>
-                        </svg>
-                        Upload Arsip Baru
-                    </button>
-                    <button class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"/>
-                        </svg>
-                        Buat Disposisi
-                    </button>
-                </div>
+                <p class="text-xs text-gray-500">Anda masih memiliki <span class="font-semibold text-blue-600">7.2 GB</span> ruang tersedia</p>
             </div>
         </div>
     </div>
 </div>
-@endsection
 
-@push('scripts')
-<script>
-    // Bar Chart
-    const barCtx = document.getElementById('barChart');
-    if (barCtx) {
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
-                datasets: [{
-                    label: 'Dokumen Diunggah',
-                    data: [12, 19, 15, 22, 18, 25],
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderColor: 'rgb(37, 99, 235)',
-                    borderWidth: 2,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
+@push('styles')
+<style>
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-    // Doughnut Chart
-    const doughnutCtx = document.getElementById('doughnutChart');
-    if (doughnutCtx) {
-        new Chart(doughnutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Surat Keputusan', 'Laporan Keuangan', 'Dokumen Proyek', 'Lain-lain'],
-                datasets: [{
-                    data: [300, 150, 100, 80],
-                    backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(107, 114, 128, 0.8)'],
-                    borderColor: ['#fff', '#fff', '#fff', '#fff'],
-                    borderWidth: 3,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 15, font: { size: 11 } } }
-                }
-            }
-        });
-    }
-</script>
+.stat-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
 @endpush
+
+@endsection

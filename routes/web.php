@@ -41,6 +41,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        // ✅ AJAX Route untuk Real-time Dashboard Update (OPTIONAL)
+    Route::get('dashboard/data', [AdminDashboardController::class, 'getData'])->name('dashboard.data');
     
     // Profil
     Route::get('profil', [ProfileController::class, 'index'])->name('profil');
@@ -205,12 +207,15 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     });
     
     // Notifikasi
-    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
-        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
-    });
+  Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+    Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+});
     
     // Manajemen Aset (Read Only)
     Route::prefix('aset')->name('aset.')->group(function () {
@@ -237,10 +242,13 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/', [SettingController::class, 'index'])->name('index');
         
         // Profile Only
-        Route::put('/profile', [SettingController::class, 'updateProfile'])->name('profile');
-        Route::put('/password', [SettingController::class, 'updatePassword'])->name('password');
-        Route::post('/avatar', [SettingController::class, 'updateAvatar'])->name('avatar');
-        Route::delete('/avatar', [SettingController::class, 'removeAvatar'])->name('avatar.remove');
+Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+    // Profil
+    Route::get('profil', [ProfileController::class, 'index'])->name('profil');
+    Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
+    Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
+});
         
         // Appearance (Staff can also customize appearance) ← NEW!
         Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');

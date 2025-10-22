@@ -18,12 +18,16 @@
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
                     <p class="text-sm text-gray-500 font-medium mb-2">Total Arsip</p>
-                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="2847">0</h3>
-                    <p class="text-xs text-green-600 mt-2 flex items-center">
+                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="{{ $totalArchives }}">0</h3>
+                    <p class="text-xs {{ $archivesGrowth >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            @if($archivesGrowth >= 0)
                             <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"/>
+                            @else
+                            <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z"/>
+                            @endif
                         </svg>
-                        +12% dari bulan lalu
+                        {{ abs($archivesGrowth) }}% dari bulan lalu
                     </p>
                 </div>
                 <div class="stat-icon bg-blue-100 p-3 rounded-xl flex-shrink-0 ml-3">
@@ -42,12 +46,16 @@
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
                     <p class="text-sm text-gray-500 font-medium mb-2">Arsip Bulan Ini</p>
-                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="184">0</h3>
-                    <p class="text-xs text-green-600 mt-2 flex items-center">
+                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="{{ $currentMonthArchives }}">0</h3>
+                    <p class="text-xs {{ $monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            @if($monthlyGrowth >= 0)
                             <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"/>
+                            @else
+                            <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z"/>
+                            @endif
                         </svg>
-                        +8% dari bulan lalu
+                        {{ abs($monthlyGrowth) }}% dari bulan lalu
                     </p>
                 </div>
                 <div class="stat-icon bg-purple-100 p-3 rounded-xl flex-shrink-0 ml-3">
@@ -67,12 +75,12 @@
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
                     <p class="text-sm text-gray-500 font-medium mb-2">Pengguna Aktif</p>
-                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="45">0</h3>
+                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="{{ $activeUsers }}">0</h3>
                     <p class="text-xs text-green-600 mt-2 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"/>
                         </svg>
-                        +3% dari bulan lalu
+                        {{ $activeUsersPercentage }}% aktif
                     </p>
                 </div>
                 <div class="stat-icon bg-green-100 p-3 rounded-xl flex-shrink-0 ml-3">
@@ -82,21 +90,21 @@
                 </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-green-600 h-2 rounded-full progress-bar" style="width: 0%" data-progress="85"></div>
+                <div class="bg-green-600 h-2 rounded-full progress-bar" style="width: 0%" data-progress="{{ $activeUsersPercentage }}"></div>
             </div>
         </div>
 
-        {{-- Card 4: Disposisi Pending --}}
+        {{-- Card 4: Disposisi --}}
         <div class="stat-card bg-white p-6 rounded-2xl shadow-md border-l-4 border-red-500 card-animate card-animate-delay-4">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-1">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Disposisi </p>
-                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="12">0</h3>
-                    <p class="text-xs text-red-600 mt-2 flex items-center">
+                    <p class="text-sm text-gray-500 font-medium mb-2">Disposisi</p>
+                    <h3 class="text-4xl font-bold text-gray-800 stat-number" data-target="{{ $pendingDispositions }}">0</h3>
+                    <p class="text-xs text-orange-600 mt-2 flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
                         </svg>
-                        -5% dari bulan lalu
+                        {{ $dispositionPercentage }}% pending
                     </p>
                 </div>
                 <div class="stat-icon bg-red-100 p-3 rounded-xl flex-shrink-0 ml-3">
@@ -106,7 +114,7 @@
                 </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-red-600 h-2 rounded-full progress-bar" style="width: 0%" data-progress="30"></div>
+                <div class="bg-red-600 h-2 rounded-full progress-bar" style="width: 0%" data-progress="{{ $dispositionPercentage }}"></div>
             </div>
         </div>
     </div>
@@ -125,7 +133,7 @@
                         <option>1 Bulan Terakhir</option>
                         <option>3 Bulan Terakhir</option>
                         <option>6 Bulan Terakhir</option>
-                        <option>Tahun Ini</option>
+                        <option>1 Tahun Terakhir</option>
                     </select>
                 </div>
                 <div class="chart-container" style="height: 300px;">
@@ -142,30 +150,36 @@
                     </a>
                 </div>
                 <div class="space-y-3">
+                    @forelse($latestArchives as $archive)
                     <div class="activity-item p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                             <div class="flex-1">
-                                <p class="font-semibold text-gray-800">Surat Keputusan Bupati No. 001/2024</p>
-                                <p class="text-xs text-gray-500 mt-1">Surat Keputusan • 2024-01-15</p>
+                                <a href="{{ route('admin.arsip.show', $archive->id) }}" class="font-semibold text-gray-800 hover:text-blue-600">
+                                    {{ $archive->judul }}
+                                </a>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ $archive->category->name ?? 'Tanpa Kategori' }} • {{ $archive->tanggal_surat->format('d M Y') }}
+                                </p>
                             </div>
                             <div class="flex gap-2 flex-wrap">
-                                <span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Tinggi</span>
-                                <span class="text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">Aktif</span>
+                                @if($archive->priority == 'urgent')
+                                <span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Mendesak</span>
+                                @elseif($archive->priority == 'high')
+                                <span class="text-xs font-medium text-orange-700 bg-orange-100 px-3 py-1 rounded-full">Tinggi</span>
+                                @else
+                                <span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Normal</span>
+                                @endif
                             </div>
                         </div>
                     </div>
-                    <div class="activity-item p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all" style="animation-delay: 0.1s;">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-800">Laporan Keuangan Q4 2023</p>
-                                <p class="text-xs text-gray-500 mt-1">Laporan • 2024-01-14</p>
-                            </div>
-                            <div class="flex gap-2 flex-wrap">
-                                <span class="text-xs font-medium text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">Sedang</span>
-                                <span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Review</span>
-                            </div>
-                        </div>
+                    @empty
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p>Belum ada arsip</p>
                     </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -177,16 +191,24 @@
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.5s;">
                 <h3 class="text-xl font-bold text-gray-800 mb-6">Aktivitas Terkini</h3>
                 <div class="space-y-4">
-                    <div class="activity-item border-l-4 border-blue-500 pl-4 py-2">
-                        <p class="text-sm font-medium text-gray-800">Diah mengunggah arsip baru</p>
-                        <p class="text-sm text-blue-600 font-medium mt-1">Surat Edaran COVID-19</p>
-                        <p class="text-xs text-gray-500 mt-1">5 menit lalu</p>
+                    @forelse($recentActivities as $activity)
+                    <div class="activity-item border-l-4 border-{{ $activity['color'] }}-500 pl-4 py-2">
+                        <p class="text-sm font-medium text-gray-800">
+                            {{ $activity['user'] }} 
+                            @if($activity['type'] == 'upload')
+                                mengunggah arsip baru
+                            @else
+                                memberikan disposisi
+                            @endif
+                        </p>
+                        <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1">{{ Str::limit($activity['title'], 50) }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
                     </div>
-                    <div class="activity-item border-l-4 border-green-500 pl-4 py-2" style="animation-delay: 0.1s;">
-                        <p class="text-sm font-medium text-gray-800">Aisyah memberikan disposisi</p>
-                        <p class="text-sm text-green-600 font-medium mt-1">Proposal Anggaran 2024</p>
-                        <p class="text-xs text-gray-500 mt-1">1 jam lalu</p>
+                    @empty
+                    <div class="text-center py-8 text-gray-500">
+                        <p class="text-sm">Belum ada aktivitas</p>
                     </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -202,25 +224,25 @@
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.7s;">
                 <h3 class="text-xl font-bold text-gray-800 mb-6">Aksi Cepat</h3>
                 <div class="space-y-3">
-                    <button class="btn-action w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
+                    <a href="{{ route('admin.arsip.create') }}" class="btn-action w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"/>
                             <path d="M9 13h2v5a1 1 0 11-2 0v-5z"/>
                         </svg>
                         Upload Arsip Baru
-                    </button>
-                    <button class="btn-action w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
+                    </a>
+                    <a href="{{ route('admin.disposisi.create') }}" class="btn-action w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"/>
                         </svg>
                         Buat Disposisi
-                    </button>
-                    <button class="btn-action w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
+                    </a>
+                    <a href="{{ route('admin.user.index') }}" class="btn-action w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-xl flex items-center justify-center font-semibold shadow-md hover:shadow-lg transition-all">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                         </svg>
                         Kelola User
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -322,9 +344,12 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Counter Animation
+        // ============================================
+        // COUNTER ANIMATION
+        // ============================================
         function animateCounter(element) {
             const target = parseInt(element.getAttribute('data-target'));
             const duration = 2000;
@@ -334,16 +359,18 @@
             const updateCounter = () => {
                 current += increment;
                 if (current < target) {
-                    element.textContent = Math.floor(current).toLocaleString();
+                    element.textContent = Math.floor(current).toLocaleString('id-ID');
                     requestAnimationFrame(updateCounter);
                 } else {
-                    element.textContent = target.toLocaleString();
+                    element.textContent = target.toLocaleString('id-ID');
                 }
             };
             updateCounter();
         }
 
-        // Progress Bar Animation
+        // ============================================
+        // PROGRESS BAR ANIMATION
+        // ============================================
         function animateProgressBar(element) {
             const target = parseInt(element.getAttribute('data-progress'));
             setTimeout(() => {
@@ -355,63 +382,102 @@
         document.querySelectorAll('.stat-number').forEach(animateCounter);
         document.querySelectorAll('.progress-bar').forEach(animateProgressBar);
 
-        // Initialize Charts
+        // ============================================
+        // BAR CHART: Tren Pengarsipan Bulanan
+        // ============================================
         const barCtx = document.getElementById('barChart');
         if (barCtx) {
+            const monthlyData = @json($monthlyTrend);
+            
             new Chart(barCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    labels: monthlyData.map(item => item.month),
                     datasets: [{
-                        label: 'Dokumen Diunggah',
-                        data: [12, 19, 15, 22, 18, 25],
+                        label: 'Arsip Diunggah',
+                        data: monthlyData.map(item => item.count),
                         backgroundColor: 'rgba(59, 130, 246, 0.8)',
                         borderColor: 'rgb(37, 99, 235)',
                         borderWidth: 2,
-                        borderRadius: 8
+                        borderRadius: 8,
+                        hoverBackgroundColor: 'rgba(37, 99, 235, 0.9)',
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: 12 },
+                                padding: 15
+                            }
+                        },
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             padding: 12,
-                            borderRadius: 8
+                            borderRadius: 8,
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Arsip: ' + context.parsed.y + ' dokumen';
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            ticks: {
+                                precision: 0,
+                                font: { size: 11 }
+                            },
+                            grid: { 
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            }
                         },
                         x: {
-                            grid: { display: false }
+                            ticks: {
+                                font: { size: 11 }
+                            },
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            }
                         }
                     }
                 }
             });
         }
 
+        // ============================================
+        // DOUGHNUT CHART: Distribusi Kategori
+        // ============================================
         const doughnutCtx = document.getElementById('doughnutChart');
         if (doughnutCtx) {
+            const categoryData = @json($categoryDistribution);
+            
             new Chart(doughnutCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Surat Keputusan', 'Laporan Keuangan', 'Dokumen Proyek', 'Lain-lain'],
+                    labels: categoryData.map(item => item.name),
                     datasets: [{
-                        data: [300, 150, 100, 80],
+                        data: categoryData.map(item => item.total),
                         backgroundColor: [
                             'rgba(59, 130, 246, 0.8)',
                             'rgba(245, 158, 11, 0.8)',
                             'rgba(139, 92, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
                             'rgba(107, 114, 128, 0.8)'
                         ],
-                        borderColor: ['#fff', '#fff', '#fff', '#fff'],
+                        borderColor: ['#fff', '#fff', '#fff', '#fff', '#fff'],
                         borderWidth: 3,
-                        hoverOffset: 15
+                        hoverOffset: 15,
+                        hoverBorderWidth: 4
                     }]
                 },
                 options: {
@@ -423,13 +489,56 @@
                             labels: {
                                 padding: 15,
                                 font: { size: 11 },
-                                usePointStyle: true
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            return {
+                                                text: `${label} (${value})`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            borderRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
             });
         }
+
+        // ============================================
+        // REAL-TIME UPDATE (Optional - setiap 30 detik)
+        // ============================================
+        function updateDashboardStats() {
+            fetch('{{ route("admin.dashboard") }}?ajax=stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update stats jika diperlukan
+                    console.log('Dashboard stats updated', data);
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }
+
+        // Uncomment untuk enable auto-refresh
+        // setInterval(updateDashboardStats, 30000);
     });
 </script>
 @endpush

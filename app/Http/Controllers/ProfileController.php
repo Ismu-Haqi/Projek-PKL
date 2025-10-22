@@ -28,6 +28,19 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
+        // ✅ CHECK IF REMOVE AVATAR REQUEST
+        if ($request->has('remove_avatar') && $request->remove_avatar == '1') {
+            // Delete old avatar if exists
+            if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
+                Storage::delete('public/' . $user->avatar);
+            }
+
+            $user->update(['avatar' => null]);
+
+            return back()->with('success', 'Foto profil berhasil dihapus!');
+        }
+        
+        // ✅ NORMAL UPDATE PROFILE
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -82,7 +95,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Remove user avatar
+     * Remove user avatar (Alternative method if route exists)
      */
     public function removeAvatar()
     {
