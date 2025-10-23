@@ -33,41 +33,109 @@ class SettingController extends Controller
     /**
      * Update user profile
      */
-    public function updateProfil(Request $request)
-    {
-        $user = Auth::user();
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'current_password' => 'nullable|required_with:password',
-            'password' => 'nullable|min:8|confirmed',
-        ], [
-            'name.required' => 'Nama harus diisi',
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email tidak valid',
-            'email.unique' => 'Email sudah digunakan',
-            'current_password.required_with' => 'Password saat ini harus diisi',
-            'password.min' => 'Password minimal 8 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak cocok',
-        ]);
+/**
+ * Update user profile (with avatar support)
+ */
+/**
+ * Update user profile (with avatar support)
+ */
+public function updateProfil(Request $request)
+{
+    $user = Auth::user();
+    
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+        'current_password' => 'nullable|required_with:password',
+        'password' => 'nullable|min:8|confirmed',
+    ], [
+        'name.required' => 'Nama harus diisi',
+        'email.required' => 'Email harus diisi',
+        'email.email' => 'Format email tidak valid',
+        'email.unique' => 'Email sudah digunakan',
+        'avatar.image' => 'File harus berupa gambar',
+        'avatar.mimes' => 'Format gambar harus: jpeg, jpg, png, atau gif',
+        'avatar.max' => 'Ukuran gambar maksimal 2MB',
+        'current_password.required_with' => 'Password saat ini harus diisi',
+        'password.min' => 'Password minimal 8 karakter',
+        'password.confirmed' => 'Konfirmasi password tidak cocok',
+    ]);
 
+    try {
         // Update name and email
         $user->name = $request->name;
         $user->email = $request->email;
 
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            
+            // Store new avatar in avatars folder
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+        }
+
         // Update password if provided
         if ($request->filled('password')) {
             if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'Password saat ini salah'])->withInput();
+                return back()
+                    ->withErrors(['current_password' => 'Password saat ini salah'])
+                    ->withInput();
             }
             $user->password = Hash::make($request->password);
         }
 
         $user->save();
 
-        return back()->with('success', 'Profil berhasil diperbarui');
+        return back()->with('success', 'Profil berhasil diperbarui!');
+        
+    } catch (\Exception $e) {
+        return back()
+            ->with('error', 'Gagal memperbarui profil: ' . $e->getMessage())
+            ->withInput();
     }
+}
+
+/**
+ * Remove user avatar
+ */
+public function removeAvatar()
+{
+    try {
+        $user = Auth::user();
+        
+        if ($user->avatar) {
+            // Delete avatar file from storage
+            if (Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            
+            // Update user record
+            $user->avatar = null;
+            $user->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto profil berhasil dihapus'
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada foto untuk dihapus'
+        ], 400);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus foto: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
      * Update general settings (Admin only)

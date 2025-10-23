@@ -41,7 +41,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        // ✅ AJAX Route untuk Real-time Dashboard Update (OPTIONAL)
     Route::get('dashboard/data', [AdminDashboardController::class, 'getData'])->name('dashboard.data');
     
     // Profil
@@ -140,24 +139,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
     
-    // ✅ PENGATURAN (SETTINGS) - UPDATED WITH APPEARANCE!
+    // ✅ PENGATURAN (SETTINGS)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
-        // Main page
         Route::get('/', [SettingController::class, 'index'])->name('index');
-        
-        // Profile settings
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
-        
-        // System settings
         Route::put('/update', [SettingController::class, 'update'])->name('update');
-        
-        // Appearance settings ← NEW!
         Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
-        
-        // Cache & Maintenance
         Route::post('/clear-cache', [SettingController::class, 'clearCache'])->name('clear-cache');
-        
-        // Backup
         Route::post('/backup', [SettingController::class, 'backup'])->name('backup');
         Route::get('/backup-list', [SettingController::class, 'backupList'])->name('backup-list');
         Route::get('/backup/download/{filename}', [SettingController::class, 'downloadBackup'])->name('backup-download');
@@ -173,7 +161,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // ==================================================
-// ✅ STAFF ROUTES
+// ✅ STAFF ROUTES (FIXED)
 // ==================================================
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     
@@ -184,6 +172,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::get('profil', [ProfileController::class, 'index'])->name('profil');
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
     
     // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
@@ -207,20 +196,21 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     });
     
     // Notifikasi
-  Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
-    Route::get('/', [NotificationController::class, 'index'])->name('index');
-    Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-    Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
-    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
-    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
-    Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
-    Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
-});
+    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+    });
     
-    // Manajemen Aset (Read Only)
+    // ✅ FIXED: Manajemen Aset (Read Only) - Moved outside nested group
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
+        Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
     // Laporan (Read Only)
@@ -229,6 +219,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
+        Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         
         // Print & Export
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
@@ -236,21 +227,10 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
     
-    // ✅ PENGATURAN (SETTINGS) - Staff Version (Updated)
+// Pengaturan (SETTINGS) - Staff Version
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
-        // Main page
         Route::get('/', [SettingController::class, 'index'])->name('index');
-        
-        // Profile Only
-Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
-    // Profil
-    Route::get('profil', [ProfileController::class, 'index'])->name('profil');
-    Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
-    Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
-    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
-});
-        
-        // Appearance (Staff can also customize appearance) ← NEW!
+        Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
         Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
     });
 });
