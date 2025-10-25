@@ -38,9 +38,9 @@ class LoginController extends Controller
     {
         // Validasi input
         $request->validate([
-            'email' => 'required|string', // UBAH dari 'email' menjadi 'string'
+            'email' => 'required|string',
             'password' => 'required|string',
-            'role' => 'required|in:admin,staff', // Tambahkan validasi role
+            'role' => 'required|in:admin,staff',
         ], [
             'email.required' => 'Email harus diisi',
             'password.required' => 'Password harus diisi',
@@ -54,7 +54,7 @@ class LoginController extends Controller
         $credentials = [
             $loginType => $request->email,
             'password' => $request->password,
-            'role' => $request->role, // Pastikan role sesuai
+            'role' => $request->role,
         ];
 
         // Attempt login
@@ -63,26 +63,28 @@ class LoginController extends Controller
 
             $user = Auth::user();
             
+            // ✅ PESAN SUKSES DENGAN SWEETALERT2
+            $welcomeMessage = $user->role === 'admin' 
+                ? 'Selamat datang kembali di Sistem Arsip Digital Diskominfo Batola, ' . $user->name . '!' 
+                : 'Selamat datang di Sistem Arsip Digital Diskominfo Batola, ' . $user->name . '!';
+            
             // Redirect sesuai role
             if ($user->role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'))
-                    ->with('success', 'Selamat datang, ' . $user->name . '!');
+                    ->with('success', $welcomeMessage);
             } elseif ($user->role === 'staff') {
                 return redirect()->intended(route('staff.dashboard'))
-                    ->with('success', 'Selamat datang, ' . $user->name . '!');
+                    ->with('success', $welcomeMessage);
             }
             
             // Jika role tidak sesuai
             Auth::logout();
-            return back()->withErrors([
-                'role' => 'Role tidak valid.',
-            ]);
+            return back()->with('error', 'Role tidak valid untuk akses sistem.');
         }
 
-        // Login gagal
-        return back()->withErrors([
-            'email' => 'Email, password, atau role yang Anda masukkan salah.',
-        ])->withInput($request->only('email', 'role'));
+        // ✅ LOGIN GAGAL - PESAN ERROR
+        return back()->with('error', 'Email, password, atau role yang Anda masukkan tidak sesuai. Silakan coba lagi.')
+            ->withInput($request->only('email', 'role'));
     }
 
     /**
@@ -90,10 +92,14 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $userName = Auth::user()->name;
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda telah berhasil logout');
+        // ✅ PESAN LOGOUT SUKSES
+        return redirect()->route('login')
+            ->with('success', 'Anda telah berhasil keluar dari sistem. Terima kasih, ' . $userName . '!');
     }
 }

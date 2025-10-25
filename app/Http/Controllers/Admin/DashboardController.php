@@ -254,4 +254,146 @@ class DashboardController extends Controller
                 return response()->json(['error' => 'Invalid type'], 400);
         }
     }
+
+    /**
+     * ✅ NEW: Get chart data based on period filter
+     */
+    public function getChartData(Request $request)
+    {
+        $period = $request->get('period', '1month');
+        $customStart = $request->get('start_date');
+        $customEnd = $request->get('end_date');
+        
+        $chartData = [];
+        $categories = [];
+        
+        switch ($period) {
+            case '1month':
+                // Data harian untuk 1 bulan terakhir (30 hari)
+                for ($i = 29; $i >= 0; $i--) {
+                    $date = Carbon::now()->subDays($i);
+                    $count = Archive::whereDate('created_at', $date->format('Y-m-d'))->count();
+                    
+                    $chartData[] = $count;
+                    $categories[] = $date->format('d M');
+                }
+                break;
+                
+            case '3month':
+                // Data mingguan untuk 3 bulan terakhir (~12 minggu)
+                for ($i = 11; $i >= 0; $i--) {
+                    $startWeek = Carbon::now()->subWeeks($i)->startOfWeek();
+                    $endWeek = Carbon::now()->subWeeks($i)->endOfWeek();
+                    
+                    $count = Archive::whereBetween('created_at', [$startWeek, $endWeek])->count();
+                    
+                    $chartData[] = $count;
+                    $categories[] = $startWeek->format('d M') . ' - ' . $endWeek->format('d M');
+                }
+                break;
+                
+            case '6month':
+                // Data bulanan untuk 6 bulan terakhir
+                for ($i = 5; $i >= 0; $i--) {
+                    $date = Carbon::now()->subMonths($i);
+                    $count = Archive::whereYear('created_at', $date->year)
+                        ->whereMonth('created_at', $date->month)
+                        ->count();
+                    
+                    $chartData[] = $count;
+                    $categories[] = $date->format('M Y');
+                }
+                break;
+                
+            case '1year':
+                // Data bulanan untuk 12 bulan terakhir
+                for ($i = 11; $i >= 0; $i--) {
+                    $date = Carbon::now()->subMonths($i);
+                    $count = Archive::whereYear('created_at', $date->year)
+                        ->whereMonth('created_at', $date->month)
+                        ->count();
+                    
+                    $chartData[] = $count;
+                    $categories[] = $date->format('M Y');
+                }
+                break;
+                
+            case 'custom':
+                if ($customStart && $customEnd) {
+                    $start = Carbon::parse($customStart);
+                    $end = Carbon::parse($customEnd);
+                    $diffInDays = $start->diffInDays($end);
+                    
+                    if ($diffInDays <= 31) {
+                        // Jika range <= 31 hari, tampilkan per hari
+                        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                            $count = Archive::whereDate('created_at', $date->format('Y-m-d'))->count();
+                            $chartData[] = $count;
+                            $categories[] = $date->format('d M');
+                        }
+                    } elseif ($diffInDays <= 90) {
+                        // Jika range <= 90 hari, tampilkan per minggu
+                        $currentWeekStart = $start->copy()->startOfWeek();
+                        while ($currentWeekStart->lte($end)) {
+                            $weekEnd = $currentWeekStart->copy()->endOfWeek();
+                            if ($weekEnd->gt($end)) {
+                                $weekEnd = $end->copy();
+                            }
+                            
+                            $count = Archive::whereBetween('created_at', [$currentWeekStart, $weekEnd])->count();
+                            $chartData[] = $count;
+                            $categories[] = $currentWeekStart->format('d M') . ' - ' . $weekEnd->format('d M');
+                            
+                            $currentWeekStart->addWeek();
+                        }
+                    } else {
+                        // Jika range > 90 hari, tampilkan per bulan
+                        $currentMonth = $start->copy()->startOfMonth();
+                        while ($currentMonth->lte($end)) {
+                            $monthEnd = $currentMonth->copy()->endOfMonth();
+                            if ($monthEnd->gt($end)) {
+                                $monthEnd = $end->copy();
+                            }
+                            
+                            $count = Archive::whereBetween('created_at', [$currentMonth, $monthEnd])->count();
+                            $chartData[] = $count;
+                            $categories[] = $currentMonth->format('M Y');
+                            
+                            $currentMonth->addMonth();
+                        }
+                    }
+                }
+                break;
+                
+            default:
+                // Default: 6 bulan terakhir
+                for ($i = 5; $i >= 0; $i--) {
+                    $date = Carbon::now()->subMonths($i);
+                    $count = Archive::whereYear('created_at', $date->year)
+                        ->whereMonth('created_at', $date->month)
+                        ->count();
+                    
+                    $chartData[] = $count;
+                    $categories[] = $date->format('M Y');
+                }
+        }
+        
+        // Hitung statistik tambahan
+        $total = array_sum($chartData);
+        $average = $total > 0 ? round($total / count($chartData), 1) : 0;
+        $max = count($chartData) > 0 ? max($chartData) : 0;
+        $min = count($chartData) > 0 ? min($chartData) : 0;
+        
+        return response()->json([
+            'success' => true,
+            'data' => $chartData,
+            'categories' => $categories,
+            'stats' => [
+                'total' => $total,
+                'average' => $average,
+                'max' => $max,
+                'min' => $min
+            ]
+        ]);
+    }
 }

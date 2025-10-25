@@ -87,8 +87,9 @@ class UserController extends Controller
 
         User::create($validated);
 
+        // ✅ PESAN SUKSES TAMBAH USER
         return redirect()->route('admin.user.index')
-            ->with('success', 'User berhasil ditambahkan!');
+            ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan ke sistem Diskominfo Batola!');
     }
 
     /**
@@ -192,8 +193,9 @@ class UserController extends Controller
 
         $user->update($validated);
 
+        // ✅ PESAN SUKSES UPDATE USER
         return redirect()->route('admin.user.index')
-            ->with('success', 'User berhasil diperbarui!');
+            ->with('success', 'Data user "' . $user->name . '" berhasil diperbarui!');
     }
 
     /**
@@ -212,10 +214,12 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri!');
         }
 
+        $userName = $user->name;
         $user->delete();
 
+        // ✅ PESAN SUKSES DELETE USER
         return redirect()->route('admin.user.index')
-            ->with('success', 'User berhasil dihapus!');
+            ->with('success', 'User "' . $userName . '" berhasil dihapus dari sistem!');
     }
 
     /**
@@ -236,7 +240,8 @@ class UserController extends Controller
             'password' => Hash::make($validated['password'])
         ]);
 
-        return back()->with('success', 'Password user berhasil direset!');
+        // ✅ PESAN SUKSES RESET PASSWORD
+        return back()->with('success', 'Password user "' . $user->name . '" berhasil direset!');
     }
 
     /**
@@ -259,8 +264,9 @@ class UserController extends Controller
             'is_active' => !$user->is_active
         ]);
 
+        // ✅ PESAN SUKSES TOGGLE STATUS
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
-        return back()->with('success', "User berhasil {$status}!");
+        return back()->with('success', "User \"{$user->name}\" berhasil {$status} dalam sistem!");
     }
 }

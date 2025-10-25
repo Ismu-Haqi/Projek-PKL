@@ -218,13 +218,13 @@
                 <td class="text-center">{{ $unit['completion_rate'] }}%</td>
                 <td class="text-center">
                     @if($unit['completion_rate'] >= 80)
-                        <span class="badge badge-excellent">EXCELLENT</span>
+                        <span class="badge badge-excellent">Baik Sekali</span>
                     @elseif($unit['completion_rate'] >= 60)
-                        <span class="badge badge-good">GOOD</span>
+                        <span class="badge badge-good">Baik</span>
                     @elseif($unit['completion_rate'] >= 40)
-                        <span class="badge badge-fair">FAIR</span>
+                        <span class="badge badge-fair">Lumayan</span>
                     @else
-                        <span class="badge badge-poor">NEED IMPROVEMENT</span>
+                        <span class="badge badge-poor">Tingkatkan Lagi</span>
                     @endif
                 </td>
             </tr>

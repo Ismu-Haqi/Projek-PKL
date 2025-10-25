@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-            {{-- File Preview --}}
+            {{-- File Info Card --}}
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,14 +195,16 @@
                         
                         <div class="flex gap-3">
                             <a href="{{ route('admin.arsip.download', $archive->id) }}" 
-                               class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium">
+                               class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 Download File
                             </a>
-                            <a href="{{ route('admin.arsip.preview', $archive->id) }}" target="_blank"
-                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium">
+                            <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                 </svg>
@@ -210,16 +212,6 @@
                             </a>
                         </div>
                     </div>
-
-                    {{-- PDF Preview (if PDF) --}}
-                    @if(pathinfo($archive->file_path, PATHINFO_EXTENSION) === 'pdf')
-                    <div class="mt-4">
-                        <iframe src="{{ route('admin.arsip.preview', $archive->id) }}" 
-                                class="w-full h-96 border-2 border-gray-200 rounded-lg"
-                                frameborder="0">
-                        </iframe>
-                    </div>
-                    @endif
                 @else
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <svg class="w-12 h-12 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,6 +296,220 @@
             @endif
         </div>
     </div>
+
+    {{-- File Preview Section (Di Bawah) --}}
+    @if($archive->file_path && Storage::disk('public')->exists($archive->file_path))
+        @php
+            $fileExtension = strtolower(pathinfo($archive->file_path, PATHINFO_EXTENSION));
+            // URL publik file untuk viewer online
+            $publicFileUrl = url(Storage::url($archive->file_path));
+        @endphp
+        
+        @if($fileExtension === 'pdf')
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    Preview Dokumen PDF
+                </h2>
+                <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    Buka Fullscreen
+                </a>
+            </div>
+            <div class="border-2 border-gray-200 rounded-lg overflow-hidden">
+                <iframe src="{{ route('admin.arsip.preview', $archive->id) }}" 
+                        class="w-full"
+                        style="height: 800px;"
+                        frameborder="0">
+                </iframe>
+            </div>
+        </div>
+        
+        @elseif(in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif']))
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Preview Gambar
+                </h2>
+                <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    Lihat Ukuran Penuh
+                </a>
+            </div>
+            <div class="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
+                <img src="{{ route('admin.arsip.preview', $archive->id) }}" 
+                     alt="{{ $archive->file_name ?? 'Preview' }}"
+                     class="max-w-full h-auto rounded shadow-lg">
+            </div>
+        </div>
+        
+        @elseif(in_array($fileExtension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']))
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Preview Dokumen {{ strtoupper($fileExtension) }}
+                    <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Powered by Google Docs Viewer</span>
+                </h2>
+                <div class="flex gap-2">
+                    <a href="https://docs.google.com/viewer?url={{ urlencode($publicFileUrl) }}&embedded=true" 
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                        Buka di Tab Baru
+                    </a>
+                </div>
+            </div>
+            
+            {{-- Info Box --}}
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium">Preview menggunakan Google Docs Viewer</p>
+                        <p class="mt-1">Jika preview tidak muncul, klik tombol "Buka di Tab Baru" atau download file untuk melihat dengan aplikasi Office.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                <iframe src="https://docs.google.com/viewer?url={{ urlencode($publicFileUrl) }}&embedded=true" 
+                        class="w-full"
+                        style="height: 800px;"
+                        frameborder="0"
+                        onload="this.style.opacity=1"
+                        onerror="showOfficeError()"
+                        style="opacity: 0; transition: opacity 0.3s;">
+                </iframe>
+                
+                {{-- Loading State --}}
+                <div id="officeLoading" class="absolute inset-0 flex items-center justify-center bg-white">
+                    <div class="text-center">
+                        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-gray-600 font-medium">Memuat preview dokumen...</p>
+                        <p class="text-sm text-gray-500 mt-2">Mohon tunggu beberapa saat</p>
+                    </div>
+                </div>
+                
+                {{-- Error State (Hidden by default) --}}
+                <div id="officeError" class="hidden p-8 text-center">
+                    <svg class="w-16 h-16 text-yellow-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <p class="text-gray-700 font-medium mb-2">Preview tidak dapat dimuat</p>
+                    <p class="text-sm text-gray-500 mb-4">Google Docs Viewer mungkin tidak dapat mengakses file. Silakan download file untuk melihat isinya.</p>
+                    <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                       class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition font-medium">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download File
+                    </a>
+                </div>
+            </div>
+            
+            {{-- Alternative Viewers --}}
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <a href="https://docs.google.com/viewer?url={{ urlencode($publicFileUrl) }}" 
+                   target="_blank"
+                   class="flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-3 rounded-lg transition font-medium">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"></path>
+                    </svg>
+                    Buka di Google Docs
+                </a>
+                
+                <a href="https://view.officeapps.live.com/op/view.aspx?src={{ urlencode($publicFileUrl) }}" 
+                   target="_blank"
+                   class="flex items-center justify-center bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-lg transition font-medium">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23 0H9v7h14zm0 9H9v7h14zm0 9H9v6h14zM0 0h7v7H0zm0 9h7v7H0zm0 9h7v6H0z"></path>
+                    </svg>
+                    Buka di Office Online
+                </a>
+            </div>
+        </div>
+        
+        @else
+        <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                <svg class="w-16 h-16 text-yellow-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-gray-700 font-medium mb-2">Preview tidak tersedia untuk file {{ strtoupper($fileExtension) }}</p>
+                <p class="text-sm text-gray-500 mb-4">Silakan download file untuk melihat isinya</p>
+                <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                   class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition font-medium">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download File
+                </a>
+            </div>
+        </div>
+        @endif
+    @endif
 </div>
+
+@push('scripts')
+<script>
+// Hide loading and show iframe when loaded
+document.querySelectorAll('iframe[src*="docs.google.com"]').forEach(iframe => {
+    iframe.addEventListener('load', function() {
+        const loading = document.getElementById('officeLoading');
+        if (loading) {
+            setTimeout(() => {
+                loading.style.display = 'none';
+                this.style.opacity = '1';
+            }, 1000);
+        }
+    });
+});
+
+// Show error if iframe fails to load
+function showOfficeError() {
+    const loading = document.getElementById('officeLoading');
+    const error = document.getElementById('officeError');
+    if (loading) loading.style.display = 'none';
+    if (error) error.classList.remove('hidden');
+}
+
+// Timeout fallback (if loading takes too long)
+setTimeout(() => {
+    const loading = document.getElementById('officeLoading');
+    if (loading && loading.style.display !== 'none') {
+        loading.style.display = 'none';
+        document.querySelector('iframe[src*="docs.google.com"]').style.opacity = '1';
+    }
+}, 5000);
+</script>
+@endpush
 
 @endsection

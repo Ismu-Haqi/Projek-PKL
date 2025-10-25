@@ -8,11 +8,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'GANDARIA - Arsip Digital')</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
         * {
@@ -187,13 +187,10 @@
 </head>
 <body>
     
-    <!-- Overlay untuk mobile -->
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
     
-    <!-- Sidebar -->
     <aside id="sidebar">
         <div class="p-4">
-            <!-- Logo -->
             <div class="flex items-center mb-6 pb-4 border-b">
                 <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-3">
                     G
@@ -201,7 +198,6 @@
                 <span class="text-xl font-bold text-gray-800">GANDARIA</span>
             </div>
             
-            <!-- Menu -->
             <nav>
                 <p class="text-xs text-gray-400 font-semibold uppercase mb-2 px-2">BERANDA</p>
                 
@@ -272,16 +268,13 @@
                 </a>
             </nav>
             
-            <!-- Footer -->
             <div class="mt-6 pt-4 border-t">
                 <p class="text-xs text-gray-400 px-2">Diskominfo.Batola.2025</p>
             </div>
         </div>
     </aside>
     
-    <!-- Main Content -->
     <div id="main-content">
-        <!-- Header -->
         <header class="top-header">
             <div class="flex items-center gap-4">
                 <button class="menu-toggle" onclick="toggleSidebar()">
@@ -300,14 +293,12 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Notifikasi -->
                 <div class="relative">
     <button onclick="toggleNotification()" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
         </svg>
         
-        <!-- ✅ BADGE COUNTER REAL-TIME -->
         @php
             $unreadCount = Auth::user()->unreadNotifications()->count();
         @endphp
@@ -318,7 +309,6 @@
         @endif
     </button>
 
-    <!-- Notification Dropdown -->
     <div id="notificationDropdown" class="dropdown-menu absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
         <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
             <div class="flex items-center justify-between">
@@ -376,8 +366,7 @@
 </div>
                 
                 
- <!-- Profile -->
-<div class="relative">
+ <div class="relative">
     <button onclick="toggleProfile()" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-all">
         <div class="hidden md:block text-right">
             <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name }}</p>
@@ -399,7 +388,6 @@
         </svg>
     </button>
 
-    <!-- Profile Dropdown -->
     <div id="profileDropdown" class="dropdown-menu absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
         <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
             <div class="flex items-center space-x-3">
@@ -453,9 +441,9 @@
             </div>
         </header>
         
-        <!-- Content -->
         <main class="p-6">
-            @if(session('success'))
+            {{-- ❌ HAPUS BAGIAN INI - Notifikasi lama dengan alert biasa --}}
+            {{-- @if(session('success'))
                 <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded mb-4">
                     <p class="font-medium">{{ session('success') }}</p>
                 </div>
@@ -465,14 +453,17 @@
                 <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
                     <p class="font-medium">{{ session('error') }}</p>
                 </div>
-            @endif
+            @endif --}}
             
             @yield('content')
         </main>
     </div>
     
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    @include('partials.sweetalert')
     
     <script>
         // Toggle Sidebar
@@ -520,12 +511,12 @@
             dropdown.classList.toggle('show');
         }
 
-        // Confirm Logout
-        function confirmLogout() {
-            if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-                document.getElementById('logoutForm').submit();
-            }
-        }
+        // ❌ HAPUS function confirmLogout() yang lama - Sudah ditangani oleh sweetalert.blade.php
+        // function confirmLogout() {
+        //     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+        //         document.getElementById('logoutForm').submit();
+        //     }
+        // }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {

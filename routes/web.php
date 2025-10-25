@@ -42,6 +42,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/data', [AdminDashboardController::class, 'getData'])->name('dashboard.data');
+    Route::get('dashboard/chart-data', [AdminDashboardController::class, 'getChartData'])->name('dashboard.chart-data');
     
     // Profil
     Route::get('profil', [ProfileController::class, 'index'])->name('profil');

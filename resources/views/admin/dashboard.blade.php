@@ -128,16 +128,78 @@
             {{-- CHART: Tren Pengarsipan --}}
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.5s;">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tren Pengarsipan Bulanan</h3>
-                    <select class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option>1 Bulan Terakhir</option>
-                        <option>3 Bulan Terakhir</option>
-                        <option>6 Bulan Terakhir</option>
-                        <option>1 Tahun Terakhir</option>
-                    </select>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Tren Pengarsipan Bulanan</h3>
+                        <p class="text-sm text-gray-500 mt-1" id="chartSubtitle">Data 6 bulan terakhir</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <select id="periodFilter" class="text-sm border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="1month">1 Bulan Terakhir</option>
+                            <option value="3month">3 Bulan Terakhir</option>
+                            <option value="6month" selected>6 Bulan Terakhir</option>
+                            <option value="1year">1 Tahun Terakhir</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <button id="refreshChart" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
                 </div>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="barChart"></canvas>
+
+                {{-- Custom Date Range (Hidden by default) --}}
+                <div id="customDateRange" class="hidden mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                            <input type="date" id="startDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                            <input type="date" id="endDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="applyCustomDate" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Chart Statistics --}}
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-600 mb-1">Total</p>
+                        <p class="text-2xl font-bold text-blue-600" id="chartStatTotal">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-600 mb-1">Rata-rata</p>
+                        <p class="text-2xl font-bold text-green-600" id="chartStatAvg">0</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-600 mb-1">Tertinggi</p>
+                        <p class="text-2xl font-bold text-purple-600" id="chartStatMax">0</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-xl">
+                        <p class="text-xs text-gray-600 mb-1">Terendah</p>
+                        <p class="text-2xl font-bold text-orange-600" id="chartStatMin">0</p>
+                    </div>
+                </div>
+
+                {{-- Loading State --}}
+                <div id="chartLoading" class="hidden text-center py-12">
+                    <svg class="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-500">Memuat data chart...</p>
+                </div>
+
+                {{-- Chart Container --}}
+                <div class="chart-container" style="height: 400px;">
+                    <div id="archiveChart"></div>
                 </div>
             </div>
 
@@ -215,8 +277,8 @@
             {{-- CHART: Distribusi Kategori --}}
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.6s;">
                 <h3 class="text-xl font-bold text-gray-800 mb-6">Distribusi Kategori Arsip</h3>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="doughnutChart"></canvas>
+                <div class="chart-container" style="height: 300px;">
+                    <div id="categoryChart"></div>
                 </div>
             </div>
 
@@ -340,11 +402,27 @@
         position: relative;
         transition: all 0.3s ease;
     }
+
+    /* ApexCharts custom styling */
+    .apexcharts-tooltip {
+        background: rgba(0, 0, 0, 0.85) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .apexcharts-tooltip-title {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: none !important;
+        font-weight: 600 !important;
+    }
 </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{{-- ApexCharts CDN --}}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // ============================================
@@ -383,162 +461,376 @@
         document.querySelectorAll('.progress-bar').forEach(animateProgressBar);
 
         // ============================================
-        // BAR CHART: Tren Pengarsipan Bulanan
+        // GLOBAL CHART VARIABLES
         // ============================================
-        const barCtx = document.getElementById('barChart');
-        if (barCtx) {
-            const monthlyData = @json($monthlyTrend);
-            
-            new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: monthlyData.map(item => item.month),
-                    datasets: [{
-                        label: 'Arsip Diunggah',
-                        data: monthlyData.map(item => item.count),
-                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                        borderColor: 'rgb(37, 99, 235)',
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        hoverBackgroundColor: 'rgba(37, 99, 235, 0.9)',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                font: { size: 12 },
-                                padding: 15
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            borderRadius: 8,
-                            titleFont: { size: 14 },
-                            bodyFont: { size: 13 },
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Arsip: ' + context.parsed.y + ' dokumen';
-                                }
-                            }
+        let archiveChart = null;
+        let categoryChart = null;
+
+        // ============================================
+        // ARCHIVE TREND CHART (ApexCharts)
+        // ============================================
+        function initArchiveChart(categories, data) {
+            const options = {
+                series: [{
+                    name: 'Arsip Diunggah',
+                    data: data
+                }],
+                chart: {
+                    type: 'area',
+                    height: 400,
+                    fontFamily: 'Inter, sans-serif',
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0,
-                                font: { size: 11 }
-                            },
-                            grid: { 
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                drawBorder: false
-                            }
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                        animateGradually: {
+                            enabled: true,
+                            delay: 150
                         },
-                        x: {
-                            ticks: {
-                                font: { size: 11 }
-                            },
-                            grid: { 
-                                display: false,
-                                drawBorder: false
-                            }
+                        dynamicAnimation: {
+                            enabled: true,
+                            speed: 350
                         }
                     }
+                },
+                colors: ['#3B82F6'],
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.6,
+                        opacityTo: 0.1,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: categories,
+                    labels: {
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            colors: '#6B7280'
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            colors: '#6B7280'
+                        },
+                        formatter: function(value) {
+                            return Math.floor(value);
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: '#F3F4F6',
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                tooltip: {
+                    theme: 'dark',
+                    x: {
+                        show: true
+                    },
+                    y: {
+                        formatter: function(value) {
+                            return value + ' dokumen';
+                        }
+                    }
+                },
+                markers: {
+                    size: 5,
+                    colors: ['#3B82F6'],
+                    strokeColors: '#fff',
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7
+                    }
                 }
-            });
+            };
+
+            if (archiveChart) {
+                archiveChart.destroy();
+            }
+
+            archiveChart = new ApexCharts(document.querySelector("#archiveChart"), options);
+            archiveChart.render();
         }
 
         // ============================================
-        // DOUGHNUT CHART: Distribusi Kategori
+        // CATEGORY DISTRIBUTION CHART (Donut)
         // ============================================
-        const doughnutCtx = document.getElementById('doughnutChart');
-        if (doughnutCtx) {
+        function initCategoryChart() {
             const categoryData = @json($categoryDistribution);
             
-            new Chart(doughnutCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: categoryData.map(item => item.name),
-                    datasets: [{
-                        data: categoryData.map(item => item.total),
-                        backgroundColor: [
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(107, 114, 128, 0.8)'
-                        ],
-                        borderColor: ['#fff', '#fff', '#fff', '#fff', '#fff'],
-                        borderWidth: 3,
-                        hoverOffset: 15,
-                        hoverBorderWidth: 4
-                    }]
+            const options = {
+                series: categoryData.map(item => item.total),
+                chart: {
+                    type: 'donut',
+                    height: 300,
+                    fontFamily: 'Inter, sans-serif',
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
+                labels: categoryData.map(item => item.name),
+                colors: ['#3B82F6', '#F59E0B', '#8B5CF6', '#10B981', '#6B7280'],
+                dataLabels: {
+                    enabled: false
+                },
+                legend: {
+                    position: 'bottom',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    markers: {
+                        width: 12,
+                        height: 12,
+                        radius: 12
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 5
+                    },
+                    formatter: function(seriesName, opts) {
+                        return seriesName + ': ' + opts.w.globals.series[opts.seriesIndex];
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '70%',
                             labels: {
-                                padding: 15,
-                                font: { size: 11 },
-                                usePointStyle: true,
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map((label, i) => {
-                                            const value = data.datasets[0].data[i];
-                                            return {
-                                                text: `${label} (${value})`,
-                                                fillStyle: data.datasets[0].backgroundColor[i],
-                                                hidden: false,
-                                                index: i
-                                            };
-                                        });
+                                show: true,
+                                name: {
+                                    show: true,
+                                    fontSize: '16px',
+                                    fontWeight: 600,
+                                    color: '#1F2937'
+                                },
+                                value: {
+                                    show: true,
+                                    fontSize: '24px',
+                                    fontWeight: 700,
+                                    color: '#3B82F6',
+                                    formatter: function(val) {
+                                        return val;
                                     }
-                                    return [];
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            borderRadius: 8,
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                },
+                                total: {
+                                    show: true,
+                                    label: 'Total Arsip',
+                                    fontSize: '14px',
+                                    fontWeight: 500,
+                                    color: '#6B7280',
+                                    formatter: function(w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                    }
                                 }
                             }
                         }
                     }
+                },
+                stroke: {
+                    width: 0
+                },
+                tooltip: {
+                    theme: 'dark',
+                    y: {
+                        formatter: function(value) {
+                            const total = categoryData.reduce((sum, item) => sum + item.total, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return value + ' (' + percentage + '%)';
+                        }
+                    }
+                },
+                states: {
+                    hover: {
+                        filter: {
+                            type: 'darken',
+                            value: 0.15
+                        }
+                    },
+                    active: {
+                        filter: {
+                            type: 'darken',
+                            value: 0.2
+                        }
+                    }
                 }
-            });
+            };
+
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+
+            categoryChart = new ApexCharts(document.querySelector("#categoryChart"), options);
+            categoryChart.render();
         }
 
         // ============================================
-        // REAL-TIME UPDATE (Optional - setiap 30 detik)
+        // LOAD CHART DATA
         // ============================================
-        function updateDashboardStats() {
-            fetch('{{ route("admin.dashboard") }}?ajax=stats')
+        function loadChartData(period, startDate = null, endDate = null) {
+            const chartLoading = document.getElementById('chartLoading');
+            const chartContainer = document.getElementById('archiveChart');
+            
+            // Show loading
+            chartLoading.classList.remove('hidden');
+            chartContainer.style.opacity = '0.3';
+
+            let url = '{{ route("admin.dashboard.chart-data") }}?period=' + period;
+            if (period === 'custom' && startDate && endDate) {
+                url += '&start_date=' + startDate + '&end_date=' + endDate;
+            }
+
+            fetch(url)
                 .then(response => response.json())
-                .then(data => {
-                    // Update stats jika diperlukan
-                    console.log('Dashboard stats updated', data);
+                .then(result => {
+                    if (result.success) {
+                        // Update chart
+                        initArchiveChart(result.categories, result.data);
+                        
+                        // Update statistics
+                        document.getElementById('chartStatTotal').textContent = result.stats.total.toLocaleString('id-ID');
+                        document.getElementById('chartStatAvg').textContent = result.stats.average.toLocaleString('id-ID');
+                        document.getElementById('chartStatMax').textContent = result.stats.max.toLocaleString('id-ID');
+                        document.getElementById('chartStatMin').textContent = result.stats.min.toLocaleString('id-ID');
+
+                        // Update subtitle
+                        const subtitles = {
+                            '1month': 'Data 30 hari terakhir',
+                            '3month': 'Data 3 bulan terakhir',
+                            '6month': 'Data 6 bulan terakhir',
+                            '1year': 'Data 12 bulan terakhir',
+                            'custom': 'Data custom range'
+                        };
+                        document.getElementById('chartSubtitle').textContent = subtitles[period] || 'Data pengarsipan';
+                    }
                 })
-                .catch(error => console.error('Error updating stats:', error));
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                    alert('Gagal memuat data chart. Silakan coba lagi.');
+                })
+                .finally(() => {
+                    // Hide loading
+                    chartLoading.classList.add('hidden');
+                    chartContainer.style.opacity = '1';
+                });
         }
 
-        // Uncomment untuk enable auto-refresh
-        // setInterval(updateDashboardStats, 30000);
+        // ============================================
+        // FILTER HANDLERS
+        // ============================================
+        const periodFilter = document.getElementById('periodFilter');
+        const customDateRange = document.getElementById('customDateRange');
+        const refreshChart = document.getElementById('refreshChart');
+        const applyCustomDate = document.getElementById('applyCustomDate');
+
+        periodFilter.addEventListener('change', function() {
+            const period = this.value;
+            
+            if (period === 'custom') {
+                customDateRange.classList.remove('hidden');
+            } else {
+                customDateRange.classList.add('hidden');
+                loadChartData(period);
+            }
+        });
+
+        refreshChart.addEventListener('click', function() {
+            const period = periodFilter.value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (period === 'custom' && (!startDate || !endDate)) {
+                alert('Silakan pilih tanggal mulai dan akhir');
+                return;
+            }
+
+            loadChartData(period, startDate, endDate);
+        });
+
+        applyCustomDate.addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Silakan pilih tanggal mulai dan akhir');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Tanggal mulai tidak boleh lebih besar dari tanggal akhir');
+                return;
+            }
+
+            loadChartData('custom', startDate, endDate);
+        });
+
+        // ============================================
+        // INITIALIZE CHARTS
+        // ============================================
+        const monthlyData = @json($monthlyTrend);
+        initArchiveChart(
+            monthlyData.map(item => item.month),
+            monthlyData.map(item => item.count)
+        );
+
+        // Initialize stats
+        const initialTotal = monthlyData.reduce((sum, item) => sum + item.count, 0);
+        const initialAvg = initialTotal / monthlyData.length;
+        const initialMax = Math.max(...monthlyData.map(item => item.count));
+        const initialMin = Math.min(...monthlyData.map(item => item.count));
+
+        document.getElementById('chartStatTotal').textContent = initialTotal.toLocaleString('id-ID');
+        document.getElementById('chartStatAvg').textContent = initialAvg.toFixed(1);
+        document.getElementById('chartStatMax').textContent = initialMax.toLocaleString('id-ID');
+        document.getElementById('chartStatMin').textContent = initialMin.toLocaleString('id-ID');
+
+        initCategoryChart();
+
+        // ============================================
+        // AUTO-REFRESH (Optional)
+        // ============================================
+        // Uncomment untuk enable auto-refresh setiap 5 menit
+        // setInterval(() => {
+        //     const currentPeriod = periodFilter.value;
+        //     if (currentPeriod !== 'custom') {
+        //         loadChartData(currentPeriod);
+        //     }
+        // }, 300000);
     });
 </script>
 @endpush

@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Archive;
 use App\Models\Category;
+use App\Models\User;
+use App\Mail\ArchiveUploadedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ArchiveController extends Controller
@@ -148,7 +152,7 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Store a newly created archive (Multiple Files Support).
+     * Store a newly created archive (Multiple Files Support + Email Notification).
      */
     public function store(Request $request)
     {
@@ -265,13 +269,44 @@ class ArchiveController extends Controller
                 }
             }
 
+            // ✅ SEND EMAIL NOTIFICATION TO ALL ADMINS
+            try {
+                $admins = User::where('role', 'admin')
+                             ->where('id', '!=', Auth::id()) // Exclude uploader
+                             ->whereNotNull('email')
+                             ->get();
+                
+                foreach ($admins as $admin) {
+                    Mail::to($admin->email)->send(new ArchiveUploadedMail($archive, $admin->name));
+                }
+                
+                Log::info('Archive upload email notifications sent', [
+                    'archive_id' => $archive->id,
+                    'recipients_count' => $admins->count()
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to send archive upload email', [
+                    'archive_id' => $archive->id,
+                    'error' => $e->getMessage()
+                ]);
+                
+                // Email gagal, tapi arsip tetap tersimpan
+            }
+
             $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
 
+            // ✅ PESAN SUKSES DENGAN SWEETALERT2
+            $fileCount = count($uploadedFiles);
+            $successMessage = $fileCount > 1 
+                ? "Data arsip berhasil disimpan dengan {$fileCount} file ke sistem Diskominfo Batola!" 
+                : "Data arsip \"{$validated['judul']}\" berhasil disimpan ke sistem Diskominfo Batola!";
+
             return redirect()->route("{$routePrefix}.arsip.index")
-                           ->with('success', count($uploadedFiles) . ' arsip berhasil disimpan!');
+                           ->with('success', $successMessage);
         } catch (\Exception $e) {
+            // ✅ PESAN ERROR DENGAN SWEETALERT2
             return redirect()->back()
-                           ->with('error', 'Gagal menyimpan arsip: ' . $e->getMessage())
+                           ->with('error', 'Gagal menyimpan arsip ke sistem. Error: ' . $e->getMessage())
                            ->withInput();
         }
     }
@@ -312,7 +347,7 @@ class ArchiveController extends Controller
         $rules = [
             'nomor_surat' => 'required|string|max:255|unique:archives,nomor_surat,' . $id,
             'judul' => 'required|string|max:255',
-            'files' => 'nullable|array', // ← NULLABLE (tidak wajib)
+            'files' => 'nullable|array',
             'files.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:10240',
         ];
 
@@ -357,7 +392,6 @@ class ArchiveController extends Controller
                     $validated['file_type'] = $file->getClientMimeType();
                 }
             }
-            // JIKA TIDAK ADA FILE BARU, FILE LAMA TETAP ADA (tidak ada perubahan)
 
             // Update tanggal_arsip
             if (isset($validated['tanggal_surat'])) {
@@ -373,16 +407,18 @@ class ArchiveController extends Controller
             // Hapus key 'files' dari validated agar tidak error saat update
             unset($validated['files']);
 
-            // UPDATE archive (tidak delete!)
+            // UPDATE archive
             $archive->update($validated);
 
             $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
 
+            // ✅ PESAN SUKSES UPDATE
             return redirect()->route("{$routePrefix}.arsip.show", $archive->id)
-                           ->with('success', 'Arsip berhasil diperbarui!');
+                           ->with('success', 'Data arsip "' . $archive->judul . '" berhasil diperbarui dalam sistem!');
         } catch (\Exception $e) {
+            // ✅ PESAN ERROR UPDATE
             return redirect()->back()
-                           ->with('error', 'Gagal memperbarui arsip: ' . $e->getMessage())
+                           ->with('error', 'Gagal memperbarui data arsip. Error: ' . $e->getMessage())
                            ->withInput();
         }
     }
@@ -394,6 +430,7 @@ class ArchiveController extends Controller
     {
         try {
             $archive = Archive::findOrFail($id);
+            $judulArsip = $archive->judul;
 
             // Delete file from storage
             if ($archive->file_path && Storage::disk('public')->exists($archive->file_path)) {
@@ -404,11 +441,13 @@ class ArchiveController extends Controller
 
             $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
 
+            // ✅ PESAN SUKSES DELETE
             return redirect()->route("{$routePrefix}.arsip.index")
-                           ->with('success', 'Arsip berhasil dihapus!');
+                           ->with('success', 'Arsip "' . $judulArsip . '" berhasil dihapus dari sistem Diskominfo Batola!');
         } catch (\Exception $e) {
+            // ✅ PESAN ERROR DELETE
             return redirect()->back()
-                           ->with('error', 'Gagal menghapus arsip: ' . $e->getMessage());
+                           ->with('error', 'Gagal menghapus arsip dari sistem. Error: ' . $e->getMessage());
         }
     }
 
@@ -424,17 +463,18 @@ class ArchiveController extends Controller
                 $archive->is_favorite = !$archive->is_favorite;
                 $archive->save();
 
+                // ✅ PESAN TOGGLE FAVORITE
                 $message = $archive->is_favorite 
-                    ? 'Arsip ditambahkan ke favorit!' 
-                    : 'Arsip dihapus dari favorit!';
+                    ? 'Arsip "' . $archive->judul . '" berhasil ditambahkan ke favorit!' 
+                    : 'Arsip "' . $archive->judul . '" berhasil dihapus dari favorit!';
 
                 return redirect()->back()->with('success', $message);
             }
 
-            return redirect()->back()->with('error', 'Fitur favorit tidak tersedia');
+            return redirect()->back()->with('warning', 'Fitur favorit tidak tersedia dalam sistem saat ini.');
             
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui favorit');
+            return redirect()->back()->with('error', 'Gagal memperbarui status favorit. Silakan coba lagi.');
         }
     }
 
@@ -492,23 +532,27 @@ class ArchiveController extends Controller
             $archive = Archive::findOrFail($id);
 
             if (!$archive->file_path) {
-                return redirect()->back()->with('error', 'File tidak ditemukan');
+                return redirect()->back()->with('error', 'File arsip tidak ditemukan dalam sistem.');
             }
 
             $fullPath = storage_path('app/public/' . $archive->file_path);
             
             if (!file_exists($fullPath)) {
-                return redirect()->back()->with('error', 'File tidak ditemukan di server');
+                return redirect()->back()->with('error', 'File arsip tidak ditemukan di server Diskominfo.');
             }
 
-            // Return file untuk preview di browser
+            $mimeType = mime_content_type($fullPath);
+            $fileName = $archive->file_name ?? basename($archive->file_path);
+
+            // Return file untuk preview di browser (inline)
             return response()->file($fullPath, [
-                'Content-Type' => mime_content_type($fullPath),
-                'Content-Disposition' => 'inline; filename="' . ($archive->file_name ?? basename($archive->file_path)) . '"'
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+                'X-Content-Type-Options' => 'nosniff',
             ]);
             
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal membuka file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal membuka file. Error: ' . $e->getMessage());
         }
     }
 
@@ -521,22 +565,22 @@ class ArchiveController extends Controller
             $archive = Archive::findOrFail($id);
 
             if (!$archive->file_path) {
-                return redirect()->back()->with('error', 'Path file tidak ditemukan');
+                return redirect()->back()->with('error', 'Path file tidak ditemukan dalam sistem.');
             }
 
             $fullPath = storage_path('app/public/' . $archive->file_path);
             
             if (!file_exists($fullPath)) {
-                return redirect()->back()->with('error', 'File tidak ditemukan di server');
+                return redirect()->back()->with('error', 'File tidak ditemukan di server Diskominfo.');
             }
 
             $downloadName = $archive->file_name ?? basename($archive->file_path);
             
-            // Force download
+            // Force download (attachment)
             return response()->download($fullPath, $downloadName);
             
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengunduh file: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengunduh file. Error: ' . $e->getMessage());
         }
     }
 }

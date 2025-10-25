@@ -6,8 +6,12 @@ use App\Models\Disposition;
 use App\Models\Archive;
 use App\Models\User;
 use App\Models\Notification;
+use App\Mail\DispositionCreatedMail;
+use App\Mail\DispositionCompletedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class DispositionController extends Controller
 {
@@ -116,11 +120,32 @@ class DispositionController extends Controller
         
         $disposition = Disposition::create($validated);
         
-        // ✅ SEND NOTIFICATION TO RECIPIENT
+        // CREATE IN-APP NOTIFICATION
         Notification::createDispositionNotification($disposition);
         
+        // SEND EMAIL NOTIFICATION
+        try {
+            $recipient = User::find($validated['to_user_id']);
+            
+            if ($recipient && $recipient->email) {
+                Mail::to($recipient->email)->send(new DispositionCreatedMail($disposition));
+                
+                Log::info('Disposition email sent successfully', [
+                    'disposition_id' => $disposition->id,
+                    'recipient' => $recipient->email
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send disposition email', [
+                'disposition_id' => $disposition->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        // PESAN SUKSES DISPOSISI
+        $recipientName = User::find($validated['to_user_id'])->name;
         return redirect()->route('admin.disposisi.index')
-            ->with('success', 'Disposisi berhasil dibuat dan dikirim!');
+            ->with('success', 'Disposisi berhasil dibuat dan dikirim ke ' . $recipientName . '!');
     }
 
     /**
@@ -142,7 +167,7 @@ class DispositionController extends Controller
         if ($role === 'staff' && !$disposition->isRead()) {
             $disposition->update(['read_at' => now()]);
             
-            // ✅ MARK RELATED NOTIFICATION AS READ
+            // MARK RELATED NOTIFICATION AS READ
             Notification::forUser($user->id)
                 ->where('type', 'disposition')
                 ->whereJsonContains('data->disposition_id', $id)
@@ -197,8 +222,9 @@ class DispositionController extends Controller
         
         $disposition->update($validated);
         
+        // PESAN SUKSES UPDATE DISPOSISI
         return redirect()->route('admin.disposisi.index')
-            ->with('success', 'Disposisi berhasil diperbarui!');
+            ->with('success', 'Data disposisi "' . $disposition->subject . '" berhasil diperbarui!');
     }
 
     /**
@@ -214,10 +240,12 @@ class DispositionController extends Controller
         }
         
         $disposition = Disposition::findOrFail($id);
+        $subjectDisposisi = $disposition->subject;
         $disposition->delete();
         
+        // PESAN SUKSES DELETE DISPOSISI
         return redirect()->route('admin.disposisi.index')
-            ->with('success', 'Disposisi berhasil dihapus!');
+            ->with('success', 'Disposisi "' . $subjectDisposisi . '" berhasil dihapus dari sistem!');
     }
 
     /**
@@ -245,12 +273,40 @@ class DispositionController extends Controller
         if ($validated['status'] === 'completed') {
             $data['completed_at'] = now();
             
-            // ✅ SEND NOTIFICATION TO ADMIN (SENDER)
+            // CREATE IN-APP NOTIFICATION
             Notification::createDispositionCompletedNotification($disposition);
+            
+            // SEND EMAIL NOTIFICATION TO ADMIN (SENDER)
+            try {
+                $sender = $disposition->fromUser;
+                
+                if ($sender && $sender->email) {
+                    Mail::to($sender->email)->send(new DispositionCompletedMail($disposition));
+                    
+                    Log::info('Disposition completed email sent successfully', [
+                        'disposition_id' => $disposition->id,
+                        'recipient' => $sender->email
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send disposition completed email', [
+                    'disposition_id' => $disposition->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
         
         $disposition->update($data);
         
-        return back()->with('success', 'Status disposisi berhasil diperbarui!');
+        // PESAN SUKSES UPDATE STATUS
+        $statusText = [
+            'in_progress' => 'sedang dikerjakan',
+            'completed' => 'selesai dikerjakan',
+            'rejected' => 'ditolak'
+        ];
+        
+        $message = 'Status disposisi berhasil diubah menjadi ' . $statusText[$validated['status']] . '!';
+        
+        return back()->with('success', $message);
     }
 }
