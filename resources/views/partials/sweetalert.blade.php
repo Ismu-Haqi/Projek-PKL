@@ -32,6 +32,39 @@
             confirmButtonColor: '#dc3545',
             confirmButtonText: 'Mengerti',
             allowOutsideClick: false,
+            @if(session('error_type') === 'password')
+            footer: '<a href="{{ route('password.request') }}" style="color: #007bff; text-decoration: none;">Lupa password? Klik di sini untuk reset</a>'
+            @endif
+        });
+    @endif
+
+    // ========================================
+    // PASSWORD ERROR NOTIFICATION (Khusus)
+    // ========================================
+    @if(session('password_error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Password Salah!',
+            text: '{{ session('password_error') }}',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Coba Lagi',
+            allowOutsideClick: false,
+            footer: '<a href="{{ route('password.request') }}" style="color: #007bff; text-decoration: none; font-weight: 500;"><i class="fas fa-key"></i> Lupa password? Reset di sini</a>'
+        });
+    @endif
+
+    // ========================================
+    // LOGIN ERROR NOTIFICATION
+    // ========================================
+    @if(session('login_error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal!',
+            html: '<p style="margin-bottom: 10px;">{{ session('login_error') }}</p>',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'Coba Lagi',
+            allowOutsideClick: false,
+            footer: '<div style="text-align: center;"><a href="{{ route('password.request') }}" style="color: #007bff; text-decoration: none; font-weight: 500;"><i class="fas fa-key"></i> Lupa Password?</a><br><small style="color: #6c757d; margin-top: 5px; display: block;">Hubungi admin jika masalah berlanjut</small></div>'
         });
     @endif
 
@@ -104,7 +137,7 @@
     function confirmLogout() {
         Swal.fire({
             title: 'Keluar dari Sistem?',
-            text: 'Anda akan keluar dari sistem Diskominfo Batola',
+            text: 'Anda akan keluar dari sistem GANDARIA',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -265,6 +298,116 @@
             }
         });
     }
+
+    // ========================================
+    // FUNCTION: CONFIRM APPROVE
+    // ========================================
+    function confirmApprove(button, message = 'Data akan disetujui') {
+        Swal.fire({
+            title: 'Setujui Data?',
+            text: message,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check"></i> Ya, Setujui',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
+
+    // ========================================
+    // FUNCTION: CONFIRM REJECT
+    // ========================================
+    function confirmReject(button, message = 'Data akan ditolak') {
+        Swal.fire({
+            title: 'Tolak Data?',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-times-circle"></i> Ya, Tolak',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
+
+    // ========================================
+    // FUNCTION: CONFIRM DOWNLOAD
+    // ========================================
+    function confirmDownload(url, filename = 'dokumen') {
+        Swal.fire({
+            title: 'Download Dokumen?',
+            text: `File ${filename} akan diunduh`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#007bff',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-download"></i> Ya, Download',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showLoading('Mengunduh dokumen...');
+                window.location.href = url;
+                setTimeout(() => {
+                    closeLoading();
+                }, 2000);
+            }
+        });
+    }
+
+    // ========================================
+    // FUNCTION: CONFIRM RESTORE
+    // ========================================
+    function confirmRestore(button, message = 'Data akan dipulihkan') {
+        Swal.fire({
+            title: 'Pulihkan Data?',
+            text: message,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#17a2b8',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-undo"></i> Ya, Pulihkan',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
+
+    // ========================================
+    // FUNCTION: CONFIRM PERMANENT DELETE
+    // ========================================
+    function confirmPermanentDelete(button) {
+        Swal.fire({
+            title: 'Hapus Permanen?',
+            text: 'Data akan dihapus secara permanen dan tidak dapat dipulihkan!',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash-alt"></i> Ya, Hapus Permanen!',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            reverseButtons: true,
+            focusCancel: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
 </script>
 
 <style>
@@ -287,5 +430,21 @@
     .colored-toast.swal2-icon-info {
         background-color: #d1ecf1 !important;
         border-left: 4px solid #17a2b8 !important;
+    }
+
+    /* Animation untuk toast */
+    .swal2-toast {
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>

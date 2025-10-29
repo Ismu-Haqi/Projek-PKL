@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-white mb-2">GANDARIA</h1>
-            <p class="text-white text-lg">Gandaria Arsip Digital Barito Kuala</p>
+            <p class="text-white text-lg">Gerbang Arsip dan Aset Rekonsiliasi Informasi Administrasi</p>
             <p class="text-blue-100 text-sm">Diskominfo Batola</p>
         </div>
 

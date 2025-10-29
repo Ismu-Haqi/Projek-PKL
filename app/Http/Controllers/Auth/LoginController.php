@@ -51,7 +51,7 @@ class LoginController extends Controller
         // Cek apakah email valid
         $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        // ✅ FIX: Cek user dulu sebelum attempt login
+        // ✅ Cek user dulu sebelum attempt login
         $user = User::where($loginType, $request->email)
                     ->where('role', $request->role)
                     ->first();
@@ -59,14 +59,14 @@ class LoginController extends Controller
         // ✅ Cek apakah user ada
         if (!$user) {
             return back()
-                ->with('error', 'Email/username atau role tidak ditemukan.')
+                ->with('login_error', 'Email/username tidak ditemukan atau role tidak sesuai. Pastikan Anda memilih role yang benar.')
                 ->withInput($request->only('email', 'role'));
         }
 
         // ✅ Cek apakah user aktif
         if (!$user->is_active) {
             return back()
-                ->with('error', 'Akun Anda tidak aktif. Hubungi administrator.')
+                ->with('warning', 'Akun Anda tidak aktif. Silakan hubungi administrator untuk mengaktifkan kembali akun Anda.')
                 ->withInput($request->only('email', 'role'));
         }
 
@@ -106,9 +106,9 @@ class LoginController extends Controller
             return back()->with('error', 'Role tidak valid untuk akses sistem.');
         }
 
-        // ✅ LOGIN GAGAL - PESAN ERROR
+        // ✅ LOGIN GAGAL - PASSWORD SALAH (Menggunakan password_error untuk SweetAlert khusus)
         return back()
-            ->with('error', 'Password yang Anda masukkan salah.')
+            ->with('password_error', 'Password yang Anda masukkan salah. Periksa kembali password Anda atau gunakan fitur lupa password.')
             ->withInput($request->only('email', 'role'));
     }
 
