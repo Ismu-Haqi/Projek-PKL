@@ -46,7 +46,7 @@ class AssetController extends Controller
         
         $assets = $query->orderBy('created_at', 'desc')->paginate(12);
         
-        // Statistics
+        // Statistics - FIXED: Pakai 'diperbaiki'
         $stats = [
             'total' => Asset::count(),
             'tersedia' => Asset::status('tersedia')->count(),
@@ -266,7 +266,7 @@ class AssetController extends Controller
     }
 
    
-  /**
+    /**
      * Generate QR Code for asset
      */
     private function generateQrCode($asset)
@@ -286,6 +286,7 @@ class AssetController extends Controller
         
         $asset->update(['qr_code' => $path]);
     }
+    
     /**
      * Download QR Code
      */
@@ -298,6 +299,6 @@ class AssetController extends Controller
             $asset->refresh();
         }
         
-        return Storage::disk('public')->download($asset->qr_code, 'QR_' . $asset->kode_asset . '.png');
+        return Storage::disk('public')->download($asset->qr_code, 'QR_' . $asset->kode_asset . '.svg');
     }
 }

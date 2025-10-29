@@ -169,27 +169,38 @@
                     </a>
                 </div>
                 
-                <div class="space-y-3">
+               <div class="space-y-3">
                     @forelse($recentDispositions ?? [] as $disposition)
                     <div class="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-l-4 border-orange-500 hover:shadow-md transition-all">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center mb-2">
                                     <span class="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg mr-2">
-                                        URGENT
+                                        {{ strtoupper($disposition->priority) }}
                                     </span>
-                                    <span class="text-xs text-gray-500">{{ $disposition->created_at ?? '2 hari lalu' }}</span>
+                                    <span class="text-xs text-gray-500">
+                                        {{ $disposition->created_at->diffForHumans() }}
+                                    </span>
                                 </div>
-                                <h4 class="font-semibold text-gray-800 mb-1">{{ $disposition->title ?? 'Surat Keputusan Bupati No. 001/2024' }}</h4>
-                                <p class="text-sm text-gray-600 mb-2">{{ $disposition->instruction ?? 'Harap segera ditindaklanjuti dan dilaporkan hasilnya' }}</p>
+                                <h4 class="font-semibold text-gray-800 mb-1">
+                                    {{ $disposition->subject ?? 'Tidak ada subjek' }}
+                                </h4>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    {{ Str::limit($disposition->instruction ?? 'Tidak ada instruksi', 100) }}
+                                </p>
                                 <div class="flex items-center text-xs text-gray-500">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
-                                    Dari: Admin
+                                    Dari: {{ $disposition->fromUser->name ?? 'Unknown' }}
                                 </div>
                             </div>
-                            <a href="{{ route('staff.disposisi.show', 1) }}" class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                            {{-- 🔥 TOMBOL PROSES YANG SUDAH DIPERBAIKI --}}
+                            <a href="{{ route('staff.disposisi.show', $disposition->id) }}" 
+                            class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
                                 Proses
                             </a>
                         </div>
@@ -200,69 +211,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <p class="text-gray-500 font-medium">Tidak ada disposisi yang perlu ditindaklanjuti</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Arsip Terbaru yang Saya Upload --}}
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800">Arsip Terbaru Saya</h3>
-                            <p class="text-sm text-gray-500">Dokumen yang baru Anda upload</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('staff.arsip.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
-                        Lihat Semua →
-                    </a>
-                </div>
-                
-                <div class="space-y-3">
-                    @forelse($recentArchives ?? [] as $archive)
-                    <div class="p-4 bg-gray-50 rounded-xl hover:bg-blue-50 border border-gray-100 hover:border-blue-200 transition-all">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-gray-800 truncate mb-1">{{ $archive->title ?? 'Laporan Keuangan Q4 2023' }}</h4>
-                                <div class="flex items-center text-xs text-gray-500 space-x-3">
-                                    <span class="flex items-center">
-                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        {{ $archive->created_at ?? '2 hari lalu' }}
-                                    </span>
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                                        {{ $archive->category ?? 'Laporan' }}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 ml-4">
-                                <a href="{{ route('staff.arsip.show', 1) }}" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Lihat">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="text-center py-12">
-                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p class="text-gray-500 font-medium">Belum ada arsip yang diupload</p>
+                        <p class="text-gray-400 text-sm mt-1">Semua disposisi sudah selesai diproses</p>
                     </div>
                     @endforelse
                 </div>

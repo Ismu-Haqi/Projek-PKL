@@ -181,19 +181,6 @@
                 margin-left: 0;
             }
         }
-               @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-            
-            #main-content {
-                margin-left: 0;
-            }
-        }
         
         /* ✅ Fix Sweetalert2 Z-Index Issue */
         .swal2-container {
@@ -228,7 +215,7 @@
     
     <aside id="sidebar">
         <div class="p-4">
-            <div class="flex items-center mb-6 pb-4 border-b">
+            <div class="flex items-center mb-6 pb-4">
                 <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-3">
                     G
                 </div>
@@ -298,7 +285,7 @@
                 
                 <a href="{{ route('admin.pengaturan.index') }}" class="sidebar-link {{ Request::routeIs('admin.pengaturan.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                     <span>Pengaturan</span>
@@ -479,19 +466,6 @@
         </header>
         
         <main class="p-6">
-            {{-- ❌ HAPUS BAGIAN INI - Notifikasi lama dengan alert biasa --}}
-            {{-- @if(session('success'))
-                <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded mb-4">
-                    <p class="font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
-            
-            @if(session('error'))
-                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
-                    <p class="font-medium">{{ session('error') }}</p>
-                </div>
-            @endif --}}
-            
             @yield('content')
         </main>
     </div>
@@ -502,6 +476,126 @@
     
     @include('partials.sweetalert')
     
+    {{-- ✅ GLOBAL DELETE & LOGOUT CONFIRMATION FUNCTIONS --}}
+    <script>
+        /**
+         * Global Delete Confirmation Function
+         * Digunakan untuk konfirmasi hapus di seluruh aplikasi (Arsip, Aset, User, dll)
+         */
+        function confirmDelete(button, message = 'Data akan dihapus permanen!') {
+            // Cari form terdekat dari button yang diklik
+            const form = button.closest('form');
+            
+            if (!form) {
+                console.error('❌ Error: Form tidak ditemukan!');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Sistem',
+                    text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
+                    confirmButtonColor: '#dc2626'
+                });
+                return false;
+            }
+            
+            // Log untuk debugging (bisa dihapus di production)
+            console.log('✅ Form ditemukan:', form);
+            console.log('📝 Action URL:', form.action);
+            console.log('🔧 Method:', form.method);
+            
+            // Tampilkan konfirmasi dengan SweetAlert2
+            Swal.fire({
+                title: '⚠️ Konfirmasi Hapus',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-2">${message}</p>
+                        <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    popup: 'animated-popup',
+                    confirmButton: 'btn-delete-confirm',
+                    cancelButton: 'btn-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan loading
+                    Swal.fire({
+                        title: 'Menghapus Data...',
+                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Disable button untuk mencegah double submit
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+                    
+                    // Submit form
+                    console.log('🚀 Submitting delete form...');
+                    form.submit();
+                } else {
+                    console.log('❌ Delete cancelled by user');
+                }
+            });
+            
+            return false;
+        }
+
+        /**
+         * Confirm Logout Function
+         * Digunakan untuk konfirmasi logout dari sistem
+         */
+        function confirmLogout() {
+            Swal.fire({
+                title: '🚪 Keluar dari Sistem?',
+                text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'animated-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan loading
+                    Swal.fire({
+                        title: 'Logging Out...',
+                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Submit logout form
+                    console.log('🚪 Logging out...');
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        }
+    </script>
+    
+    {{-- Toggle Sidebar, Notification, Profile Scripts --}}
     <script>
         // Toggle Sidebar
         function toggleSidebar() {
@@ -547,13 +641,6 @@
             // Toggle profile dropdown
             dropdown.classList.toggle('show');
         }
-
-        // ❌ HAPUS function confirmLogout() yang lama - Sudah ditangani oleh sweetalert.blade.php
-        // function confirmLogout() {
-        //     if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-        //         document.getElementById('logoutForm').submit();
-        //     }
-        // }
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {

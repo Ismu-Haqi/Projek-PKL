@@ -235,16 +235,14 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-between items-center pt-6 border-t">
-            <form action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" 
-                  onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" 
-                        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                    🗑️ Hapus Aset
-                </button>
-            </form>
+            <!-- Tombol Hapus (Link ke form terpisah) -->
+            <a href="javascript:void(0)" 
+               onclick="confirmDelete()"
+               class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition inline-flex items-center">
+                🗑️ Hapus Aset
+            </a>
 
+            <!-- Tombol Batal & Update -->
             <div class="flex gap-3">
                 <a href="{{ route('admin.aset.index') }}" 
                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
@@ -256,6 +254,12 @@
                 </button>
             </div>
         </div>
+    </form>
+
+    <!-- Form Delete (Terpisah & Hidden) - FIXED: Pastikan di luar form update -->
+    <form id="deleteForm" action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
     </form>
 
 </div>
@@ -275,6 +279,20 @@ function previewImage(event) {
         reader.readAsDataURL(file);
     } else {
         preview.classList.add('hidden');
+    }
+}
+
+function confirmDelete() {
+    if (confirm('Yakin ingin menghapus aset "{{ $asset->nama }}"?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+        // Debug log
+        console.log('Submitting delete form...');
+        
+        const form = document.getElementById('deleteForm');
+        if (form) {
+            form.submit();
+        } else {
+            console.error('Form delete tidak ditemukan!');
+        }
     }
 }
 </script>

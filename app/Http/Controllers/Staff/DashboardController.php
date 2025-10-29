@@ -56,11 +56,12 @@ class DashboardController extends Controller
         // ================================
         
         // Disposisi terbaru yang perlu ditindaklanjuti (max 3)
+        // 🔥 PERBAIKAN: Pastikan relasi dan data lengkap terload
         $recentDispositions = [];
         if (Schema::hasTable('dispositions')) {
             $recentDispositions = Disposition::where('to_user_id', $user->id)
                 ->whereIn('status', ['pending', 'in_progress'])
-                ->with(['fromUser', 'archive'])
+                ->with(['fromUser', 'archive']) // Eager loading
                 ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
@@ -133,7 +134,7 @@ class DashboardController extends Controller
                     return [
                         'type' => 'disposition_completed',
                         'title' => 'Disposisi selesai diproses',
-                        'description' => $disposition->title ?? 'Disposisi',
+                        'description' => $disposition->subject ?? 'Disposisi',
                         'time' => $disposition->updated_at->diffForHumans(),
                         'created_at' => $disposition->updated_at,
                         'icon' => 'check',
