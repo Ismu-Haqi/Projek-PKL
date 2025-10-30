@@ -215,7 +215,7 @@
     
     <aside id="sidebar">
         <div class="p-4">
-            <div class="flex items-center mb-6 pb-4">
+            <div class="flex items-center mb-6 pb-4 border-b">
                 <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-3">
                     G
                 </div>

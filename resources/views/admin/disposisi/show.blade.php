@@ -113,7 +113,8 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" 
+                   <button type="button" 
+                        onclick="confirmUpdateDisposition(this)"
                         class="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all shadow-lg font-medium flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -242,25 +243,43 @@
                         </div>
                     </div>
 
+                    <!-- Status Badge -->
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Status</label>
+                        @php
+                            $statusColors = [
+                                'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                                'in_progress' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                'completed' => 'bg-green-100 text-green-700 border-green-200',
+                                'rejected' => 'bg-red-100 text-red-700 border-red-200'
+                            ];
+                        @endphp
+                        <div class="mt-2">
+                            <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold border {{ $statusColors[$disposition->status] ?? 'bg-gray-100 text-gray-700 border-gray-200' }}">
+                                {{ $disposition->statusLabel['text'] ?? ucfirst($disposition->status) }}
+                            </span>
+                        </div>
+                    </div>
+
                     <!-- Priority Badge -->
                     <div>
                         <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Prioritas</label>
                         @php
                             $priorityColors = [
-                                'Sangat Mendesak' => 'bg-red-100 text-red-700 border-red-200',
-                                'Mendesak' => 'bg-orange-100 text-orange-700 border-orange-200',
-                                'Biasa' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                'Tidak Mendesak' => 'bg-gray-100 text-gray-700 border-gray-200'
+                                'urgent' => 'bg-red-100 text-red-700 border-red-200',
+                                'high' => 'bg-orange-100 text-orange-700 border-orange-200',
+                                'normal' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                'low' => 'bg-gray-100 text-gray-700 border-gray-200'
                             ];
                         @endphp
                         <div class="mt-2">
-                            <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold border {{ $priorityColors[$disposition->priority] }}">
+                            <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold border {{ $priorityColors[$disposition->priority] ?? 'bg-gray-100 text-gray-700 border-gray-200' }}">
                                 @if($disposition->priority === 'urgent')
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
                                 </svg>
                                 @endif
-                                {{ $disposition->priorityLabel['text'] }}
+                                {{ $disposition->priorityLabel['text'] ?? ucfirst($disposition->priority) }}
                             </span>
                         </div>
                     </div>
@@ -319,18 +338,16 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
-                <h3 class="font-bold text-gray-800 mb-4">Aksi Cepat</h3>
-                <div class="space-y-2">
-                    <a href="{{ route(Auth::user()->role . '.arsip.show', $disposition->archive_id) }}" 
-                       class="block w-full px-4 py-2 bg-white text-center rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 border border-gray-200">
-                        📄 Lihat Arsip Terkait
-                    </a>
-                    <a href="{{ route(Auth::user()->role . '.arsip.download', $disposition->archive_id) }}" 
-                       class="block w-full px-4 py-2 bg-white text-center rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 border border-gray-200">
-                        ⬇️ Download Arsip
-                    </a>
-                </div>
+          <div class="space-y-2">
+                <a href="{{ route(Auth::user()->role . '.arsip.show', $disposition->archive_id) }}" 
+                class="block w-full px-4 py-2 bg-white text-center rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 border border-gray-200">
+                    📄 Lihat Arsip Terkait
+                </a>
+                <a href="javascript:void(0)" 
+                onclick="confirmDownload('{{ route(Auth::user()->role . '.arsip.download', $disposition->archive_id) }}', '{{ $disposition->archive->nomor_surat ?? 'Arsip' }}')"
+                class="block w-full px-4 py-2 bg-white text-center rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 border border-gray-200">
+                    ⬇️ Download Arsip
+                </a>
             </div>
         </div>
     </div>
