@@ -63,9 +63,9 @@
     <!-- Action Buttons -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex gap-2">
-            <form action="{{ route('admin.notifikasi.read-all') }}" method="POST" class="inline">
+            <form action="{{ route('admin.notifikasi.read-all') }}" method="POST" class="inline" id="markAllReadForm">
                 @csrf
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <button type="button" onclick="confirmMarkAllRead(this)" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -73,13 +73,14 @@
                 </button>
             </form>
 
-            <form action="{{ route('admin.notifikasi.index') }}" method="GET" class="inline" onsubmit="return confirm('Hapus semua notifikasi yang sudah dibaca?')">
-                <button type="submit" name="clear_read" value="1" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            <form action="{{ route('admin.notifikasi.index') }}" method="GET" class="inline" id="clearReadForm">
+                <button type="button" onclick="confirmClearRead(this)" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
                     Hapus Yang Sudah Dibaca
                 </button>
+                <input type="hidden" name="clear_read" value="1">
             </form>
         </div>
     </div>
@@ -133,10 +134,10 @@
                         </form>
                         @endif
 
-                        <form action="{{ route('admin.notifikasi.destroy', $notification->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus notifikasi ini?')">
+                        <form action="{{ route('admin.notifikasi.destroy', $notification->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition" title="Hapus">
+                            <button type="button" onclick="confirmDeleteNotification(this, '{{ $notification->title }}')" class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition" title="Hapus">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
@@ -165,4 +166,123 @@
     @endif
 
 </div>
+
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
+
+{{-- Custom JavaScript untuk Notifikasi --}}
+<script>
+    // Fungsi konfirmasi hapus notifikasi individual
+    window.confirmDeleteNotification = function(button, notificationTitle) {
+        if (typeof Swal === 'undefined') {
+            if (confirm('Hapus notifikasi ini?')) {
+                button.closest('form').submit();
+            }
+            return;
+        }
+
+        Swal.fire({
+            title: '🗑️ Hapus Notifikasi?',
+            html: `
+                <div class="text-left">
+                    <p class="text-gray-700 mb-2">Notifikasi "<strong>${notificationTitle}</strong>" akan dihapus</p>
+                    <p class="text-sm text-red-600">Tindakan ini tidak dapat dibatalkan!</p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+            reverseButtons: true,
+            focusCancel: true,
+            customClass: {
+                popup: 'animated-popup'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showLoading('Menghapus notifikasi...');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.closest('form').submit();
+            }
+        });
+    }
+
+    // Fungsi konfirmasi tandai semua sudah dibaca
+    window.confirmMarkAllRead = function(button) {
+        if (typeof Swal === 'undefined') {
+            if (confirm('Tandai semua notifikasi sudah dibaca?')) {
+                button.closest('form').submit();
+            }
+            return;
+        }
+
+        Swal.fire({
+            title: '✅ Tandai Semua Sudah Dibaca?',
+            text: 'Semua notifikasi akan ditandai sebagai sudah dibaca',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check-double mr-2"></i> Ya, Tandai Semua',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'animated-popup'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showLoading('Memperbarui notifikasi...');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+                button.closest('form').submit();
+            }
+        });
+    }
+
+    // Fungsi konfirmasi hapus notifikasi yang sudah dibaca
+    window.confirmClearRead = function(button) {
+        if (typeof Swal === 'undefined') {
+            if (confirm('Hapus semua notifikasi yang sudah dibaca?')) {
+                button.closest('form').submit();
+            }
+            return;
+        }
+
+        Swal.fire({
+            title: '🗑️ Hapus Notifikasi yang Sudah Dibaca?',
+            html: `
+                <div class="text-left">
+                    <p class="text-gray-700 mb-3">Semua notifikasi yang sudah dibaca akan dihapus</p>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                        <p class="text-sm text-yellow-800">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan!
+                        </p>
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus Semua!',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+            reverseButtons: true,
+            focusCancel: true,
+            customClass: {
+                popup: 'animated-popup'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showLoading('Menghapus notifikasi...');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+                button.closest('form').submit();
+            }
+        });
+    }
+</script>
 @endsection

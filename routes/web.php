@@ -164,6 +164,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // ==================================================
 // ✅ STAFF ROUTES (FIXED)
 // ==================================================
+// Public QR Scan Route (sebelum Route::middleware)
+Route::get('/aset/view/{id}', [AssetController::class, 'publicShow'])->name('aset.public.show');
+
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
     
     // Dashboard

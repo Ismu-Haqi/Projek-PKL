@@ -269,23 +269,29 @@ class AssetController extends Controller
     /**
      * Generate QR Code for asset
      */
-    private function generateQrCode($asset)
-    {
-        $qrContent = route('admin.aset.show', $asset->id);
-        
-        // FIX: Ganti ke SVG (tidak perlu Imagick extension)
-        $qrCode = QrCode::format('svg')
-            ->size(300)
-            ->errorCorrection('H')
-            ->generate($qrContent);
-        
-        $filename = 'qr_' . $asset->kode_asset . '.svg';
-        $path = 'qrcodes/' . $filename;
-        
-        Storage::disk('public')->put($path, $qrCode);
-        
-        $asset->update(['qr_code' => $path]);
-    }
+private function generateQrCode($asset)
+{
+    // Ganti ke route public
+    $qrContent = route('aset.public.show', $asset->id);
+    
+    $qrCode = QrCode::format('svg')
+        ->size(300)
+        ->errorCorrection('H')
+        ->generate($qrContent);
+    
+    $filename = 'qr_' . $asset->kode_asset . '.svg';
+    $path = 'qrcodes/' . $filename;
+    
+    Storage::disk('public')->put($path, $qrCode);
+    
+    $asset->update(['qr_code' => $path]);
+}
+
+public function publicShow($id)
+{
+    $asset = Asset::findOrFail($id);
+    return view('public.aset-detail', compact('asset'));
+}
     
     /**
      * Download QR Code
