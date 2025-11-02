@@ -235,12 +235,12 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-between items-center pt-6 border-t">
-            <!-- Tombol Hapus (Link ke form terpisah) -->
-            <a href="javascript:void(0)" 
-               onclick="confirmDelete()"
-               class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition inline-flex items-center">
+            <!-- Tombol Hapus -->
+            <button type="button" 
+                    onclick="confirmDeleteAsset()"
+                    class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition inline-flex items-center">
                 🗑️ Hapus Aset
-            </a>
+            </button>
 
             <!-- Tombol Batal & Update -->
             <div class="flex gap-3">
@@ -256,13 +256,16 @@
         </div>
     </form>
 
-    <!-- Form Delete (Terpisah & Hidden) - FIXED: Pastikan di luar form update -->
+    <!-- Form Delete (Terpisah & Hidden) -->
     <form id="deleteForm" action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
     </form>
 
 </div>
+
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
 
 <script>
 function previewImage(event) {
@@ -282,18 +285,55 @@ function previewImage(event) {
     }
 }
 
-function confirmDelete() {
-    if (confirm('Yakin ingin menghapus aset "{{ $asset->nama }}"?\n\nData yang dihapus tidak dapat dikembalikan!')) {
-        // Debug log
-        console.log('Submitting delete form...');
-        
-        const form = document.getElementById('deleteForm');
-        if (form) {
-            form.submit();
-        } else {
-            console.error('Form delete tidak ditemukan!');
+// Fungsi konfirmasi hapus aset dengan SweetAlert2
+function confirmDeleteAsset() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Yakin ingin menghapus aset "{{ $asset->nama }}"?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+            document.getElementById('deleteForm').submit();
         }
+        return;
     }
+
+    Swal.fire({
+        title: '⚠️ Hapus Aset?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Aset <strong class="text-red-600">{{ $asset->nama }}</strong> akan dihapus permanen</p>
+                <div class="bg-gray-50 p-3 rounded mb-3">
+                    <p class="text-sm text-gray-600">Kode Aset: <span class="font-mono font-semibold">{{ $asset->kode_asset }}</span></p>
+                    <p class="text-sm text-gray-600">Kategori: <strong>{{ $asset->kategori }}</strong></p>
+                </div>
+                <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus Aset!',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus Aset...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            document.getElementById('deleteForm').submit();
+        }
+    });
 }
 </script>
 @endsection

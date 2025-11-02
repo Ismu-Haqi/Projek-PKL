@@ -71,7 +71,7 @@
         <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">diperbaiki</p>
+                    <p class="text-sm text-gray-500 font-medium">Diperbaiki</p>
                     <h3 class="text-2xl font-bold text-gray-800">{{ $stats['diperbaiki'] }}</h3>
                 </div>
                 <div class="bg-yellow-100 p-3 rounded-full">
@@ -131,12 +131,12 @@
                     <option value="">Semua Status</option>
                     <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                     <option value="digunakan" {{ request('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
-                    <option value="diperbaiki" {{ request('status') == 'diperbaiki' ? 'selected' : '' }}>diperbaiki</option>
+                    <option value="diperbaiki" {{ request('status') == 'diperbaiki' ? 'selected' : '' }}>Diperbaiki</option>
                     <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                 </select>
             </div>
 
-            {{-- Unit - FIXED: Sama seperti Arsip Digital --}}
+            {{-- Unit --}}
             <div>
                 <select name="unit" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Semua Unit</option>
@@ -195,7 +195,7 @@
                         $statusLabels = [
                             'tersedia' => 'Tersedia',
                             'digunakan' => 'Digunakan',
-                            'diperbaiki' => 'diperbaiki',
+                            'diperbaiki' => 'Diperbaiki',
                             'rusak' => 'Rusak'
                         ];
                     @endphp
@@ -264,7 +264,7 @@
                     </div>
                 </div>
 
-                {{-- Action Buttons - FIXED: 2 Baris untuk Rapi --}}
+                {{-- Action Buttons --}}
                 <div class="pt-3 border-t border-gray-100 space-y-2">
                     {{-- Button Detail (Full Width) --}}
                     <a href="{{ route('admin.aset.show', $asset->id) }}" 
@@ -287,13 +287,11 @@
                             <span>Edit</span>
                         </a>
 
-                        <form action="{{ route('admin.aset.destroy', $asset->id) }}" 
-                              method="POST" 
-                              class="flex-1"
-                              onsubmit="return confirm('Yakin ingin menghapus aset {{ $asset->nama }}?')">
+                        <form action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" class="flex-1">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" 
+                            <button type="button" 
+                                    onclick="confirmDelete(this, 'Aset <strong>{{ $asset->nama }}</strong> akan dihapus permanen!')"
                                     class="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -347,20 +345,7 @@
 
 </div>
 
-@push('scripts')
-<script>
-// Auto-hide success message
-@if(session('success'))
-    setTimeout(function() {
-        const alert = document.querySelector('.alert-success');
-        if (alert) {
-            alert.style.transition = 'opacity 0.5s';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        }
-    }, 3000);
-@endif
-</script>
-@endpush
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
 
 @endsection

@@ -55,7 +55,7 @@
 
             <!-- QR Code -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">🔲 QR Code</h3>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">📲 QR Code</h3>
                 @if($asset->qr_code && Storage::disk('public')->exists($asset->qr_code))
                     <img src="{{ asset('storage/' . $asset->qr_code) }}" alt="QR Code" 
                          class="w-full max-w-xs mx-auto rounded-lg shadow-md">
@@ -192,7 +192,7 @@
 
             <!-- Timeline -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">🕒 Timeline</h3>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">🕐 Timeline</h3>
                 <div class="space-y-3">
                     <div class="flex items-start">
                         <div class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
@@ -234,11 +234,11 @@
                 Edit Aset
             </a>
             
-            <form action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" class="inline"
-                  onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
+            <form action="{{ route('admin.aset.destroy', $asset->id) }}" method="POST" class="inline" id="deleteAssetForm">
                 @csrf
                 @method('DELETE')
-                <button type="submit" 
+                <button type="button" 
+                        onclick="confirmDeleteAssetShow()"
                         class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -251,4 +251,61 @@
     </div>
 
 </div>
+
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
+
+<script>
+// Fungsi konfirmasi hapus aset di halaman show
+function confirmDeleteAssetShow() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Yakin ingin menghapus aset ini?')) {
+            document.getElementById('deleteAssetForm').submit();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '⚠️ Hapus Aset?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Aset <strong class="text-red-600">{{ $asset->nama }}</strong> akan dihapus permanen</p>
+                <div class="bg-gray-50 p-3 rounded mb-3">
+                    <p class="text-sm text-gray-600">Kode Aset: <span class="font-mono font-semibold">{{ $asset->kode_asset }}</span></p>
+                    <p class="text-sm text-gray-600">Kategori: <strong>{{ $asset->kategori }}</strong></p>
+                    <p class="text-sm text-gray-600">Lokasi: <strong>{{ $asset->lokasi ?? '-' }}</strong></p>
+                </div>
+                <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus Aset!',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus Aset...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            document.getElementById('deleteAssetForm').submit();
+        }
+    });
+}
+</script>
 @endsection

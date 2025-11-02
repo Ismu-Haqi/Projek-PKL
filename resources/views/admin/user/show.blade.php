@@ -28,7 +28,7 @@
             </a>
             
             @if($user->id !== Auth::id())
-            <button onclick="toggleModal('resetPasswordModal')" 
+            <button onclick="showResetPasswordModal()" 
                 class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -280,10 +280,12 @@
                                 {{ $user->is_active ? 'User tidak akan bisa login ke sistem' : 'User dapat kembali login ke sistem' }}
                             </p>
                         </div>
-                        <form action="{{ route('admin.user.toggleStatus', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin?')">
+                        <form action="{{ route('admin.user.toggleStatus', $user->id) }}" method="POST" id="toggleStatusForm">
                             @csrf
                             @method('PUT')
-                            <button type="submit" class="px-4 py-2 {{ $user->is_active ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600' }} text-white rounded-lg transition-colors">
+                            <button type="button" 
+                                    onclick="confirmToggleStatus({{ $user->is_active ? 'true' : 'false' }}, '{{ $user->name }}')"
+                                    class="px-4 py-2 {{ $user->is_active ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600' }} text-white rounded-lg transition-colors">
                                 {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                             </button>
                         </form>
@@ -295,10 +297,12 @@
                             <p class="font-semibold text-red-800">Hapus User</p>
                             <p class="text-sm text-red-600 mt-1">Tindakan ini tidak dapat dibatalkan. Semua data user akan dihapus permanen.</p>
                         </div>
-                        <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan!')">
+                        <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST" id="deleteUserForm">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            <button type="button" 
+                                    onclick="confirmDeleteUserShow('{{ $user->name }}', '{{ $user->email }}')"
+                                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                                 Hapus User
                             </button>
                         </form>
@@ -310,61 +314,188 @@
     </div>
 </div>
 
-<!-- Reset Password Modal -->
-<div id="resetPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
-        <div class="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4 rounded-t-xl">
-            <h3 class="text-xl font-bold text-white">Reset Password User</h3>
-        </div>
-        
-        <form action="{{ route('admin.user.reset-password', $user->id) }}" method="POST" class="p-6 space-y-4">
-            @csrf
-            @method('POST')
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Password Baru</label>
-                <input type="password" name="password" required
-                    placeholder="Minimal 8 karakter"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation" required
-                    placeholder="Ulangi password"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-            </div>
-            
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p class="text-sm text-yellow-800">⚠️ User harus menggunakan password baru ini untuk login</p>
-            </div>
-            
-            <div class="flex items-center justify-end space-x-3 pt-4">
-                <button type="button" onclick="toggleModal('resetPasswordModal')" 
-                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="submit" 
-                    class="px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-colors">
-                    Reset Password
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
 
 <script>
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.toggle('hidden');
-    modal.classList.toggle('flex');
+// Show Reset Password Modal with SweetAlert2
+function showResetPasswordModal() {
+    if (typeof Swal === 'undefined') {
+        alert('SweetAlert2 tidak tersedia');
+        return;
+    }
+
+    Swal.fire({
+        title: '🔑 Reset Password User',
+        html: `
+            <form id="resetPasswordForm" action="{{ route('admin.user.reset-password', $user->id) }}" method="POST">
+                @csrf
+                <div class="text-left space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password Baru</label>
+                        <input type="password" name="password" id="newPassword" required
+                            placeholder="Minimal 8 karakter"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" id="confirmPassword" required
+                            placeholder="Ulangi password"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <p class="text-sm text-yellow-800">⚠️ User harus menggunakan password baru ini untuk login</p>
+                    </div>
+                </div>
+            </form>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#ea580c',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-key mr-2"></i> Reset Password',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        },
+        preConfirm: () => {
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!password || !confirmPassword) {
+                Swal.showValidationMessage('Semua field harus diisi');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                Swal.showValidationMessage('Password minimal 8 karakter');
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                Swal.showValidationMessage('Password tidak cocok');
+                return false;
+            }
+            
+            return true;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Mereset Password...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-orange-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            document.getElementById('resetPasswordForm').submit();
+        }
+    });
 }
 
-// Close modal when clicking outside
-document.getElementById('resetPasswordModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        toggleModal('resetPasswordModal');
+// Confirm Toggle Status
+function confirmToggleStatus(isActive, userName) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Yakin ingin mengubah status user?')) {
+            document.getElementById('toggleStatusForm').submit();
+        }
+        return;
     }
-});
+
+    const action = isActive ? 'menonaktifkan' : 'mengaktifkan';
+    const status = isActive ? 'nonaktif' : 'aktif';
+    
+    Swal.fire({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} User?`,
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">User <strong>${userName}</strong> akan ${action}</p>
+                <p class="text-sm text-gray-600">User yang ${status} ${isActive ? 'tidak dapat' : 'dapat'} login ke sistem</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: isActive ? '#eab308' : '#22c55e',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: `<i class="fas fa-check mr-2"></i> Ya, ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Memproses...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            document.getElementById('toggleStatusForm').submit();
+        }
+    });
+}
+
+// Confirm Delete User
+function confirmDeleteUserShow(userName, userEmail) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Yakin ingin menghapus user ini?')) {
+            document.getElementById('deleteUserForm').submit();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '⚠️ Hapus User?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>
+                <div class="bg-gray-50 p-3 rounded mb-3">
+                    <p class="text-sm text-gray-600">Email: <strong>${userEmail}</strong></p>
+                </div>
+                <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
+                    <p class="text-sm text-red-600 font-semibold">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Semua data user akan dihapus permanen dan TIDAK DAPAT dikembalikan!
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus User!',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus User...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-red-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            document.getElementById('deleteUserForm').submit();
+        }
+    });
+}
 </script>
 @endsection

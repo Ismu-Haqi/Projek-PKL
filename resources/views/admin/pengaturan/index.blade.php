@@ -9,19 +9,6 @@
     <p class="text-gray-600 mt-1">Kelola pengaturan aplikasi dan profil Anda</p>
 </div>
 
-{{-- Alert Messages --}}
-@if(session('success'))
-<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-    <span class="block sm:inline">{{ session('success') }}</span>
-</div>
-@endif
-
-@if(session('error'))
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-    <span class="block sm:inline">{{ session('error') }}</span>
-</div>
-@endif
-
 {{-- Tabs Navigation --}}
 <div class="bg-white rounded-lg shadow-sm">
     <div class="border-b border-gray-200">
@@ -64,7 +51,7 @@
         <div id="content-profil" class="tab-content">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Profil Pengguna</h2>
             
-            <form action="{{ route('admin.pengaturan.update-profil') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.pengaturan.update-profil') }}" method="POST" id="formProfil" class="space-y-4">
                 @csrf
                 @method('PUT')
                 
@@ -134,7 +121,8 @@
                 </div>
                 
                 <div class="flex justify-end pt-4">
-                    <button type="submit" 
+                    <button type="button" 
+                            onclick="confirmSaveProfile()"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Perubahan
@@ -148,7 +136,7 @@
         <div id="content-sistem" class="tab-content hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Sistem</h2>
             
-            <form action="{{ route('admin.pengaturan.update') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.pengaturan.update') }}" method="POST" id="formSistem" class="space-y-4">
                 @csrf
                 @method('PUT')
                 
@@ -158,7 +146,7 @@
                         <input type="text" 
                                name="app_name" 
                                id="app_name" 
-                               value="{{ old('app_name', $settings['app_name'] ?? 'SIPPB') }}"
+                               value="{{ old('app_name', $settings['app_name'] ?? 'GANDARIA') }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
@@ -240,13 +228,14 @@
                 
                 <div class="flex justify-between items-center pt-4 border-t border-gray-200 mt-6">
                     <button type="button" 
-                            onclick="clearCache()"
+                            onclick="confirmClearCache()"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-trash-alt mr-2"></i>
                         Bersihkan Cache
                     </button>
                     
-                    <button type="submit" 
+                    <button type="button" 
+                            onclick="confirmSaveSystem()"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Pengaturan
@@ -259,7 +248,7 @@
         <div id="content-tampilan" class="tab-content hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Tampilan</h2>
             
-            <form action="{{ route('admin.pengaturan.update-appearance') }}" method="POST" class="space-y-6">
+            <form action="{{ route('admin.pengaturan.update-appearance') }}" method="POST" id="formTampilan" class="space-y-6">
                 @csrf
                 @method('PUT')
                 
@@ -432,7 +421,7 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-3">Ukuran Teks</label>
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            {{-- Extra Small --}}
+                            {{-- Text size options (xs, sm, md, lg, xl) --}}
                             <div class="relative">
                                 <input type="radio" name="text_size" id="text-xs" value="xs" 
                                        {{ ($settings['text_size'] ?? '') == 'xs' ? 'checked' : '' }}
@@ -448,7 +437,6 @@
                                 </div>
                             </div>
 
-                            {{-- Small --}}
                             <div class="relative">
                                 <input type="radio" name="text_size" id="text-sm" value="sm" 
                                        {{ ($settings['text_size'] ?? '') == 'sm' ? 'checked' : '' }}
@@ -464,7 +452,6 @@
                                 </div>
                             </div>
 
-                            {{-- Medium (Default) --}}
                             <div class="relative">
                                 <input type="radio" name="text_size" id="text-md" value="md" 
                                        {{ ($settings['text_size'] ?? 'md') == 'md' ? 'checked' : '' }}
@@ -480,7 +467,6 @@
                                 </div>
                             </div>
 
-                            {{-- Large --}}
                             <div class="relative">
                                 <input type="radio" name="text_size" id="text-lg" value="lg" 
                                        {{ ($settings['text_size'] ?? '') == 'lg' ? 'checked' : '' }}
@@ -496,7 +482,6 @@
                                 </div>
                             </div>
 
-                            {{-- Extra Large --}}
                             <div class="relative">
                                 <input type="radio" name="text_size" id="text-xl" value="xl" 
                                        {{ ($settings['text_size'] ?? '') == 'xl' ? 'checked' : '' }}
@@ -512,27 +497,10 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-500 mt-3">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Pilih ukuran teks yang nyaman untuk dibaca
-                        </p>
                     </div>
 
                     {{-- Display Toggles --}}
                     <div class="space-y-3 pt-4 border-t border-gray-200">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <label for="show_breadcrumbs" class="font-medium text-gray-700">Tampilkan Breadcrumbs</label>
-                                <p class="text-sm text-gray-500">Menampilkan navigasi breadcrumb di setiap halaman</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="show_breadcrumbs" id="show_breadcrumbs" value="1"
-                                       {{ ($settings['show_breadcrumbs'] ?? 1) ? 'checked' : '' }}
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
                                 <label for="compact_mode" class="font-medium text-gray-700">Mode Kompak</label>
@@ -564,13 +532,14 @@
                 {{-- Action Buttons --}}
                 <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                     <button type="button" 
-                            onclick="resetAppearance()"
+                            onclick="confirmResetAppearance()"
                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-undo mr-2"></i>
                         Reset ke Default
                     </button>
                     
-                    <button type="submit" 
+                    <button type="button" 
+                            onclick="confirmSaveAppearance()"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Pengaturan
@@ -599,7 +568,7 @@
             <div class="space-y-4">
                 <div class="flex gap-3">
                     <button type="button" 
-                            onclick="createBackup()"
+                            onclick="confirmCreateBackup()"
                             class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
                         <i class="fas fa-download mr-2"></i>
                         Buat Backup Sekarang
@@ -628,30 +597,29 @@
     </div>
 </div>
 
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
+
 @endsection
 
 @push('scripts')
 <script>
 // Tab Switching Function
 function switchTab(tabName) {
-    // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
     });
     
-    // Remove active class from all tabs
     document.querySelectorAll('.tab-button').forEach(button => {
         button.classList.remove('active', 'border-blue-500', 'text-blue-600');
         button.classList.add('border-transparent', 'text-gray-500');
     });
     
-    // Show selected tab content
     const selectedContent = document.getElementById(`content-${tabName}`);
     if (selectedContent) {
         selectedContent.classList.remove('hidden');
     }
     
-    // Add active class to selected tab
     const selectedTab = document.getElementById(`tab-${tabName}`);
     if (selectedTab) {
         selectedTab.classList.add('active', 'border-blue-500', 'text-blue-600');
@@ -659,80 +627,393 @@ function switchTab(tabName) {
     }
 }
 
-// Clear Cache Function
-function clearCache() {
-    if (confirm('Bersihkan semua cache sistem?\n\nIni akan membersihkan:\n- Cache konfigurasi\n- Cache view\n- Cache route\n- Cache aplikasi')) {
-        const btn = event.target.closest('button');
-        const originalHTML = btn.innerHTML;
-        
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Membersihkan...';
-        
-        fetch('{{ route("admin.pengaturan.clear-cache") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ ' + data.message);
-            } else {
-                alert('❌ ' + (data.message || 'Gagal membersihkan cache'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('❌ Terjadi kesalahan saat membersihkan cache');
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-        });
+// ============================================
+// CONFIRM SAVE PROFILE
+// ============================================
+function confirmSaveProfile() {
+    if (typeof Swal === 'undefined') {
+        document.getElementById('formProfil').submit();
+        return;
     }
+
+    const password = document.getElementById('password').value;
+    const hasPasswordChange = password.length > 0;
+    
+    Swal.fire({
+        title: '💾 Simpan Perubahan Profil?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Perubahan yang akan disimpan:</p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                    <li>✓ Informasi profil (nama, email)</li>
+                    ${hasPasswordChange ? '<li class="text-orange-600">⚠️ Password akan diubah</li>' : ''}
+                </ul>
+                ${hasPasswordChange ? '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded"><p class="text-sm text-yellow-800"><i class="fas fa-exclamation-triangle mr-2"></i>Anda harus login ulang dengan password baru</p></div>' : ''}
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading('Menyimpan perubahan profil...');
+            document.getElementById('formProfil').submit();
+        }
+    });
 }
 
-// Create Backup Function
-function createBackup() {
-    if (confirm('Buat backup database sekarang?\n\nProses ini mungkin memakan waktu beberapa saat tergantung ukuran database.')) {
-        const btn = event.target.closest('button');
-        const originalHTML = btn.innerHTML;
-        
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Membuat Backup...';
-        
-        fetch('{{ route("admin.pengaturan.backup") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ ' + data.message + '\n\nFile: ' + data.filename);
+// ============================================
+// CONFIRM SAVE SYSTEM SETTINGS
+// ============================================
+function confirmSaveSystem() {
+    if (typeof Swal === 'undefined') {
+        document.getElementById('formSistem').submit();
+        return;
+    }
+
+    const maintenanceMode = document.getElementById('maintenance_mode').checked;
+    
+    Swal.fire({
+        title: '⚙️ Simpan Pengaturan Sistem?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Pengaturan sistem akan diperbarui</p>
+                ${maintenanceMode ? '<div class="bg-red-50 border-l-4 border-red-400 p-3 rounded mb-3"><p class="text-sm text-red-600 font-semibold"><i class="fas fa-exclamation-circle mr-2"></i>Mode Maintenance akan <strong>AKTIF</strong>. User tidak dapat mengakses sistem!</p></div>' : ''}
+                <p class="text-sm text-gray-600">Pastikan pengaturan sudah benar sebelum menyimpan</p>
+            </div>
+        `,
+        icon: maintenanceMode ? 'warning' : 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading('Menyimpan pengaturan sistem...');
+            document.getElementById('formSistem').submit();
+        }
+    });
+}
+
+// ============================================
+// CONFIRM SAVE APPEARANCE
+// ============================================
+function confirmSaveAppearance() {
+    if (typeof Swal === 'undefined') {
+        document.getElementById('formTampilan').submit();
+        return;
+    }
+
+    Swal.fire({
+        title: '🎨 Simpan Pengaturan Tampilan?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Pengaturan tampilan akan diterapkan:</p>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>✓ Tema dan warna aksen</li>
+                    <li>✓ Ukuran teks</li>
+                    <li>✓ Opsi tampilan lainnya</li>
+                </ul>
+                <p class="text-sm text-blue-600 mt-3"><i class="fas fa-info-circle mr-2"></i>Perubahan akan diterapkan setelah refresh halaman</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading('Menyimpan pengaturan tampilan...');
+            document.getElementById('formTampilan').submit();
+        }
+    });
+}
+
+// ============================================
+// CONFIRM CLEAR CACHE
+// ============================================
+function confirmClearCache() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Bersihkan semua cache sistem?')) {
+            clearCacheProcess();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '🗑️ Bersihkan Cache?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Cache yang akan dibersihkan:</p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                    <li>• Cache konfigurasi</li>
+                    <li>• Cache view/template</li>
+                    <li>• Cache route</li>
+                    <li>• Cache aplikasi</li>
+                </ul>
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Proses ini akan meningkatkan performa sistem
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#eab308',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Bersihkan',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            clearCacheProcess();
+        }
+    });
+}
+
+function clearCacheProcess() {
+    Swal.fire({
+        title: 'Membersihkan Cache...',
+        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-yellow-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    fetch('{{ route("admin.pengaturan.clear-cache") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Cache Berhasil Dibersihkan!',
+                html: `<p class="text-gray-700">${data.message}</p>`,
+                confirmButtonColor: '#22c55e',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Membersihkan Cache',
+                html: `<p class="text-gray-700">${data.message || 'Terjadi kesalahan'}</p>`,
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan',
+            text: 'Gagal membersihkan cache. Silakan coba lagi.',
+            confirmButtonColor: '#dc2626'
+        });
+    });
+}
+
+// ============================================
+// CONFIRM CREATE BACKUP
+// ============================================
+function confirmCreateBackup() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Buat backup database sekarang?')) {
+            createBackupProcess();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '💾 Buat Backup Database?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Backup akan menyimpan:</p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                    <li>• Semua data database</li>
+                    <li>• Struktur tabel</li>
+                    <li>• Data pengguna & arsip</li>
+                </ul>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-clock mr-2"></i>
+                        Proses mungkin memakan waktu tergantung ukuran database
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22c55e',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-database mr-2"></i> Ya, Buat Backup',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            createBackupProcess();
+        }
+    });
+}
+
+function createBackupProcess() {
+    Swal.fire({
+        title: 'Membuat Backup...',
+        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-green-500 mb-3"></i><p>Mohon tunggu, sedang memproses backup database...</p></div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    fetch('{{ route("admin.pengaturan.backup") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Backup Berhasil Dibuat!',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-2">${data.message}</p>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-sm text-gray-600">File:</p>
+                            <p class="text-sm font-mono font-semibold text-blue-600">${data.filename}</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#22c55e',
+                confirmButtonText: 'OK'
+            }).then(() => {
                 const backupList = document.getElementById('backup-list');
                 if (backupList && !backupList.classList.contains('hidden')) {
                     loadBackupList();
                 }
-            } else {
-                alert('❌ ' + (data.message || 'Gagal membuat backup'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('❌ Terjadi kesalahan saat membuat backup');
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Membuat Backup',
+                html: `<p class="text-gray-700">${data.message || 'Terjadi kesalahan'}</p>`,
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan',
+            text: 'Gagal membuat backup. Silakan coba lagi.',
+            confirmButtonColor: '#dc2626'
         });
+    });
+}
+
+// ============================================
+// CONFIRM RESET APPEARANCE
+// ============================================
+function confirmResetAppearance() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Reset semua pengaturan tampilan ke default?')) {
+            resetAppearanceToDefault();
+        }
+        return;
     }
+
+    Swal.fire({
+        title: '🔄 Reset Pengaturan Tampilan?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Pengaturan akan dikembalikan ke default:</p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                    <li>• Tema: Light</li>
+                    <li>• Warna aksen: Biru</li>
+                    <li>• Ukuran teks: Sedang</li>
+                    <li>• Opsi tampilan: Default</li>
+                </ul>
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Anda masih perlu klik "Simpan" untuk menerapkan
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6b7280',
+        cancelButtonColor: '#dc2626',
+        confirmButtonText: '<i class="fas fa-undo mr-2"></i> Ya, Reset',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            resetAppearanceToDefault();
+            Swal.fire({
+                icon: 'success',
+                title: 'Pengaturan Direset!',
+                text: 'Jangan lupa klik "Simpan Pengaturan" untuk menerapkan perubahan',
+                confirmButtonColor: '#22c55e',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+    });
+}
+
+function resetAppearanceToDefault() {
+    document.getElementById('theme-light').checked = true;
+    document.getElementById('color-blue').checked = true;
+    document.getElementById('text-md').checked = true;
+    document.getElementById('compact_mode').checked = false;
+    document.getElementById('smooth_scrolling').checked = true;
 }
 
 // Load Backup List Function
@@ -798,40 +1079,9 @@ function loadBackupList() {
     });
 }
 
-// Reset Appearance Function
-function resetAppearance() {
-    if (confirm('Reset semua pengaturan tampilan ke default?\n\nTindakan ini akan mengembalikan:\n- Tema ke Light\n- Warna aksen ke Biru\n- Ukuran teks ke Sedang\n- Semua opsi tampilan ke nilai awal')) {
-        // Reset theme
-        document.getElementById('theme-light').checked = true;
-        
-        // Reset color
-        document.getElementById('color-blue').checked = true;
-        
-        // Reset text size
-        document.getElementById('text-md').checked = true;
-        
-        // Reset checkboxes
-        document.getElementById('show_breadcrumbs').checked = true;
-        document.getElementById('compact_mode').checked = false;
-        document.getElementById('smooth_scrolling').checked = true;
-        
-        alert('Pengaturan telah direset! Klik "Simpan" untuk menerapkan.');
-    }
-}
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Show first tab by default
     switchTab('profil');
-    
-    // Auto-hide success/error messages after 5 seconds
-    setTimeout(() => {
-        document.querySelectorAll('[role="alert"]').forEach(alert => {
-            alert.style.transition = 'opacity 0.5s';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        });
-    }, 5000);
 });
 </script>
 @endpush

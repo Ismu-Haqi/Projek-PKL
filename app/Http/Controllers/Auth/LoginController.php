@@ -84,10 +84,21 @@ class LoginController extends Controller
 
             $user = Auth::user();
             
-            // ✅ PESAN SUKSES DENGAN SWEETALERT2
-            $welcomeMessage = $user->role === 'admin' 
-                ? 'Selamat datang kembali di Sistem Arsip Digital Diskominfo Batola, ' . $user->name . '!' 
-                : 'Selamat datang di Sistem Arsip Digital Diskominfo Batola, ' . $user->name . '!';
+            // ✅ PESAN SUKSES LOGIN DENGAN SAMBUTAN
+            $currentHour = now()->format('H');
+            $greeting = '';
+            
+            if ($currentHour >= 5 && $currentHour < 12) {
+                $greeting = 'Selamat Pagi';
+            } elseif ($currentHour >= 12 && $currentHour < 15) {
+                $greeting = 'Selamat Siang';
+            } elseif ($currentHour >= 15 && $currentHour < 18) {
+                $greeting = 'Selamat Sore';
+            } else {
+                $greeting = 'Selamat Malam';
+            }
+            
+            $welcomeMessage = $greeting . ', ' . $user->name . '! Selamat datang di GANDARIA - Sistem Arsip Digital Diskominfo Batola.';
             
             // ✅ Redirect sesuai role dengan intended
             if ($user->role === 'admin') {
@@ -106,9 +117,9 @@ class LoginController extends Controller
             return back()->with('error', 'Role tidak valid untuk akses sistem.');
         }
 
-        // ✅ LOGIN GAGAL - PASSWORD SALAH (Menggunakan password_error untuk SweetAlert khusus)
+        // ✅ LOGIN GAGAL - PASSWORD SALAH
         return back()
-            ->with('password_error', 'Password yang Anda masukkan salah. Periksa kembali password Anda atau gunakan fitur lupa password.')
+            ->with('password_error', 'Password yang Anda masukkan salah. Silakan periksa kembali atau gunakan fitur lupa password jika Anda tidak ingat.')
             ->withInput($request->only('email', 'role'));
     }
 
@@ -118,13 +129,26 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $userName = Auth::user()->name ?? 'User';
+        $currentHour = now()->format('H');
+        
+        // Ucapan sesuai waktu
+        $farewell = '';
+        if ($currentHour >= 5 && $currentHour < 12) {
+            $farewell = 'Selamat beraktivitas';
+        } elseif ($currentHour >= 12 && $currentHour < 15) {
+            $farewell = 'Selamat beristirahat';
+        } elseif ($currentHour >= 15 && $currentHour < 18) {
+            $farewell = 'Semoga hari Anda menyenangkan';
+        } else {
+            $farewell = 'Selamat beristirahat';
+        }
         
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // ✅ PESAN LOGOUT SUKSES
+        // ✅ PESAN LOGOUT DENGAN UCAPAN
         return redirect()->route('login')
-            ->with('success', 'Anda telah berhasil keluar dari sistem. Terima kasih, ' . $userName . '!');
+            ->with('success', 'Terima kasih, ' . $userName . '! Anda telah berhasil keluar dari sistem. ' . $farewell . '!');
     }
 }

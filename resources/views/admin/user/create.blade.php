@@ -234,6 +234,9 @@
     </div>
 </div>
 
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
+
 <script>
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -241,8 +244,88 @@ function togglePassword(fieldId) {
     field.type = field.type === 'password' ? 'text' : 'password';
 }
 
-// Generate random password
+// Generate random password with SweetAlert2 confirmation
 function generatePassword() {
+    if (typeof Swal === 'undefined') {
+        generatePasswordFallback();
+        return;
+    }
+
+    Swal.fire({
+        title: '🔑 Generate Password Otomatis?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Password akan di-generate secara acak dengan ketentuan:</p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                    <li>✓ Panjang 12 karakter</li>
+                    <li>✓ Kombinasi huruf besar & kecil</li>
+                    <li>✓ Angka dan simbol khusus</li>
+                    <li>✓ Aman dan sulit ditebak</li>
+                </ul>
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Password akan ditampilkan dan diisi otomatis ke form
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-random mr-2"></i> Generate Password',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const length = 12;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            let password = "";
+            
+            for (let i = 0; i < length; i++) {
+                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            
+            // Set password
+            document.getElementById('password').value = password;
+            document.getElementById('password_confirmation').value = password;
+            document.getElementById('password').type = 'text';
+            document.getElementById('password_confirmation').type = 'text';
+            
+            // Show generated password
+            Swal.fire({
+                title: '✅ Password Berhasil Di-generate!',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-3">Password yang di-generate:</p>
+                        <div class="bg-gray-100 p-4 rounded-lg mb-3">
+                            <p class="font-mono text-lg font-bold text-center text-blue-600 break-all">${password}</p>
+                        </div>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <strong>Penting:</strong> Pastikan untuk mencatat password ini! Password sudah diisi ke form.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonColor: '#4f46e5',
+                confirmButtonText: '<i class="fas fa-check mr-2"></i> OK, Saya Sudah Catat',
+                customClass: {
+                    popup: 'animated-popup'
+                }
+            });
+        }
+    });
+}
+
+// Fallback for when SweetAlert is not loaded
+function generatePasswordFallback() {
     const length = 12;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     let password = "";
@@ -256,7 +339,6 @@ function generatePassword() {
     document.getElementById('password').type = 'text';
     document.getElementById('password_confirmation').type = 'text';
     
-    // Show notification
     alert('Password berhasil di-generate:\n' + password + '\n\nPastikan untuk mencatat password ini!');
 }
 

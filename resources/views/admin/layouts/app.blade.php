@@ -482,117 +482,161 @@
          * Global Delete Confirmation Function
          * Digunakan untuk konfirmasi hapus di seluruh aplikasi (Arsip, Aset, User, dll)
          */
-        function confirmDelete(button, message = 'Data akan dihapus permanen!') {
-            // Cari form terdekat dari button yang diklik
-            const form = button.closest('form');
-            
-            if (!form) {
-                console.error('❌ Error: Form tidak ditemukan!');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error Sistem',
-                    text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
-                    confirmButtonColor: '#dc2626'
-                });
-                return false;
-            }
-            
-            // Log untuk debugging (bisa dihapus di production)
-            console.log('✅ Form ditemukan:', form);
-            console.log('📝 Action URL:', form.action);
-            console.log('🔧 Method:', form.method);
-            
-            // Tampilkan konfirmasi dengan SweetAlert2
+       function confirmDelete(button, message = 'Data akan dihapus permanen!') {
+    // Cari form terdekat dari button yang diklik
+    const form = button.closest('form');
+    
+    if (!form) {
+        console.error('❌ Error: Form tidak ditemukan!');
+        if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: '⚠️ Konfirmasi Hapus',
-                html: `
-                    <div class="text-left">
-                        <p class="text-gray-700 mb-2">${message}</p>
-                        <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
+                icon: 'error',
+                title: 'Error Sistem',
+                text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
                 confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
-                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-                reverseButtons: true,
-                focusCancel: true,
-                customClass: {
-                    popup: 'animated-popup',
-                    confirmButton: 'btn-delete-confirm',
-                    cancelButton: 'btn-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Tampilkan loading
-                    Swal.fire({
-                        title: 'Menghapus Data...',
-                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    // Disable button untuk mencegah double submit
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
-                    
-                    // Submit form
-                    console.log('🚀 Submitting delete form...');
-                    form.submit();
-                } else {
-                    console.log('❌ Delete cancelled by user');
+                allowOutsideClick: true
+            });
+        } else {
+            alert('Form tidak ditemukan!');
+        }
+        return false;
+    }
+    
+    // Log untuk debugging
+    console.log('✅ Form ditemukan:', form);
+    console.log('🔍 Action URL:', form.action);
+    
+    // Check if SweetAlert is available
+    if (typeof Swal === 'undefined') {
+        if (confirm('Yakin ingin menghapus?\n\n' + message)) {
+            form.submit();
+        }
+        return;
+    }
+    
+    // Tampilkan konfirmasi dengan SweetAlert2
+    Swal.fire({
+        title: '⚠️ Konfirmasi Hapus',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-2">${message}</p>
+                <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'animated-popup',
+            confirmButton: 'btn-delete-confirm',
+            cancelButton: 'btn-cancel'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan loading
+            Swal.fire({
+                title: 'Menghapus Data...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
             
-            return false;
+            // Disable button untuk mencegah double submit
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+            
+            // Submit form
+            console.log('🚀 Submitting delete form...');
+            form.submit();
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // Explicitly close modal when cancel
+            Swal.close();
+            console.log('❌ Delete cancelled by user');
+        } else {
+            // Handle other dismissals (backdrop click, escape key)
+            Swal.close();
         }
+    }).catch((error) => {
+        console.error('SweetAlert Error:', error);
+        Swal.close();
+    });
+    
+    return false;
+}
 
-        /**
-         * Confirm Logout Function
-         * Digunakan untuk konfirmasi logout dari sistem
-         */
-        function confirmLogout() {
+/**
+ * Confirm Logout Function
+ * Digunakan untuk konfirmasi logout dari sistem
+ */
+function confirmLogout() {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Keluar dari sistem?')) {
+            document.getElementById('logoutForm').submit();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '🚪 Keluar dari Sistem?',
+        text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan loading
             Swal.fire({
-                title: '🚪 Keluar dari Sistem?',
-                text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
-                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-                reverseButtons: true,
-                customClass: {
-                    popup: 'animated-popup'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Tampilkan loading
-                    Swal.fire({
-                        title: 'Logging Out...',
-                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    // Submit logout form
-                    console.log('🚪 Logging out...');
-                    document.getElementById('logoutForm').submit();
+                title: 'Logging Out...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
+            
+            // Submit logout form
+            console.log('🚪 Logging out...');
+            const logoutForm = document.getElementById('logoutForm');
+            if (logoutForm) {
+                logoutForm.submit();
+            } else {
+                console.error('Logout form not found!');
+                Swal.close();
+            }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.close();
+        } else {
+            Swal.close();
         }
+    }).catch((error) => {
+        console.error('SweetAlert Error:', error);
+        Swal.close();
+    });
+}
     </script>
     
     {{-- Toggle Sidebar, Notification, Profile Scripts --}}

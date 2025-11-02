@@ -199,10 +199,13 @@
                                 </a>
                                 
                                 @if($user->id !== Auth::id())
-                                <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
+                                <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                    <button type="button" 
+                                            onclick="confirmDeleteUser(this, '{{ $user->name }}', '{{ $user->email }}')"
+                                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                                            title="Hapus">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -238,10 +241,69 @@
     </div>
 </div>
 
+{{-- Include SweetAlert --}}
+@include('partials.sweetalert')
+
 <script>
 // Auto-submit form when filter changes
 document.querySelector('select[name="role"]').addEventListener('change', function() {
     this.form.submit();
 });
+
+// Fungsi konfirmasi hapus user
+function confirmDeleteUser(button, userName, userEmail) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
+            button.closest('form').submit();
+        }
+        return;
+    }
+
+    Swal.fire({
+        title: '⚠️ Hapus User?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>
+                <div class="bg-gray-50 p-3 rounded mb-3">
+                    <p class="text-sm text-gray-600">Email: <strong>${userEmail}</strong></p>
+                </div>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Peringatan:</strong> Semua data user akan dihapus permanen dan tidak dapat dikembalikan!
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus User!',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus User...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            button.disabled = true;
+            button.closest('form').submit();
+        }
+    });
+}
 </script>
 @endsection
