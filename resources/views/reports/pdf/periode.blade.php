@@ -105,8 +105,8 @@
 <body>
     <div class="header">
         <h1>LAPORAN STATISTIK PERIODE</h1>
-        <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
-        <p>Dinas Komunikasi dan Informatika</p>
+        <p>GANDARIA - Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
+        <p>Dinas Komunikasi dan Informatika Kab.Barito Kuala</p>
     </div>
 
     <div class="info-box">

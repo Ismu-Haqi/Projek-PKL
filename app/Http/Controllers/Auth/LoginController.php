@@ -37,16 +37,27 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        // Validasi input
+        // Validasi input termasuk captcha
         $request->validate([
             'email' => 'required|string',
             'password' => 'required|string',
             'role' => 'required|in:admin,staff',
+            'captcha' => 'required|string',
+            'captcha_code' => 'required|string',
         ], [
             'email.required' => 'Email harus diisi',
             'password.required' => 'Password harus diisi',
             'role.required' => 'Pilih role terlebih dahulu',
+            'captcha.required' => 'Captcha harus diisi',
+            'captcha_code.required' => 'Kode captcha tidak valid',
         ]);
+
+        // ✅ VALIDASI CAPTCHA - Cek apakah captcha cocok
+        if ($request->captcha !== $request->captcha_code) {
+            return back()
+                ->withErrors(['captcha' => 'Kode captcha yang Anda masukkan salah! Silakan coba lagi.'])
+                ->withInput($request->only('email', 'role'));
+        }
 
         // Cek apakah email valid
         $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';

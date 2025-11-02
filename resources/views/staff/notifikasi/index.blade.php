@@ -5,18 +5,6 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    {{-- Success Message --}}
-    @if(session('success'))
-    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-xl animate-fade-in shadow-lg">
-        <div class="flex items-center">
-            <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p class="text-green-800 font-medium">{{ session('success') }}</p>
-        </div>
-    </div>
-    @endif
-
     {{-- Header Section with Gradient --}}
     <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 rounded-2xl shadow-2xl mb-8 p-8">
         <div class="absolute inset-0 bg-black opacity-10"></div>
@@ -106,9 +94,9 @@
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
         <div class="flex flex-wrap gap-3">
             @if($stats['unread'] > 0)
-            <form action="{{ route('staff.notifikasi.read-all') }}" method="POST" class="inline-flex">
+            <form action="{{ route('staff.notifikasi.read-all') }}" method="POST" class="inline-flex" id="readAllForm">
                 @csrf
-                <button type="submit" class="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <button type="button" onclick="confirmReadAll()" class="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -118,8 +106,8 @@
             @endif
 
             @if($stats['read'] > 0)
-            <form action="{{ route('staff.notifikasi.index') }}" method="GET" class="inline-flex" onsubmit="return confirm('Hapus semua notifikasi yang sudah dibaca?')">
-                <button type="submit" name="clear_read" value="1" class="inline-flex items-center bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <form action="{{ route('staff.notifikasi.index') }}" method="GET" class="inline-flex" id="clearReadForm">
+                <button type="button" onclick="confirmClearRead()" class="inline-flex items-center bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -200,9 +188,9 @@
                                 @endif
 
                                 @if(!$notification->isRead())
-                                <form action="{{ route('staff.notifikasi.read.post', $notification->id) }}" method="POST" class="inline">
+                                <form action="{{ route('staff.notifikasi.read.post', $notification->id) }}" method="POST" class="inline" id="markReadForm{{ $notification->id }}">
                                     @csrf
-                                    <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Tandai Sudah Dibaca">
+                                    <button type="button" onclick="confirmMarkRead({{ $notification->id }})" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Tandai Sudah Dibaca">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -210,10 +198,10 @@
                                 </form>
                                 @endif
 
-                                <form action="{{ route('staff.notifikasi.destroy', $notification->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus notifikasi ini?')">
+                                <form action="{{ route('staff.notifikasi.destroy', $notification->id) }}" method="POST" class="inline" id="deleteNotifForm{{ $notification->id }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                    <button type="button" onclick="confirmDeleteNotif({{ $notification->id }})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -273,35 +261,104 @@
 
 </div>
 
-@push('styles')
-<style>
-@keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-}
-</style>
-@endpush
-
 @push('scripts')
 <script>
-// Auto-hide success messages
-setTimeout(() => {
-    document.querySelectorAll('.animate-fade-in').forEach(el => {
-        el.style.transition = 'opacity 0.5s';
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 500);
+// ✅ Confirm Read All
+function confirmReadAll() {
+    Swal.fire({
+        title: 'Tandai Semua Sudah Dibaca',
+        text: 'Semua notifikasi yang belum dibaca akan ditandai sebagai sudah dibaca',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-check mr-2"></i>Ya, Tandai',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('readAllForm').submit();
+        }
     });
-}, 5000);
+}
+
+// ✅ Confirm Clear Read
+function confirmClearRead() {
+    Swal.fire({
+        title: 'Hapus Notifikasi yang Sudah Dibaca',
+        html: '<div class="text-left"><p class="text-gray-700 mb-3">Semua notifikasi yang sudah dibaca akan dihapus secara permanen</p><div class="bg-red-50 border-l-4 border-red-500 p-3 rounded"><p class="text-sm text-red-700 font-semibold">⚠️ Peringatan: Data yang dihapus tidak dapat dikembalikan!</p></div></div>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Ya, Hapus',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Add hidden input and submit
+            const form = document.getElementById('clearReadForm');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'clear_read';
+            input.value = '1';
+            form.appendChild(input);
+            form.submit();
+        }
+    });
+}
+
+// ✅ Confirm Mark Read Single
+function confirmMarkRead(id) {
+    Swal.fire({
+        title: 'Tandai Sudah Dibaca',
+        text: 'Notifikasi ini akan ditandai sebagai sudah dibaca',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-check mr-2"></i>Ya, Tandai',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('markReadForm' + id).submit();
+        }
+    });
+}
+
+// ✅ Confirm Delete Single Notification
+function confirmDeleteNotif(id) {
+    Swal.fire({
+        title: 'Hapus Notifikasi',
+        html: '<div class="text-left"><p class="text-gray-700 mb-3">Notifikasi ini akan dihapus secara permanen</p><div class="bg-red-50 border-l-4 border-red-500 p-3 rounded"><p class="text-sm text-red-700 font-semibold">⚠️ Tindakan ini tidak dapat dibatalkan!</p></div></div>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Ya, Hapus',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteNotifForm' + id).submit();
+        }
+    });
+}
 
 // Auto-refresh unread count every 30 seconds
 setInterval(() => {
     fetch('{{ route("staff.notifikasi.unread-count") }}')
         .then(response => response.json())
         .then(data => {
-            // Update badge if needed
             console.log('Unread count:', data.count);
         })
         .catch(error => console.error('Error:', error));

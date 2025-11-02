@@ -19,47 +19,6 @@
     </div>
 </div>
 
-{{-- Alert Messages --}}
-@if(session('success'))
-<div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg animate-fade-in">
-    <div class="flex items-center">
-        <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-        <div>
-            <p class="font-medium text-green-800">Berhasil!</p>
-            <p class="text-green-700 text-sm">{{ session('success') }}</p>
-        </div>
-    </div>
-</div>
-@endif
-
-@if(session('error'))
-<div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg animate-fade-in">
-    <div class="flex items-center">
-        <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
-        <div>
-            <p class="font-medium text-red-800">Gagal!</p>
-            <p class="text-red-700 text-sm">{{ session('error') }}</p>
-        </div>
-    </div>
-</div>
-@endif
-
-@if($errors->any())
-<div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
-    <div class="flex items-start">
-        <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3 mt-0.5"></i>
-        <div class="flex-1">
-            <p class="font-medium text-red-800 mb-2">Terdapat kesalahan:</p>
-            <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    </div>
-</div>
-@endif
-
 {{-- Main Content --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
@@ -340,13 +299,21 @@
 
 @push('scripts')
 <script>
-// Preview Avatar
+// ========================================
+// ✅ PREVIEW AVATAR
+// ========================================
 function previewAvatar(event) {
     const file = event.target.files[0];
     if (file) {
         // Validate file size (2MB)
         if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file terlalu besar! Maksimal 2MB');
+            Swal.fire({
+                icon: 'error',
+                title: 'File Terlalu Besar',
+                text: 'Ukuran file maksimal 2MB',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Mengerti'
+            });
             event.target.value = '';
             return;
         }
@@ -354,7 +321,13 @@ function previewAvatar(event) {
         // Validate file type
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if (!validTypes.includes(file.type)) {
-            alert('Format file tidak valid! Gunakan JPG, PNG atau GIF');
+            Swal.fire({
+                icon: 'error',
+                title: 'Format File Tidak Valid',
+                text: 'Gunakan format JPG, PNG atau GIF',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Mengerti'
+            });
             event.target.value = '';
             return;
         }
@@ -380,41 +353,135 @@ function previewAvatar(event) {
             } else if (sidebarPlaceholder) {
                 sidebarPlaceholder.outerHTML = `<img src="${e.target.result}" alt="Avatar" class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover" id="sidebar-avatar">`;
             }
+
+            // Show success toast
+            Swal.fire({
+                icon: 'success',
+                title: 'Preview berhasil',
+                text: 'Klik "Simpan Perubahan" untuk mengupload foto',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                backdrop: false
+            });
         };
         reader.readAsDataURL(file);
     }
 }
 
-// Remove Avatar
+// ========================================
+// ✅ REMOVE AVATAR WITH SWEETALERT
+// ========================================
 function removeAvatar() {
-    if (confirm('Hapus foto profil?\n\nFoto akan dihapus secara permanen. Lanjutkan?')) {
-        const btn = event.target;
-        btn.disabled = true;
-        
-        fetch('{{ route("staff.profil.avatar.remove") }}', {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Gagal menghapus foto: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menghapus foto');
-        });
-    }
+    Swal.fire({
+        title: 'Hapus Foto Profil',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-3">Foto profil Anda akan dihapus secara permanen</p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                    <p class="text-sm text-yellow-700">
+                        <i class="fas fa-info-circle mr-2"></i>Anda dapat mengunggah foto baru kapan saja
+                    </p>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Ya, Hapus',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Sedang Memproses',
+                html: `
+                    <div class="loading-smooth-container">
+                        <div class="spinner-wrapper">
+                            <i class="fas fa-spinner fa-pulse"></i>
+                        </div>
+                        <p class="loading-text">Menghapus foto profil...</p>
+                        <div class="loading-progress">
+                            <div class="loading-progress-bar"></div>
+                        </div>
+                    </div>
+                `,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'loading-popup-smooth'
+                },
+                didOpen: () => {
+                    const progressBar = document.querySelector('.loading-progress-bar');
+                    if (progressBar) {
+                        setTimeout(() => {
+                            progressBar.style.width = '100%';
+                        }, 100);
+                    }
+                }
+            });
+            
+            // Send delete request
+            fetch('{{ route("staff.profil.avatar.remove") }}', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Foto profil berhasil dihapus',
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'animated-popup'
+                        }
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message || 'Gagal menghapus foto profil',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'Tutup'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Terjadi kesalahan saat menghapus foto',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Tutup'
+                });
+            });
+        }
+    });
 }
 
-// Toggle Password Visibility
+// ========================================
+// TOGGLE PASSWORD VISIBILITY
+// ========================================
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
     const icon = document.getElementById(fieldId + '-icon');
@@ -430,7 +497,9 @@ function togglePassword(fieldId) {
     }
 }
 
-// Check Password Strength
+// ========================================
+// CHECK PASSWORD STRENGTH
+// ========================================
 function checkPasswordStrength() {
     const password = document.getElementById('password').value;
     const strengthBar = document.getElementById('strength-bar');
@@ -479,35 +548,128 @@ function checkPasswordStrength() {
         strengthText.className = 'text-xs font-medium text-green-500';
     }
 }
-
-// Auto-hide alerts
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('[class*="animate-fade-in"]');
-        alerts.forEach(alert => {
-            alert.style.transition = 'opacity 0.5s, transform 0.5s';
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-10px)';
-            setTimeout(() => alert.remove(), 500);
-        });
-    }, 5000);
-});
 </script>
 
 <style>
-@keyframes fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
+/* Loading Smooth Container */
+.loading-smooth-container {
+    text-align: center;
+    padding: 30px 20px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 30px;
+}
+
+.spinner-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #e0e7ff;
+    animation: pulse-ring 1.5s ease-out infinite;
+}
+
+.spinner-wrapper i {
+    font-size: 48px !important;
+    color: #3b82f6 !important;
+    animation: spinPulse 1.2s ease-in-out infinite !important;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.8);
         opacity: 1;
-        transform: translateY(0);
+    }
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
     }
 }
 
-.animate-fade-in {
-    animation: fade-in 0.3s ease-out;
+@keyframes spinPulse {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.15);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+.loading-text {
+    color: #64748b !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    margin: 0 0 20px 0 !important;
+    animation: fadeInOut 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.loading-progress {
+    width: 100%;
+    max-width: 300px;
+    height: 4px;
+    background: #e0e7ff;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.loading-popup-smooth {
+    animation: loadingPopupIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes loadingPopupIn {
+    from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
 }
 </style>
 @endpush
