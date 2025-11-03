@@ -2,16 +2,14 @@
 <html lang="id">
 <head>
     {{-- Appearance Settings --}}
-@include('admin.layouts.appearance-styles')
+    @include('admin.layouts.appearance-styles')
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'GANDARIA - Arsip Digital')</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
@@ -26,7 +24,9 @@
             background: #f9fafb;
         }
         
-        /* Sidebar */
+        /* ========================================
+           RESPONSIVE SIDEBAR
+           ======================================== */
         #sidebar {
             position: fixed;
             left: 0;
@@ -44,7 +44,9 @@
             transform: translateX(-100%);
         }
         
-        /* Main Content */
+        /* ========================================
+           RESPONSIVE MAIN CONTENT
+           ======================================== */
         #main-content {
             margin-left: 260px;
             transition: margin-left 0.3s ease;
@@ -55,17 +57,34 @@
             margin-left: 0;
         }
         
-        /* Sidebar Link */
+        /* ========================================
+           RESPONSIVE HEADER
+           ======================================== */
+        .top-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        
+        /* ========================================
+           SIDEBAR LINKS - RESPONSIVE
+           ======================================== */
         .sidebar-link {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            margin: 4px 8px;
+            padding: 10px 12px;
+            margin: 3px 6px;
             border-radius: 8px;
             color: #6b7280;
             text-decoration: none;
             transition: all 0.2s;
-            font-size: 14px;
+            font-size: 13px;
         }
         
         .sidebar-link:hover {
@@ -80,26 +99,15 @@
         }
         
         .sidebar-link svg {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
             flex-shrink: 0;
         }
         
-        /* Header */
-        .top-header {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
-        
-        /* Toggle Button */
+        /* ========================================
+           MENU TOGGLE BUTTON
+           ======================================== */
         .menu-toggle {
             width: 40px;
             height: 40px;
@@ -117,7 +125,9 @@
             background: #f3f4f6;
         }
         
-        /* Dropdown Animation */
+        /* ========================================
+           DROPDOWN - RESPONSIVE
+           ======================================== */
         .dropdown-menu {
             display: none;
             opacity: 0;
@@ -131,7 +141,9 @@
             transform: translateY(0);
         }
         
-        /* Scrollbar */
+        /* ========================================
+           SCROLLBAR CUSTOM
+           ======================================== */
         #sidebar::-webkit-scrollbar {
             width: 4px;
         }
@@ -145,17 +157,9 @@
             border-radius: 4px;
         }
         
-        /* Dropdown scrollbar */
-        .dropdown-menu::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .dropdown-menu::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        
-        /* Overlay untuk mobile */
+        /* ========================================
+           OVERLAY UNTUK MOBILE
+           ======================================== */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -168,21 +172,9 @@
             display: block;
         }
         
-        @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-            
-            #main-content {
-                margin-left: 0;
-            }
-        }
-        
-        /* ✅ Fix Sweetalert2 Z-Index Issue */
+        /* ========================================
+           SWEETALERT Z-INDEX FIX
+           ======================================== */
         .swal2-container {
             z-index: 99999 !important;
         }
@@ -194,16 +186,140 @@
         .swal2-container.swal2-backdrop-show {
             background: rgba(0, 0, 0, 0.4) !important;
         }
-
-        .swal2-actions {
-            z-index: 100001 !important;
+        
+        /* ========================================
+           RESPONSIVE BREAKPOINTS
+           ======================================== */
+        
+        /* TABLET (768px - 1024px) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            #sidebar {
+                width: 220px;
+            }
+            
+            #main-content {
+                margin-left: 220px;
+            }
+            
+            .sidebar-link {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+            
+            .sidebar-link svg {
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+            }
         }
-
-        .swal2-confirm,
-        .swal2-cancel,
-        .swal2-deny {
-            z-index: 100002 !important;
-            pointer-events: auto !important;
+        
+        /* MOBILE (max-width: 768px) */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            #sidebar.show {
+                transform: translateX(0);
+            }
+            
+            #main-content {
+                margin-left: 0;
+            }
+            
+            .top-header {
+                padding: 0.75rem;
+            }
+            
+            /* Hide user name on mobile header */
+            .top-header .hidden.md\\:block {
+                display: none !important;
+            }
+            
+            /* Adjust dropdown width on mobile */
+            .dropdown-menu {
+                width: 90vw;
+                max-width: 320px;
+                right: 0.5rem;
+            }
+            
+            /* Adjust notification dropdown */
+            #notificationDropdown {
+                right: 0;
+                left: auto;
+            }
+        }
+        
+        /* SMALL MOBILE (max-width: 480px) */
+        @media (max-width: 480px) {
+            #sidebar {
+                width: 260px;
+            }
+            
+            .top-header {
+                padding: 0.5rem;
+            }
+            
+            .dropdown-menu {
+                width: calc(100vw - 1rem);
+                max-width: none;
+            }
+            
+            /* Make buttons smaller on small screens */
+            .menu-toggle {
+                width: 36px;
+                height: 36px;
+            }
+            
+            /* Adjust avatar size */
+            .top-header .w-10.h-10 {
+                width: 2rem !important;
+                height: 2rem !important;
+            }
+        }
+        
+        /* ========================================
+           RESPONSIVE UTILITIES
+           ======================================== */
+        
+        /* Responsive padding for main content */
+        @media (max-width: 768px) {
+            main.p-6 {
+                padding: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            main.p-6 {
+                padding: 0.75rem !important;
+            }
+        }
+        
+        /* Responsive text sizes */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            h2 {
+                font-size: 1.25rem !important;
+            }
+            
+            h3 {
+                font-size: 1.125rem !important;
+            }
+        }
+        
+        /* Touch-friendly tap targets */
+        @media (hover: none) {
+            .sidebar-link,
+            .menu-toggle,
+            button,
+            a {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
     </style>
     
@@ -215,10 +331,10 @@
     
     <aside id="sidebar">
         <div class="p-4">
-            <div class="flex items-center mb-6 pb-4">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-3">
-                    G
-                </div>
+           <div class="flex items-center mb-6 pb-4 mt-3">
+                <img src="{{ asset('images/gandaria.png') }}" 
+                    alt="Logo GANDARIA" 
+                    class="w-10 h-10 object-contain mr-3 ml-3">
                 <span class="text-xl font-bold text-gray-800">GANDARIA</span>
             </div>
             
@@ -300,168 +416,159 @@
     
     <div id="main-content">
         <header class="top-header">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 md:gap-4">
                 <button class="menu-toggle" onclick="toggleSidebar()">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-                
-                <div class="relative flex-1 max-w-md">
-                    <input type="text" placeholder="Cari arsip, surat, atau dokumen..." 
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </div>
             </div>
             
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 md:gap-3">
                 <div class="relative">
-    <button onclick="toggleNotification()" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-        </svg>
-        
-        @php
-            $unreadCount = Auth::user()->unreadNotifications()->count();
-        @endphp
-        @if($unreadCount > 0)
-        <span class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-        </span>
-        @endif
-    </button>
-
-    <div id="notificationDropdown" class="dropdown-menu absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-gray-800">Notifikasi</h3>
-                @if($unreadCount > 0)
-                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }} Baru</span>
-                @endif
-            </div>
-        </div>
-        
-        <div class="max-h-96 overflow-y-auto">
-            @php
-                $recentNotifications = Auth::user()->notifications()
-                    ->orderBy('created_at', 'desc')
-                    ->limit(5)
-                    ->get();
-            @endphp
-            
-            @forelse($recentNotifications as $notif)
-            <a href="{{ $notif->url ? route(Auth::user()->role . '.notifikasi.read', $notif->id) : route(Auth::user()->role . '.notifikasi.index') }}" 
-               class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notif->isRead() ? '' : 'bg-blue-50' }}">
-                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-{{ $notif->icon_class['color'] }}-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-{{ $notif->icon_class['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $notif->icon_class['icon'] }}"/>
-                    </svg>
-                </div>
-                <div class="ml-3 flex-1">
-                    <p class="text-sm font-medium text-gray-800">
-                        {{ $notif->title }}
-                        @if(!$notif->isRead())
-                        <span class="inline-block w-1.5 h-1.5 bg-blue-600 rounded-full ml-1"></span>
+                    <button onclick="toggleNotification()" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        
+                        @php
+                            $unreadCount = Auth::user()->unreadNotifications()->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                        <span class="absolute top-0 right-0 w-4 h-4 md:w-5 md:h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                        </span>
                         @endif
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1">{{ Str::limit($notif->message, 50) }}</p>
-                    <p class="text-xs text-blue-600 mt-1">{{ $notif->time_ago }}</p>
-                </div>
-            </a>
-            @empty
-            <div class="p-8 text-center">
-                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                <p class="text-sm text-gray-500 mt-2">Tidak ada notifikasi</p>
-            </div>
-            @endforelse
-        </div>
-        
-        <div class="p-3 bg-gray-50 text-center border-t">
-            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" 
-               class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                Lihat Semua Notifikasi
-            </a>
-        </div>
-    </div>
-</div>
-                
-                
- <div class="relative">
-    <button onclick="toggleProfile()" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-all">
-        <div class="hidden md:block text-right">
-            <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name }}</p>
-            <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>
-        </div>
-        <div class="w-10 h-10 rounded-full shadow-md overflow-hidden">
-            @if(Auth::user()->avatar)
-                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
-                     alt="{{ Auth::user()->name }}" 
-                     class="w-full h-full object-cover">
-            @else
-                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                </div>
-            @endif
-        </div>
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-    </button>
+                    </button>
 
-    <div id="profileDropdown" class="dropdown-menu absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-        <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-full shadow-lg overflow-hidden">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
-                             alt="{{ Auth::user()->name }}" 
-                             class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                    <div id="notificationDropdown" class="dropdown-menu absolute right-0 mt-2 w-80 md:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-gray-800">Notifikasi</h3>
+                                @if($unreadCount > 0)
+                                <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }} Baru</span>
+                                @endif
+                            </div>
                         </div>
-                    @endif
+                        
+                        <div class="max-h-96 overflow-y-auto">
+                            @php
+                                $recentNotifications = Auth::user()->notifications()
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit(5)
+                                    ->get();
+                            @endphp
+                            
+                            @forelse($recentNotifications as $notif)
+                            <a href="{{ $notif->url ? route(Auth::user()->role . '.notifikasi.read', $notif->id) : route(Auth::user()->role . '.notifikasi.index') }}" 
+                               class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notif->isRead() ? '' : 'bg-blue-50' }}">
+                                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-{{ $notif->icon_class['color'] }}-100 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-{{ $notif->icon_class['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $notif->icon_class['icon'] }}"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3 flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-800 truncate">
+                                        {{ $notif->title }}
+                                        @if(!$notif->isRead())
+                                        <span class="inline-block w-1.5 h-1.5 bg-blue-600 rounded-full ml-1"></span>
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ Str::limit($notif->message, 50) }}</p>
+                                    <p class="text-xs text-blue-600 mt-1">{{ $notif->time_ago }}</p>
+                                </div>
+                            </a>
+                            @empty
+                            <div class="p-8 text-center">
+                                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 mt-2">Tidak ada notifikasi</p>
+                            </div>
+                            @endforelse
+                        </div>
+                        
+                        <div class="p-3 bg-gray-50 text-center border-t">
+                            <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" 
+                               class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                Lihat Semua Notifikasi
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p class="font-bold text-gray-800">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-600">{{ Auth::user()->email }}</p>
+                
+                <div class="relative">
+                    <button onclick="toggleProfile()" class="flex items-center gap-2 md:gap-3 p-2 rounded-lg hover:bg-gray-100 transition-all">
+                        <div class="hidden md:block text-right">
+                            <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                            <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full shadow-md overflow-hidden">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                     alt="{{ Auth::user()->name }}" 
+                                     class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs md:text-sm">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                </div>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <div id="profileDropdown" class="dropdown-menu absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                        <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-full shadow-lg overflow-hidden">
+                                    @if(Auth::user()->avatar)
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                             alt="{{ Auth::user()->name }}" 
+                                             class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-gray-600">{{ Auth::user()->email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <a href="{{ route(Auth::user()->role . '.profil') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                                <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Profil Saya</span>
+                            </a>
+                            @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                                <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Pengaturan</span>
+                            </a>
+                            @endif
+                        </div>
+                        <div class="p-2 border-t border-gray-200">
+                            <form action="{{ route('logout') }}" method="POST" id="logoutForm">
+                                @csrf
+                                <button type="button" onclick="confirmLogout()" class="w-full flex items-center px-4 py-3 rounded-lg hover:bg-red-50 transition-colors group">
+                                    <svg class="w-5 h-5 text-gray-600 group-hover:text-red-600 mr-3 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors">Keluar</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="p-2">
-            <a href="{{ route(Auth::user()->role . '.profil') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <span class="text-sm font-medium text-gray-700">Profil Saya</span>
-            </a>
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span class="text-sm font-medium text-gray-700">Pengaturan</span>
-            </a>
-            @endif
-        </div>
-        <div class="p-2 border-t border-gray-200">
-            <form action="{{ route('logout') }}" method="POST" id="logoutForm">
-                @csrf
-                <button type="button" onclick="confirmLogout()" class="w-full flex items-center px-4 py-3 rounded-lg hover:bg-red-50 transition-colors group">
-                    <svg class="w-5 h-5 text-gray-600 group-hover:text-red-600 mr-3 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    <span class="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors">Keluar</span>
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
             </div>
         </header>
         
@@ -471,248 +578,199 @@
     </div>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     @include('partials.sweetalert')
     
-    {{-- ✅ GLOBAL DELETE & LOGOUT CONFIRMATION FUNCTIONS --}}
+    {{-- GLOBAL DELETE & LOGOUT CONFIRMATION FUNCTIONS --}}
     <script>
-        /**
-         * Global Delete Confirmation Function
-         * Digunakan untuk konfirmasi hapus di seluruh aplikasi (Arsip, Aset, User, dll)
-         */
-       function confirmDelete(button, message = 'Data akan dihapus permanen!') {
-    // Cari form terdekat dari button yang diklik
-    const form = button.closest('form');
-    
-    if (!form) {
-        console.error('❌ Error: Form tidak ditemukan!');
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Sistem',
-                text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
-                confirmButtonColor: '#dc2626',
-                allowOutsideClick: true
-            });
-        } else {
-            alert('Form tidak ditemukan!');
-        }
-        return false;
-    }
-    
-    // Log untuk debugging
-    console.log('✅ Form ditemukan:', form);
-    console.log('🔍 Action URL:', form.action);
-    
-    // Check if SweetAlert is available
-    if (typeof Swal === 'undefined') {
-        if (confirm('Yakin ingin menghapus?\n\n' + message)) {
-            form.submit();
-        }
-        return;
-    }
-    
-    // Tampilkan konfirmasi dengan SweetAlert2
-    Swal.fire({
-        title: '⚠️ Konfirmasi Hapus',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-2">${message}</p>
-                <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
-            </div>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        focusCancel: true,
-        allowOutsideClick: true,
-        allowEscapeKey: true,
-        customClass: {
-            popup: 'animated-popup',
-            confirmButton: 'btn-delete-confirm',
-            cancelButton: 'btn-cancel'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Tampilkan loading
-            Swal.fire({
-                title: 'Menghapus Data...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
+        function confirmDelete(button, message = 'Data akan dihapus permanen!') {
+            const form = button.closest('form');
+            
+            if (!form) {
+                console.error('❌ Error: Form tidak ditemukan!');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Sistem',
+                        text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
+                        confirmButtonColor: '#dc2626',
+                        allowOutsideClick: true
+                    });
+                } else {
+                    alert('Form tidak ditemukan!');
                 }
-            });
-            
-            // Disable button untuk mencegah double submit
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
-            
-            // Submit form
-            console.log('🚀 Submitting delete form...');
-            form.submit();
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-            // Explicitly close modal when cancel
-            Swal.close();
-            console.log('❌ Delete cancelled by user');
-        } else {
-            // Handle other dismissals (backdrop click, escape key)
-            Swal.close();
-        }
-    }).catch((error) => {
-        console.error('SweetAlert Error:', error);
-        Swal.close();
-    });
-    
-    return false;
-}
-
-/**
- * Confirm Logout Function
- * Digunakan untuk konfirmasi logout dari sistem
- */
-function confirmLogout() {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Keluar dari sistem?')) {
-            document.getElementById('logoutForm').submit();
-        }
-        return;
-    }
-
-    Swal.fire({
-        title: '🚪 Keluar dari Sistem?',
-        text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        allowOutsideClick: true,
-        allowEscapeKey: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Tampilkan loading
-            Swal.fire({
-                title: 'Logging Out...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            // Submit logout form
-            console.log('🚪 Logging out...');
-            const logoutForm = document.getElementById('logoutForm');
-            if (logoutForm) {
-                logoutForm.submit();
-            } else {
-                console.error('Logout form not found!');
-                Swal.close();
+                return false;
             }
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-            Swal.close();
-        } else {
-            Swal.close();
+            
+            if (typeof Swal === 'undefined') {
+                if (confirm('Yakin ingin menghapus?\n\n' + message)) {
+                    form.submit();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: '⚠️ Konfirmasi Hapus',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-2">${message}</p>
+                        <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+                reverseButtons: true,
+                focusCancel: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Menghapus Data...',
+                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+                    form.submit();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.close();
+                } else {
+                    Swal.close();
+                }
+            }).catch((error) => {
+                console.error('SweetAlert Error:', error);
+                Swal.close();
+            });
+            
+            return false;
         }
-    }).catch((error) => {
-        console.error('SweetAlert Error:', error);
-        Swal.close();
-    });
-}
+
+        function confirmLogout() {
+            if (typeof Swal === 'undefined') {
+                if (confirm('Keluar dari sistem?')) {
+                    document.getElementById('logoutForm').submit();
+                }
+                return;
+            }
+
+            Swal.fire({
+                title: '🚪 Keluar dari Sistem?',
+                text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+                reverseButtons: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Logging Out...',
+                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    const logoutForm = document.getElementById('logoutForm');
+                    if (logoutForm) {
+                        logoutForm.submit();
+                    } else {
+                        console.error('Logout form not found!');
+                        Swal.close();
+                    }
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.close();
+                } else {
+                    Swal.close();
+                }
+            }).catch((error) => {
+                console.error('SweetAlert Error:', error);
+                Swal.close();
+            });
+        }
     </script>
     
     {{-- Toggle Sidebar, Notification, Profile Scripts --}}
     <script>
-        // Toggle Sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('main-content');
             const overlay = document.getElementById('sidebar-overlay');
             
             if (window.innerWidth <= 768) {
-                // Mobile
                 sidebar.classList.toggle('show');
                 overlay.classList.toggle('active');
             } else {
-                // Desktop
                 sidebar.classList.toggle('hidden');
                 mainContent.classList.toggle('full');
             }
         }
         
-        // Toggle Notification Dropdown
         function toggleNotification() {
             const dropdown = document.getElementById('notificationDropdown');
             const profileDropdown = document.getElementById('profileDropdown');
             
-            // Close profile dropdown
             if (profileDropdown.classList.contains('show')) {
                 profileDropdown.classList.remove('show');
             }
             
-            // Toggle notification dropdown
             dropdown.classList.toggle('show');
         }
 
-        // Toggle Profile Dropdown
         function toggleProfile() {
             const dropdown = document.getElementById('profileDropdown');
             const notificationDropdown = document.getElementById('notificationDropdown');
             
-            // Close notification dropdown
             if (notificationDropdown.classList.contains('show')) {
                 notificationDropdown.classList.remove('show');
             }
             
-            // Toggle profile dropdown
             dropdown.classList.toggle('show');
         }
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const notificationDropdown = document.getElementById('notificationDropdown');
             const profileDropdown = document.getElementById('profileDropdown');
             const menuToggle = event.target.closest('.menu-toggle');
             
-            // Check if click is outside notification dropdown
             const notificationBtn = event.target.closest('button[onclick="toggleNotification()"]');
             if (!notificationBtn && !notificationDropdown.contains(event.target)) {
                 notificationDropdown.classList.remove('show');
             }
             
-            // Check if click is outside profile dropdown
             const profileBtn = event.target.closest('button[onclick="toggleProfile()"]');
             if (!profileBtn && !profileDropdown.contains(event.target)) {
                 profileDropdown.classList.remove('show');
             }
             
-            // Close sidebar when clicking outside on mobile
             if (!sidebar.contains(event.target) && !menuToggle && window.innerWidth <= 768) {
                 sidebar.classList.remove('show');
                 document.getElementById('sidebar-overlay').classList.remove('active');
             }
         });
         
-        // Prevent dropdown from closing when clicking inside
         document.getElementById('notificationDropdown').addEventListener('click', function(event) {
             event.stopPropagation();
         });

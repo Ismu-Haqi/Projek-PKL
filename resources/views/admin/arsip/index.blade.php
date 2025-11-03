@@ -313,6 +313,180 @@
 
 @push('scripts')
 <script>
+/**
+ * Confirm Toggle Favorite Function
+ * @param {HTMLElement} button - Button element yang diklik
+ * @param {boolean} isFavorite - Status favorit saat ini
+ * @param {string} title - Judul arsip (optional)
+ */
+function confirmToggleFavorite(button, isFavorite, title = 'arsip ini') {
+    // Cari form terdekat dari button yang diklik
+    const form = button.closest('form');
+    
+    if (!form) {
+        console.error('❌ Error: Form tidak ditemukan!');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Sistem',
+                text: 'Form tidak ditemukan. Silakan refresh halaman.',
+                confirmButtonColor: '#dc2626'
+            });
+        } else {
+            alert('Form tidak ditemukan!');
+        }
+        return false;
+    }
+    
+    // Log untuk debugging
+    console.log('✅ Form ditemukan:', form);
+    console.log('📋 Action URL:', form.action);
+    console.log('⭐ Is Favorite:', isFavorite);
+    
+    // Check if SweetAlert is available
+    if (typeof Swal === 'undefined') {
+        if (confirm(isFavorite ? 'Hapus dari favorit?' : 'Tambahkan ke favorit?')) {
+            form.submit();
+        }
+        return;
+    }
+    
+    // Tampilkan konfirmasi dengan SweetAlert2
+    Swal.fire({
+        title: isFavorite ? '⭐ Hapus dari Favorit?' : '⭐ Tambahkan ke Favorit?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-2">${isFavorite ? 'Arsip akan dihapus dari daftar favorit' : 'Arsip akan ditambahkan ke daftar favorit'}</p>
+                <p class="text-sm text-gray-600 font-semibold">"${title}"</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: isFavorite ? '#dc2626' : '#eab308',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: isFavorite ? '<i class="fas fa-star mr-2"></i> Hapus dari Favorit' : '<i class="fas fa-star mr-2"></i> Tambahkan ke Favorit',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'animated-popup',
+            confirmButton: 'btn-favorite-confirm',
+            cancelButton: 'btn-cancel'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan loading
+            Swal.fire({
+                title: isFavorite ? 'Menghapus dari Favorit...' : 'Menambahkan ke Favorit...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-yellow-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Disable button untuk mencegah double submit
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Submit form
+            console.log('🚀 Submitting favorite form...');
+            form.submit();
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.close();
+            console.log('❌ Favorite action cancelled');
+        } else {
+            Swal.close();
+        }
+    }).catch((error) => {
+        console.error('SweetAlert Error:', error);
+        Swal.close();
+    });
+    
+    return false;
+}
+
+/**
+ * Confirm Download Function
+ * @param {string} downloadUrl - URL untuk download file
+ * @param {string} fileName - Nama file yang akan didownload
+ */
+function confirmDownload(downloadUrl, fileName = 'file') {
+    // Check if SweetAlert is available
+    if (typeof Swal === 'undefined') {
+        window.location.href = downloadUrl;
+        return;
+    }
+    
+    Swal.fire({
+        title: '📥 Download File?',
+        html: `
+            <div class="text-left">
+                <p class="text-gray-700 mb-2">Anda akan mengunduh file:</p>
+                <p class="text-sm text-blue-600 font-semibold bg-blue-50 p-3 rounded">"${fileName}"</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-download mr-2"></i> Ya, Download',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'animated-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan loading
+            Swal.fire({
+                title: 'Memproses Download...',
+                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-green-500 mb-3"></i><p>File sedang diunduh</p></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                timer: 1500,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Start download
+            console.log('📥 Starting download:', downloadUrl);
+            setTimeout(() => {
+                window.location.href = downloadUrl;
+                
+                // Show success message after download starts
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Download Dimulai!',
+                        text: 'File sedang diunduh ke perangkat Anda',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }, 500);
+            }, 500);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.close();
+            console.log('❌ Download cancelled');
+        } else {
+            Swal.close();
+        }
+    }).catch((error) => {
+        console.error('SweetAlert Error:', error);
+        Swal.close();
+    });
+}
+
 // Auto-hide success/error message
 setTimeout(function() {
     const alerts = document.querySelectorAll('.animate-fade-in');

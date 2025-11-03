@@ -55,7 +55,7 @@ class LoginController extends Controller
         // ✅ VALIDASI CAPTCHA - Cek apakah captcha cocok
         if ($request->captcha !== $request->captcha_code) {
             return back()
-                ->withErrors(['captcha' => 'Kode captcha yang Anda masukkan salah! Silakan coba lagi.'])
+                ->withErrors(['captcha' => 'Kode captcha yang Anda masukkan salah! Kode captcha bersifat case-sensitive, pastikan Anda memasukkan dengan benar.'])
                 ->withInput($request->only('email', 'role'));
         }
 
