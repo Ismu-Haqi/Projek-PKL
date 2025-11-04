@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - GANDARIA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
@@ -59,290 +62,29 @@
             box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
         }
         
-        /* ========================================
-           RESPONSIVE STYLES
-           ======================================== */
-        
-        /* TABLET (768px - 1024px) */
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .logo-container {
-                width: 200px;
-                height: 200px;
-            }
-            
-            h1.system-title {
-                font-size: 2.5rem;
-            }
-            
-            .description-box {
-                font-size: 0.875rem;
-                padding: 1rem;
-            }
-        }
-        
-        /* MOBILE (max-width: 768px) */
+        /* RESPONSIVE STYLES */
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            /* Logo Circle - Smaller on Mobile */
             .logo-container {
-                width: 180px;
-                height: 180px;
-                margin-bottom: 1.5rem;
-            }
-            
-            .logo-container img {
-                padding: 1.5rem;
-            }
-            
-            /* System Title - Smaller */
-            h1.system-title {
-                font-size: 2rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .subtitle {
-                font-size: 0.875rem;
-                margin-bottom: 1rem;
-            }
-            
-            /* Description Box - Compact */
-            .description-box {
-                font-size: 0.75rem;
-                padding: 0.875rem;
-                margin-top: 1rem;
-            }
-            
-            /* Login Card - Full Width on Mobile */
-            .login-card {
-                border-radius: 1.5rem;
-                padding: 1.5rem;
-            }
-            
-            /* Partner Logos - Smaller */
-            .partner-logo {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .partner-logo img {
-                width: 1.75rem;
-                height: 1.75rem;
-            }
-            
-            /* Login Title */
-            h2.login-title {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            /* Form Labels - Smaller */
-            label {
-                font-size: 0.813rem;
-                margin-bottom: 0.375rem;
-            }
-            
-            /* Input Fields - Adjust Padding */
-            .input-field {
-                padding: 0.75rem;
-                font-size: 0.875rem;
-            }
-            
-            /* Select Dropdown */
-            select.input-field {
-                padding: 0.75rem;
-            }
-            
-            /* Captcha Canvas - Responsive */
-            #captchaCanvas {
-                width: 100px;
-                height: 35px;
-            }
-            
-            .captcha-container {
-                padding: 0.75rem;
-            }
-            
-            .captcha-refresh-btn {
-                width: 1.25rem;
-                height: 1.25rem;
-            }
-            
-            /* Submit Button */
-            .btn-login {
-                padding: 0.875rem;
-                font-size: 0.875rem;
-            }
-            
-            /* Badge - Smaller */
-            .badge-container {
-                margin-top: 1rem;
-            }
-            
-            .badge-icon {
-                width: 2rem;
-                height: 2rem;
-            }
-            
-            .badge-text {
-                font-size: 0.75rem;
-            }
-            
-            /* Footer */
-            footer {
-                padding: 1rem;
-                margin-top: 1.5rem;
-            }
-            
-            footer p {
-                font-size: 0.75rem;
-            }
-            
-            footer p.text-xs {
-                font-size: 0.625rem;
-            }
-        }
-        
-        /* SMALL MOBILE (max-width: 480px) */
-        @media (max-width: 480px) {
-            .container {
-                padding: 0.75rem;
-            }
-            
-            /* Logo - Even Smaller */
-            .logo-container {
-                width: 150px;
-                height: 150px;
-                margin-bottom: 1rem;
-            }
-            
-            /* System Title */
-            h1.system-title {
-                font-size: 1.75rem;
-            }
-            
-            .subtitle {
-                font-size: 0.75rem;
-            }
-            
-            /* Description Box - Very Compact */
-            .description-box {
-                font-size: 0.688rem;
-                padding: 0.75rem;
-                line-height: 1.4;
-            }
-            
-            /* Login Card */
-            .login-card {
-                padding: 1.25rem;
-            }
-            
-            /* Partner Logos - Smallest */
-            .partner-logo {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .partner-logo img {
-                width: 1.5rem;
-                height: 1.5rem;
-            }
-            
-            /* Login Title */
-            h2.login-title {
-                font-size: 1.25rem;
-            }
-            
-            /* Input Fields - Compact */
-            .input-field {
-                padding: 0.625rem;
-                font-size: 0.813rem;
-            }
-            
-            /* Captcha - Smallest */
-            #captchaCanvas {
-                width: 90px;
-                height: 30px;
-            }
-            
-            /* Submit Button */
-            .btn-login {
-                padding: 0.75rem;
-                font-size: 0.813rem;
-            }
-            
-            /* Badge - Hide on Very Small Screens */
-            .badge-container {
-                transform: scale(0.85);
-            }
-            
-            /* Footer */
-            footer {
-                padding: 0.75rem;
-            }
-        }
-        
-        /* LANDSCAPE MODE - Mobile */
-        @media (max-height: 600px) and (orientation: landscape) {
-            .logo-container {
-                width: 120px;
-                height: 120px;
-                margin-bottom: 0.5rem;
+                width: 180px !important;
+                height: 180px !important;
             }
             
             h1.system-title {
-                font-size: 1.5rem;
+                font-size: 2rem !important;
             }
             
             .subtitle {
-                font-size: 0.75rem;
+                font-size: 0.875rem !important;
             }
             
             .description-box {
-                display: none;
-            }
-            
-            .login-card {
-                padding: 1rem;
-            }
-            
-            .partner-logos-container {
-                margin-bottom: 0.5rem;
-            }
-            
-            h2.login-title {
-                font-size: 1.25rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .form-spacing {
-                margin-top: 0.75rem;
-            }
-            
-            .badge-container {
-                display: none;
-            }
-            
-            footer {
-                padding: 0.5rem;
-                margin-top: 0.5rem;
-            }
-        }
-        
-        /* Touch-friendly Buttons */
-        @media (hover: none) {
-            .input-field,
-            .btn-login,
-            button,
-            a {
-                min-height: 44px;
+                font-size: 0.75rem !important;
+                padding: 0.875rem !important;
             }
             
             .partner-logo {
-                min-height: 44px;
-                min-width: 44px;
+                width: 40px !important;
+                height: 40px !important;
             }
         }
     </style>
@@ -422,6 +164,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pengguna</label>
                         <input type="text" 
                                name="email"
+                               value="{{ old('email') }}"
                                placeholder="Nama Pengguna"
                                required
                                class="input-field w-full px-3 md:px-4 py-2.5 md:py-3 border-2 border-gray-200 rounded-xl focus:border-sky-500 focus:outline-none bg-gray-50 text-sm md:text-base">
@@ -452,7 +195,7 @@
                                 <input type="checkbox" 
                                        name="remember"
                                        class="w-3.5 h-3.5 md:w-4 md:h-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
-                                <span class="ml-2 text-xs text-gray-600">Lihat Kata Sandi</span>
+                                <span class="ml-2 text-xs text-gray-600">Ingat Saya</span>
                             </label>
                             <a href="#" class="text-xs text-sky-600 hover:text-sky-700">Lupa Kata Sandi?</a>
                         </div>
@@ -465,8 +208,8 @@
                                 required
                                 class="input-field w-full px-3 md:px-4 py-2.5 md:py-3 border-2 border-gray-200 rounded-xl focus:border-sky-500 focus:outline-none bg-gray-50 appearance-none cursor-pointer text-sm md:text-base">
                             <option value="">-- Pilih Role --</option>
-                            <option value="admin">Administrator</option>
-                            <option value="staff">Staff</option>
+                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
+                            <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
                         </select>
                     </div>
 
@@ -520,12 +263,132 @@
     <!-- Footer -->
     <footer class="text-center text-white py-4 md:py-6 mt-6 md:mt-8">
         <p class="text-xs md:text-sm px-4">Temukan Aplikasi GANDARIA di <strong>Google Play Store</strong> dan <strong>App Store</strong></p>
-        <p class="text-xs mt-2">Copyright © 2025 Arsip Nasional Republik Indonesia</p>
+        <p class="text-xs mt-2">Copyright © 2025 Diskominfo Kabupaten Barito Kuala</p>
     </footer>
 
     <script>
         // Captcha Variables
         let captchaCode = '';
+        
+        // ============================================
+        // SWEETALERT ERROR NOTIFICATIONS
+        // ============================================
+        
+        // Check for Laravel validation errors
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Validasi Gagal',
+                html: `
+                    <div class="text-left">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li class="text-sm text-gray-700">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                `,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: '<i class="fas fa-check mr-2"></i>Mengerti',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3'
+                }
+            });
+        @endif
+        
+        // Check for login error (username/email not found)
+        @if(session('login_error'))
+            Swal.fire({
+                icon: 'error',
+                title: '👤 User Tidak Ditemukan',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-3">{{ session('login_error') }}</p>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Tips:</strong> Pastikan Anda memasukkan username/email yang benar dan memilih role yang sesuai.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: '<i class="fas fa-redo mr-2"></i>Coba Lagi',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3'
+                }
+            });
+        @endif
+        
+        // Check for password error
+        @if(session('password_error'))
+            Swal.fire({
+                icon: 'error',
+                title: '🔒 Password Salah',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-3">{{ session('password_error') }}</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                            <p class="text-sm text-blue-800">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                <strong>Lupa Password?</strong> Hubungi administrator untuk reset password Anda.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: '<i class="fas fa-key mr-2"></i>Coba Lagi',
+                footer: '<a href="#" class="text-sky-600 hover:text-sky-700 text-sm"><i class="fas fa-question-circle mr-1"></i> Butuh Bantuan?</a>',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3'
+                }
+            });
+        @endif
+        
+        // Check for account inactive warning
+        @if(session('warning'))
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Akun Tidak Aktif',
+                html: `
+                    <div class="text-left">
+                        <p class="text-gray-700 mb-3">{{ session('warning') }}</p>
+                        <div class="bg-orange-50 border-l-4 border-orange-500 p-3 rounded">
+                            <p class="text-sm text-orange-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Silakan hubungi administrator sistem untuk aktivasi akun.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: '<i class="fas fa-phone mr-2"></i>Hubungi Admin',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3'
+                }
+            });
+        @endif
+        
+        // Check for success message (logout success)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Berhasil',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#10b981',
+                confirmButtonText: '<i class="fas fa-check mr-2"></i>OK',
+                timer: 3000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-3'
+                }
+            });
+        @endif
         
         // Generate Random Captcha - RESPONSIVE
         function generateCaptcha() {
@@ -588,6 +451,7 @@
             document.getElementById('captchaInput').value = '';
         }
         
+        // Validate Captcha with SweetAlert
         function validateCaptcha() {
             const userInput = document.getElementById('captchaInput').value;
             const originalCode = document.getElementById('captchaCode').value;
@@ -601,12 +465,123 @@
             }
         }
         
+        // Form Submit Handler with SweetAlert
         document.querySelector('form').addEventListener('submit', function(e) {
-            if (!validateCaptcha()) {
-                e.preventDefault();
-                alert('Kode captcha salah! Silakan coba lagi.');
+            e.preventDefault();
+            
+            // Validate all fields
+            const email = document.querySelector('input[name="email"]').value.trim();
+            const password = document.querySelector('input[name="password"]').value;
+            const role = document.querySelector('select[name="role"]').value;
+            const captcha = document.getElementById('captchaInput').value.trim();
+            
+            // Check empty fields
+            if (!email) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Nama Pengguna Kosong',
+                    text: 'Silakan masukkan nama pengguna atau email Anda!',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '<i class="fas fa-edit mr-2"></i>Isi Sekarang',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
                 return false;
             }
+            
+            if (!password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Password Kosong',
+                    text: 'Silakan masukkan password Anda!',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '<i class="fas fa-key mr-2"></i>Isi Sekarang',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+                return false;
+            }
+            
+            if (!role) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Role Belum Dipilih',
+                    text: 'Silakan pilih role login Anda (Administrator atau Staff)!',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '<i class="fas fa-user-check mr-2"></i>Pilih Role',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+                return false;
+            }
+            
+            if (!captcha) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Captcha Kosong',
+                    text: 'Silakan masukkan kode captcha yang terlihat!',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: '<i class="fas fa-shield-alt mr-2"></i>Isi Captcha',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+                return false;
+            }
+            
+            // Validate captcha
+            if (!validateCaptcha()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Captcha Salah!',
+                    html: `
+                        <div class="text-left">
+                            <p class="text-gray-700 mb-3">Kode captcha yang Anda masukkan tidak sesuai.</p>
+                            <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded">
+                                <p class="text-sm text-red-800">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Kode captcha baru telah dibuat. Silakan masukkan kode yang baru.
+                                </p>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonColor: '#dc2626',
+                    confirmButtonText: '<i class="fas fa-redo mr-2"></i>Coba Lagi',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-3'
+                    }
+                });
+                return false;
+            }
+            
+            // Show loading
+            Swal.fire({
+                title: '🔐 Memverifikasi...',
+                html: `
+                    <div class="text-center py-4">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-sky-600 mb-4"></div>
+                        <p class="text-gray-600">Mohon tunggu sebentar</p>
+                    </div>
+                `,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'rounded-2xl'
+                }
+            });
+            
+            // Submit form
+            this.submit();
             return true;
         });
         

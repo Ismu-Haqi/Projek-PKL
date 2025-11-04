@@ -7,7 +7,7 @@
     
     {{-- MAIN HEADER DASHBOARD --}}
     <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl text-white mb-6 shadow-lg card-animate">
-        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! </h1>
+        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! 👋</h1>
         <p class="text-yellow-100">GANDARIA Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
     </div>
 
@@ -55,7 +55,7 @@
                             <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z"/>
                             @endif
                         </svg>
-                        {{ abs($monthlyGrowth) }}% dari bulan 
+                        {{ abs($monthlyGrowth) }}% dari bulan lalu
                     </p>
                 </div>
                 <div class="stat-icon bg-purple-100 p-3 rounded-xl flex-shrink-0 ml-3">
@@ -203,7 +203,7 @@
                 </div>
             </div>
 
-            {{-- ARSIP TERBARU --}}
+            {{-- ✅ ARSIP TERBARU - WITH AUTO SCROLL --}}
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.6s;">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold text-gray-800">Arsip Terbaru</h3>
@@ -211,37 +211,41 @@
                         Lihat Semua →
                     </a>
                 </div>
-                <div class="space-y-3">
-                    @forelse($latestArchives as $archive)
-                    <div class="activity-item p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div class="flex-1">
-                                <a href="{{ route('admin.arsip.show', $archive->id) }}" class="font-semibold text-gray-800 hover:text-blue-600">
-                                    {{ $archive->judul }}
-                                </a>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    {{ $archive->category->name ?? 'Tanpa Kategori' }} • {{ $archive->tanggal_surat->format('d M Y') }}
-                                </p>
-                            </div>
-                            <div class="flex gap-2 flex-wrap">
-                                @if($archive->priority == 'urgent')
-                                <span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Mendesak</span>
-                                @elseif($archive->priority == 'high')
-                                <span class="text-xs font-medium text-orange-700 bg-orange-100 px-3 py-1 rounded-full">Tinggi</span>
-                                @else
-                                <span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Normal</span>
-                                @endif
+                
+                {{-- Auto-scroll Container --}}
+                <div class="auto-scroll-wrapper" style="height: 420px; overflow: hidden; position: relative;">
+                    <div id="archiveScrollContainer" class="space-y-3">
+                        @forelse($latestArchives as $archive)
+                        <div class="archive-scroll-item activity-item p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div class="flex-1">
+                                    <a href="{{ route('admin.arsip.show', $archive->id) }}" class="font-semibold text-gray-800 hover:text-blue-600">
+                                        {{ $archive->judul }}
+                                    </a>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        {{ $archive->category->name ?? 'Tanpa Kategori' }} • {{ $archive->tanggal_surat->format('d M Y') }}
+                                    </p>
+                                </div>
+                                <div class="flex gap-2 flex-wrap">
+                                    @if($archive->priority == 'urgent')
+                                    <span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Mendesak</span>
+                                    @elseif($archive->priority == 'high')
+                                    <span class="text-xs font-medium text-orange-700 bg-orange-100 px-3 py-1 rounded-full">Tinggi</span>
+                                    @else
+                                    <span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Normal</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
+                        @empty
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p>Belum ada arsip</p>
+                        </div>
+                        @endforelse
                     </div>
-                    @empty
-                    <div class="text-center py-8 text-gray-500">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <p>Belum ada arsip</p>
-                    </div>
-                    @endforelse
                 </div>
             </div>
         </div>
@@ -249,28 +253,32 @@
         {{-- RIGHT COLUMN --}}
         <div class="lg:col-span-4 space-y-6">
             
-            {{-- AKTIVITAS TERKINI --}}
+            {{-- ✅ AKTIVITAS TERKINI - WITH AUTO SCROLL --}}
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.5s;">
                 <h3 class="text-xl font-bold text-gray-800 mb-6">Aktivitas Terkini</h3>
-                <div class="space-y-4">
-                    @forelse($recentActivities as $activity)
-                    <div class="activity-item border-l-4 border-{{ $activity['color'] }}-500 pl-4 py-2">
-                        <p class="text-sm font-medium text-gray-800">
-                            {{ $activity['user'] }} 
-                            @if($activity['type'] == 'upload')
-                                mengunggah arsip baru
-                            @else
-                                memberikan disposisi
-                            @endif
-                        </p>
-                        <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1">{{ Str::limit($activity['title'], 50) }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
+                
+                {{-- Auto-scroll Container --}}
+                <div class="auto-scroll-wrapper" style="height: 420px; overflow: hidden; position: relative;">
+                    <div id="activityScrollContainer" class="space-y-4">
+                        @forelse($recentActivities as $activity)
+                        <div class="activity-scroll-item activity-item border-l-4 border-{{ $activity['color'] }}-500 pl-4 py-3">
+                            <p class="text-sm font-medium text-gray-800">
+                                {{ $activity['user'] }} 
+                                @if($activity['type'] == 'upload')
+                                    mengunggah arsip baru
+                                @else
+                                    memberikan disposisi
+                                @endif
+                            </p>
+                            <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1">{{ Str::limit($activity['title'], 50) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
+                        </div>
+                        @empty
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-sm">Belum ada aktivitas</p>
+                        </div>
+                        @endforelse
                     </div>
-                    @empty
-                    <div class="text-center py-8 text-gray-500">
-                        <p class="text-sm">Belum ada aktivitas</p>
-                    </div>
-                    @endforelse
                 </div>
             </div>
 
@@ -415,6 +423,52 @@
         background: rgba(255, 255, 255, 0.1) !important;
         border: none !important;
         font-weight: 600 !important;
+    }
+
+    /* ============================================ */
+    /* ✅ AUTO-SCROLL ANIMATION STYLES */
+    /* ============================================ */
+    .auto-scroll-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auto-scroll-wrapper::before,
+    .auto-scroll-wrapper::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 30px;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .auto-scroll-wrapper::before {
+        top: 0;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    }
+
+    .auto-scroll-wrapper::after {
+        bottom: 0;
+        background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    }
+
+    /* Pause on hover */
+    .auto-scroll-wrapper:hover .scrolling {
+        animation-play-state: paused;
+    }
+
+    /* Item fade effect */
+    .activity-scroll-item,
+    .archive-scroll-item {
+        opacity: 1;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .auto-scroll-wrapper:hover .activity-scroll-item,
+    .auto-scroll-wrapper:hover .archive-scroll-item {
+        opacity: 1;
     }
 </style>
 @endpush
@@ -822,15 +876,218 @@
         initCategoryChart();
 
         // ============================================
-        // AUTO-REFRESH (Optional)
+        // ✅ AUTO-SCROLL ANIMATION FOR ACTIVITIES & ARCHIVES
         // ============================================
-        // Uncomment untuk enable auto-refresh setiap 5 menit
-        // setInterval(() => {
-        //     const currentPeriod = periodFilter.value;
-        //     if (currentPeriod !== 'custom') {
-        //         loadChartData(currentPeriod);
-        //     }
-        // }, 300000);
+        function initAutoScroll(containerId, itemClass) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.warn(`Container ${containerId} not found`);
+                return;
+            }
+
+            const items = container.querySelectorAll(`.${itemClass}`);
+            const itemCount = items.length;
+
+            console.log(`Initializing auto-scroll for ${containerId}: ${itemCount} items`);
+
+            // Only enable auto-scroll if more than 5 items
+            if (itemCount <= 5) {
+                console.log(`Auto-scroll disabled for ${containerId}: not enough items (${itemCount} <= 5)`);
+                return;
+            }
+
+            // Remove existing animation first
+            container.style.animation = 'none';
+            container.classList.remove('scrolling');
+
+            // Duplicate items for seamless loop
+            const itemsHTML = container.innerHTML;
+            container.innerHTML = itemsHTML + itemsHTML;
+
+            // Wait for DOM update
+            setTimeout(() => {
+                // Calculate heights with more accurate method
+                const allItems = container.querySelectorAll(`.${itemClass}`);
+                if (allItems.length === 0) {
+                    console.error('No items found after duplication');
+                    return;
+                }
+
+                const firstItem = allItems[0];
+                const itemHeight = firstItem.offsetHeight;
+                
+                // Detect gap from container class
+                let gap = 16; // default space-y-4 = 16px
+                if (container.classList.contains('space-y-3')) {
+                    gap = 12; // space-y-3 = 12px
+                } else if (container.classList.contains('space-y-4')) {
+                    gap = 16; // space-y-4 = 16px
+                }
+
+                const totalHeight = (itemHeight + gap) * itemCount;
+
+                console.log(`Container: ${containerId}, Item height: ${itemHeight}px, Gap: ${gap}px, Total height: ${totalHeight}px`);
+
+                // Set animation
+                const speedPerItem = 4500; // ms per item (smooth & readable)
+                const duration = speedPerItem * itemCount;
+
+                // Create unique keyframe name
+                const keyframeName = `smoothScroll_${containerId}`;
+
+                // Remove old keyframe if exists
+                const oldStyle = document.getElementById(`style_${containerId}`);
+                if (oldStyle) {
+                    oldStyle.remove();
+                }
+
+                // Create keyframes dynamically with unique ID
+                const styleSheet = document.createElement('style');
+                styleSheet.id = `style_${containerId}`;
+                styleSheet.textContent = `
+                    @keyframes ${keyframeName} {
+                        0% {
+                            transform: translateY(0);
+                        }
+                        100% {
+                            transform: translateY(-${totalHeight}px);
+                        }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+
+                // Apply animation
+                container.style.animation = `${keyframeName} ${duration}ms linear infinite`;
+                container.classList.add('scrolling');
+
+                console.log(`✅ Auto-scroll activated for ${containerId}`);
+            }, 100);
+
+            // Pause on hover
+            const wrapper = container.parentElement;
+            wrapper.addEventListener('mouseenter', () => {
+                container.style.animationPlayState = 'paused';
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                container.style.animationPlayState = 'running';
+            });
+        }
+
+        // Initialize auto-scroll for both sections
+        console.log('🚀 Initializing dashboard auto-scroll...');
+        
+        // Add delay to ensure DOM is fully loaded
+        setTimeout(() => {
+            initAutoScroll('activityScrollContainer', 'activity-scroll-item');
+            initAutoScroll('archiveScrollContainer', 'archive-scroll-item');
+        }, 500);
+
+        // ============================================
+        // ✅ AUTO-REFRESH DATA WITH PROPER REINIT
+        // ============================================
+        
+        // Uncomment untuk enable auto-refresh aktivitas & arsip setiap 30 detik
+        setInterval(() => {
+            fetch('{{ route("admin.dashboard.data") }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update Recent Activities
+                        const activityContainer = document.getElementById('activityScrollContainer');
+                        if (activityContainer && data.recentActivities && data.recentActivities.length > 0) {
+                            // Stop existing animation
+                            activityContainer.style.animation = 'none';
+                            activityContainer.classList.remove('scrolling');
+                            
+                            let activitiesHTML = '';
+                            data.recentActivities.forEach(activity => {
+                                activitiesHTML += `
+                                    <div class="activity-scroll-item activity-item border-l-4 border-${activity.color}-500 pl-4 py-3">
+                                        <p class="text-sm font-medium text-gray-800">
+                                            ${activity.user} ${activity.type === 'upload' ? 'mengunggah arsip baru' : 'memberikan disposisi'}
+                                        </p>
+                                        <p class="text-sm text-${activity.color}-600 font-medium mt-1">${activity.title.substring(0, 50)}${activity.title.length > 50 ? '...' : ''}</p>
+                                        <p class="text-xs text-gray-500 mt-1">${activity.time}</p>
+                                    </div>
+                                `;
+                            });
+                            
+                            activityContainer.innerHTML = activitiesHTML;
+                            
+                            // Reinitialize auto-scroll after a short delay
+                            setTimeout(() => {
+                                initAutoScroll('activityScrollContainer', 'activity-scroll-item');
+                            }, 200);
+                        }
+
+                        // Update Latest Archives
+                        const archiveContainer = document.getElementById('archiveScrollContainer');
+                        if (archiveContainer && data.latestArchives && data.latestArchives.length > 0) {
+                            // Stop existing animation
+                            archiveContainer.style.animation = 'none';
+                            archiveContainer.classList.remove('scrolling');
+                            
+                            let archivesHTML = '';
+                            data.latestArchives.forEach(archive => {
+                                let priorityBadge = '';
+                                if (archive.priority === 'urgent') {
+                                    priorityBadge = '<span class="text-xs font-medium text-red-700 bg-red-100 px-3 py-1 rounded-full">Mendesak</span>';
+                                } else if (archive.priority === 'high') {
+                                    priorityBadge = '<span class="text-xs font-medium text-orange-700 bg-orange-100 px-3 py-1 rounded-full">Tinggi</span>';
+                                } else {
+                                    priorityBadge = '<span class="text-xs font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Normal</span>';
+                                }
+
+                                archivesHTML += `
+                                    <div class="archive-scroll-item activity-item p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-gray-50 transition-all">
+                                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div class="flex-1">
+                                                <a href="/admin/arsip/${archive.id}" class="font-semibold text-gray-800 hover:text-blue-600">
+                                                    ${archive.judul}
+                                                </a>
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    ${archive.category} • ${archive.tanggal_surat}
+                                                </p>
+                                            </div>
+                                            <div class="flex gap-2 flex-wrap">
+                                                ${priorityBadge}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            archiveContainer.innerHTML = archivesHTML;
+                            
+                            // Reinitialize auto-scroll after a short delay
+                            setTimeout(() => {
+                                initAutoScroll('archiveScrollContainer', 'archive-scroll-item');
+                            }, 100);
+                        }
+
+                        // Update Category Chart if data provided
+                        if (data.categoryDistribution) {
+                            updateCategoryChart(data.categoryDistribution);
+                        }
+
+                        console.log('✅ Dashboard data refreshed successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error refreshing dashboard data:', error);
+                });
+        }, 30000); // 30 seconds
+        
+        // Function to update category chart
+        function updateCategoryChart(categoryData) {
+            if (categoryChart && categoryData && categoryData.length > 0) {
+                categoryChart.updateOptions({
+                    series: categoryData.map(item => item.total),
+                    labels: categoryData.map(item => item.name)
+                });
+            }
+        }
     });
 </script>
 @endpush
