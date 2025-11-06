@@ -62,6 +62,35 @@
             box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
         }
         
+        /* ✅ NEW: Role option styling */
+        .role-option {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .role-option::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .role-option[value="admin"]::before {
+            background: #3b82f6;
+        }
+        
+        .role-option[value="staff"]::before {
+            background: #10b981;
+        }
+        
+        .role-option[value="pimpinan"]::before {
+            background: #8b5cf6;
+        }
+        
         /* RESPONSIVE STYLES */
         @media (max-width: 768px) {
             .logo-container {
@@ -109,7 +138,7 @@
                 
                 <!-- System Name -->
                 <h1 class="system-title text-3xl md:text-5xl font-bold text-white mb-2 md:mb-3 tracking-wide">GANDARIA</h1>
-                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Sistem Informasi Kearsipan Dinamis Terintegrasi</p>
+                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Aplikasi arsip dan Aset Dinamis Terintegrasi</p>
                 
                 <!-- Description -->
                 <div class="description-box bg-white/10 backdrop-blur-sm rounded-2xl p-4 md:p-6 mt-3 md:mt-4 text-white mx-4 md:mx-0">
@@ -201,16 +230,27 @@
                         </div>
                     </div>
 
-                    <!-- Role Selection -->
+                    <!-- ✅ UPDATED: Role Selection with Pimpinan -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Login Sebagai</label>
                         <select name="role" 
                                 required
                                 class="input-field w-full px-3 md:px-4 py-2.5 md:py-3 border-2 border-gray-200 rounded-xl focus:border-sky-500 focus:outline-none bg-gray-50 appearance-none cursor-pointer text-sm md:text-base">
                             <option value="">-- Pilih Role --</option>
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
-                            <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="admin" class="role-option" {{ old('role') == 'admin' ? 'selected' : '' }}>
+                                👨‍💼 Administrator
+                            </option>
+                            <option value="staff" class="role-option" {{ old('role') == 'staff' ? 'selected' : '' }}>
+                                👤 Staff
+                            </option>
+                            <option value="pimpinan" class="role-option" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>
+                                👔 Pimpinan
+                            </option>
                         </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Pilih sesuai dengan akses akun Anda
+                        </p>
                     </div>
 
                     <!-- Captcha -->
@@ -238,21 +278,17 @@
                     <button type="submit" 
                             id="submitBtn"
                             class="btn-login w-full py-3 md:py-4 text-white font-semibold rounded-xl text-sm md:text-base">
-                        MASUK
+                        <i class="fas fa-sign-in-alt mr-2"></i> MASUK
                     </button>
                 </form>
 
-                <!-- Balai Sertifikasi Badge -->
-                <div class="badge-container mt-4 md:mt-6 flex justify-center">
-                    <div class="flex items-center gap-2 text-sky-600">
-                        <svg class="badge-icon w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                <!-- Info Badge -->
+                <div class="badge-container mt-4 md:mt-6 text-center">
+                    <div class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-xl border border-blue-200">
+                        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                         </svg>
-                        <div class="badge-text text-left text-xs md:text-sm">
-                            <div class="font-bold">Balai Besar</div>
-                            <div class="font-bold">Sertifikasi</div>
-                            <div class="font-bold">Elektronik</div>
-                        </div>
+                        <span class="text-xs text-gray-700">3 Level Akses: Admin, Staff & Pimpinan</span>
                     </div>
                 </div>
             </div>
@@ -262,7 +298,6 @@
 
     <!-- Footer -->
     <footer class="text-center text-white py-4 md:py-6 mt-6 md:mt-8">
-        <p class="text-xs md:text-sm px-4">Temukan Aplikasi GANDARIA di <strong>Google Play Store</strong> dan <strong>App Store</strong></p>
         <p class="text-xs mt-2">Copyright © 2025 Diskominfo Kabupaten Barito Kuala</p>
     </footer>
 
@@ -326,7 +361,7 @@
         @if(session('password_error'))
             Swal.fire({
                 icon: 'error',
-                title: '🔒 Password Salah',
+                title: '🔐 Password Salah',
                 html: `
                     <div class="text-left">
                         <p class="text-gray-700 mb-3">{{ session('password_error') }}</p>
@@ -510,7 +545,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: '⚠️ Role Belum Dipilih',
-                    text: 'Silakan pilih role login Anda (Administrator atau Staff)!',
+                    text: 'Silakan pilih role login Anda (Administrator, Staff, atau Pimpinan)!',
                     confirmButtonColor: '#f59e0b',
                     confirmButtonText: '<i class="fas fa-user-check mr-2"></i>Pilih Role',
                     customClass: {
@@ -562,13 +597,21 @@
                 return false;
             }
             
-            // Show loading
+            // Show loading with role-specific message
+            const roleNames = {
+                'admin': 'Administrator',
+                'staff': 'Staff',
+                'pimpinan': 'Pimpinan'
+            };
+            const roleName = roleNames[role] || 'User';
+            
             Swal.fire({
                 title: '🔐 Memverifikasi...',
                 html: `
                     <div class="text-center py-4">
                         <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-sky-600 mb-4"></div>
-                        <p class="text-gray-600">Mohon tunggu sebentar</p>
+                        <p class="text-gray-600">Login sebagai <strong>${roleName}</strong></p>
+                        <p class="text-sm text-gray-500 mt-2">Mohon tunggu sebentar</p>
                     </div>
                 `,
                 allowOutsideClick: false,
@@ -605,6 +648,26 @@
             resizeTimer = setTimeout(function() {
                 generateCaptcha();
             }, 250);
+        });
+        
+        // ✅ NEW: Role selection change handler with visual feedback
+        document.querySelector('select[name="role"]').addEventListener('change', function() {
+            const selectedRole = this.value;
+            const roleMessages = {
+                'admin': '👨‍💼 Akses penuh ke semua fitur sistem',
+                'staff': '👤 Akses untuk mengelola arsip & disposisi',
+                'pimpinan': '👔 Akses monitoring & laporan eksekutif'
+            };
+            
+            if (selectedRole && roleMessages[selectedRole]) {
+                // Show brief info about selected role
+                const infoElement = this.nextElementSibling;
+                if (infoElement && infoElement.classList.contains('text-xs')) {
+                    infoElement.innerHTML = `<i class="fas fa-info-circle mr-1"></i>${roleMessages[selectedRole]}`;
+                    infoElement.style.color = selectedRole === 'admin' ? '#3b82f6' : 
+                                             selectedRole === 'staff' ? '#10b981' : '#8b5cf6';
+                }
+            }
         });
         
         window.onload = function() {

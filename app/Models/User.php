@@ -11,6 +11,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'username',
@@ -23,11 +28,21 @@ class User extends Authenticatable
         'is_active',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -35,7 +50,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * ========================================
+     * ROLE CHECKER METHODS
+     * ========================================
+     */
+
+    /**
      * Check if user is admin
+     *
+     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -44,6 +67,8 @@ class User extends Authenticatable
 
     /**
      * Check if user is staff
+     *
+     * @return bool
      */
     public function isStaff(): bool
     {
@@ -51,7 +76,19 @@ class User extends Authenticatable
     }
 
     /**
+     * ✅ NEW: Check if user is pimpinan
+     *
+     * @return bool
+     */
+    public function isPimpinan(): bool
+    {
+        return $this->role === 'pimpinan';
+    }
+
+    /**
      * Check if user is active
+     *
+     * @return bool
      */
     public function isActive(): bool
     {
@@ -59,7 +96,15 @@ class User extends Authenticatable
     }
 
     /**
+     * ========================================
+     * NOTIFICATION RELATIONS
+     * ========================================
+     */
+
+    /**
      * Relasi ke Notifications
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function notifications()
     {
@@ -68,6 +113,8 @@ class User extends Authenticatable
 
     /**
      * Relasi ke unread notifications
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function unreadNotifications()
     {
@@ -76,6 +123,8 @@ class User extends Authenticatable
 
     /**
      * Get unread notifications count
+     *
+     * @return int
      */
     public function getUnreadNotificationsCountAttribute()
     {
@@ -84,13 +133,63 @@ class User extends Authenticatable
 
     /**
      * ========================================
-     * RELATIONS UNTUK USER CONTROLLER
+     * ARCHIVE & DOCUMENT RELATIONS
+     * ========================================
+     */
+
+    /**
+     * Archives created by this user
+     * Relasi ke arsip yang dibuat oleh user ini
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function archives()
+    {
+        if (!\Schema::hasTable('archives')) {
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
+        }
+        return $this->hasMany(Archive::class, 'user_id');
+    }
+
+    /**
+     * Incoming letters handled by this user
+     * Relasi ke surat masuk yang ditangani oleh user ini
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function incomingLetters()
+    {
+        if (!\Schema::hasTable('incoming_letters')) {
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
+        }
+        return $this->hasMany(IncomingLetter::class, 'received_by');
+    }
+
+    /**
+     * Outgoing letters created by this user
+     * Relasi ke surat keluar yang dibuat oleh user ini
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function outgoingLetters()
+    {
+        if (!\Schema::hasTable('outgoing_letters')) {
+            return $this->hasMany(self::class)->whereRaw('1 = 0');
+        }
+        return $this->hasMany(OutgoingLetter::class, 'created_by');
+    }
+
+    /**
+     * ========================================
+     * DISPOSITION RELATIONS
      * ========================================
      */
 
     /**
      * Dispositions sent by this user (admin only)
      * Relasi ke disposisi yang dikirim oleh user ini
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function sentDispositions()
     {
@@ -103,6 +202,8 @@ class User extends Authenticatable
     /**
      * Dispositions received by this user (staff only)
      * Relasi ke disposisi yang diterima oleh user ini
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function receivedDispositions()
     {
@@ -113,40 +214,6 @@ class User extends Authenticatable
     }
 
     /**
-     * ✅ FIX: Archives created by this user
-     * Kolom yang benar adalah 'user_id', bukan 'created_by'
-     */
-    public function archives()
-    {
-        if (!\Schema::hasTable('archives')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0');
-        }
-        return $this->hasMany(Archive::class, 'user_id'); // ✅ FIXED: user_id
-    }
-
-    /**
-     * Incoming letters handled by this user
-     */
-    public function incomingLetters()
-    {
-        if (!\Schema::hasTable('incoming_letters')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0');
-        }
-        return $this->hasMany(IncomingLetter::class, 'received_by');
-    }
-
-    /**
-     * Outgoing letters created by this user
-     */
-    public function outgoingLetters()
-    {
-        if (!\Schema::hasTable('outgoing_letters')) {
-            return $this->hasMany(self::class)->whereRaw('1 = 0');
-        }
-        return $this->hasMany(OutgoingLetter::class, 'created_by');
-    }
-
-    /**
      * ========================================
      * QUERY SCOPES
      * ========================================
@@ -154,6 +221,9 @@ class User extends Authenticatable
 
     /**
      * Scope untuk filter admin
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAdmin($query)
     {
@@ -162,6 +232,9 @@ class User extends Authenticatable
 
     /**
      * Scope untuk filter staff
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeStaff($query)
     {
@@ -169,7 +242,21 @@ class User extends Authenticatable
     }
 
     /**
+     * ✅ NEW: Scope untuk filter pimpinan
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePimpinan($query)
+    {
+        return $query->where('role', 'pimpinan');
+    }
+
+    /**
      * Scope untuk filter active users
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query)
     {
@@ -178,9 +265,75 @@ class User extends Authenticatable
 
     /**
      * Scope untuk filter inactive users
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeInactive($query)
     {
         return $query->where('is_active', false);
+    }
+
+    /**
+     * ========================================
+     * ACCESSORS & MUTATORS
+     * ========================================
+     */
+
+    /**
+     * Get the user's role badge color
+     *
+     * @return string
+     */
+    public function getRoleBadgeColorAttribute()
+    {
+        return match($this->role) {
+            'admin' => 'blue',
+            'staff' => 'green',
+            'pimpinan' => 'purple',
+            default => 'gray'
+        };
+    }
+
+    /**
+     * Get the user's role display name
+     *
+     * @return string
+     */
+    public function getRoleDisplayNameAttribute()
+    {
+        return match($this->role) {
+            'admin' => 'Administrator',
+            'staff' => 'Staff',
+            'pimpinan' => 'Pimpinan',
+            default => ucfirst($this->role)
+        };
+    }
+
+    /**
+     * Get the user's initials for avatar
+     *
+     * @return string
+     */
+    public function getInitialsAttribute()
+    {
+        $words = explode(' ', $this->name);
+        if (count($words) >= 2) {
+            return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+        }
+        return strtoupper(substr($this->name, 0, 2));
+    }
+
+    /**
+     * Get the user's avatar URL or default
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        return null;
     }
 }

@@ -14,6 +14,28 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = [
+            // ✅ Pimpinan Users
+            [
+                'name' => 'Kepala Dinas',
+                'username' => 'kepala',
+                'email' => 'kepala@diskominfo.batola.go.id',
+                'password' => Hash::make('password'),
+                'role' => 'pimpinan',
+                'unit' => 'Kepala Dinas',
+                'phone' => '081234567800',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Sekretaris Dinas',
+                'username' => 'sekretaris',
+                'email' => 'sekretaris@diskominfo.batola.go.id',
+                'password' => Hash::make('password'),
+                'role' => 'pimpinan',
+                'unit' => 'Sekretariat',
+                'phone' => '081234567801',
+                'is_active' => true,
+            ],
+            
             // Admin Users
             [
                 'name' => 'Administrator',
@@ -100,10 +122,21 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::create($userData);
+       User::updateOrCreate(
+    [
+        'username' => $userData['username'],
+        'email' => $userData['email']
+    ], 
+    $userData
+);
         }
 
         $this->command->info('✅ ' . count($users) . ' user berhasil dibuat!');
         $this->command->info('📧 Default password untuk semua user: password');
+        $this->command->info('');
+        $this->command->info('👥 Breakdown:');
+        $this->command->info('   - Pimpinan: 2 user (kepala, sekretaris)');
+        $this->command->info('   - Admin: 2 user');
+        $this->command->info('   - Staff: 6 user');
     }
 }

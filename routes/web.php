@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Pimpinan\DashboardController as PimpinanDashboardController; 
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\AssetController; 
 use App\Http\Controllers\UserController; 
@@ -14,12 +15,12 @@ use App\Http\Controllers\DispositionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 
-// ✅ Halaman Login
+// Halaman Login
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('login', [LoginController::class, 'login'])->middleware('guest');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ✅ Redirect Root URL
+// ✅ UPDATED: Redirect Root URL - Support Pimpinan
 Route::get('/', function () {
     if (auth()->check()) {
         $role = auth()->user()->role;
@@ -28,6 +29,8 @@ Route::get('/', function () {
             return redirect()->route('admin.dashboard');
         } elseif ($role === 'staff') {
             return redirect()->route('staff.dashboard');
+        } elseif ($role === 'pimpinan') {
+            return redirect()->route('pimpinan.dashboard');
         }
     }
     
@@ -35,7 +38,7 @@ Route::get('/', function () {
 });
 
 // ==================================================
-// ✅ ADMIN ROUTES
+// ADMIN ROUTES
 // ==================================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
@@ -55,21 +58,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::get('/create', [ArchiveController::class, 'create'])->name('create');
         Route::post('/store', [ArchiveController::class, 'store'])->name('store');
-        
-        // Route spesifik HARUS SEBELUM route dynamic {id}
         Route::get('/favorit/list', [ArchiveController::class, 'favorit'])->name('favorit');
-        
-        // Route dengan {id} parameter
         Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ArchiveController::class, 'update'])->name('update');
         Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy');
-        
-        // Preview & Download
         Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
         Route::get('/{id}/download', [ArchiveController::class, 'download'])->name('download');
-        
-        // Favorite
         Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
     });
     
@@ -129,18 +124,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/user', [ReportController::class, 'user'])->name('user');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
-        
-        // Print & Export
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
-        
-        // DEPRECATED - Backward compatibility
-        Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export.pdf');
-        Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
     });
     
-    // ✅ PENGATURAN (SETTINGS)
+    // Pengaturan
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
@@ -162,23 +151,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // ==================================================
-// ✅ STAFF ROUTES (FIXED)
+// STAFF ROUTES
 // ==================================================
-// Public QR Scan Route (sebelum Route::middleware)
 Route::get('/aset/view/{id}', [AssetController::class, 'publicShow'])->name('aset.public.show');
 
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
-    
-    // Dashboard
     Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
-    
-    // Profil
     Route::get('profil', [ProfileController::class, 'index'])->name('profil');
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
     
-    // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
@@ -192,11 +175,76 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
     });
     
-    // Disposisi
     Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/', [DispositionController::class, 'index'])->name('index');
         Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
         Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
+    });
+    
+    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read.post');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+    });
+    
+    Route::prefix('aset')->name('aset.')->group(function () {
+        Route::get('/', [AssetController::class, 'index'])->name('index');
+        Route::get('/{id}', [AssetController::class, 'show'])->name('show');
+        Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
+    });
+    
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
+        Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
+        Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
+        Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
+        Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+    });
+    
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
+        Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
+    });
+});
+
+// ==================================================
+// ✅ PIMPINAN ROUTES (READ-ONLY MONITORING)
+// ==================================================
+Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
+    
+    // Dashboard
+    Route::get('dashboard', [PimpinanDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/data', [PimpinanDashboardController::class, 'getData'])->name('dashboard.data');
+    Route::get('dashboard/chart-data', [PimpinanDashboardController::class, 'getChartData'])->name('dashboard.chart-data');
+    
+    // Profil
+    Route::get('profil', [ProfileController::class, 'index'])->name('profil');
+    Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
+    Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+    Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
+    
+    // Arsip Digital (Read-Only + Favorit)
+    Route::prefix('arsip')->name('arsip.')->group(function () {
+        Route::get('/', [ArchiveController::class, 'index'])->name('index');
+        Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
+        Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
+        Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
+        Route::get('/{id}/download', [ArchiveController::class, 'download'])->name('download');
+        Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
+    });
+    
+    // Disposisi (Read-Only)
+    Route::prefix('disposisi')->name('disposisi.')->group(function () {
+        Route::get('/', [DispositionController::class, 'index'])->name('index');
+        Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
     });
     
     // Notifikasi
@@ -210,28 +258,33 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
     });
     
-    // ✅ FIXED: Manajemen Aset (Read Only) - Moved outside nested group
+    // Manajemen Aset (Read-Only)
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
-    // Laporan (Read Only)
+    // ✅ TAMBAHAN: Manajemen User (Read-Only untuk Pimpinan)
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/{id}', [UserController::class, 'show'])->name('show');
+    });
+    
+    // Laporan (Full Access)
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/user', [ReportController::class, 'user'])->name('user');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
-        
-        // Print & Export
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
     
-// Pengaturan (SETTINGS) - Staff Version
+    // Pengaturan (Limited)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');

@@ -12,6 +12,9 @@ class UserController extends Controller
 {
     /**
      * Display a listing of users
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
      */
     public function index(Request $request)
     {
@@ -40,15 +43,16 @@ class UserController extends Controller
 
         $users = $query->paginate(15);
 
-        // Statistics
+        // ✅ UPDATED: Statistics with pimpinan
         $stats = [
             'total' => User::count(),
             'admin' => User::where('role', 'admin')->count(),
             'staff' => User::where('role', 'staff')->count(),
+            'pimpinan' => User::where('role', 'pimpinan')->count(),
             'active' => User::where('is_active', true)->count(),
         ];
 
-        // ✅ TAMBAHAN: Ambil semua unit unik untuk dropdown di modal
+        // Ambil semua unit unik untuk dropdown di modal
         $units = User::select('unit')
             ->distinct()
             ->whereNotNull('unit')
@@ -61,6 +65,8 @@ class UserController extends Controller
 
     /**
      * Show the form for creating a new user
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
@@ -68,7 +74,6 @@ class UserController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // ✅ TAMBAHAN: Ambil semua unit untuk dropdown
         $units = User::select('unit')
             ->distinct()
             ->whereNotNull('unit')
@@ -81,6 +86,9 @@ class UserController extends Controller
 
     /**
      * Store a newly created user
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -88,12 +96,13 @@ class UserController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        // ✅ UPDATED: Validation include 'pimpinan'
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|email|unique:users',
             'password' => ['required', 'confirmed', Password::min(8)],
-            'role' => 'required|in:admin,staff',
+            'role' => 'required|in:admin,staff,pimpinan',
             'unit' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -103,13 +112,15 @@ class UserController extends Controller
 
         User::create($validated);
 
-        // ✅ PESAN SUKSES TAMBAH USER
         return redirect()->route('admin.user.index')
             ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan ke sistem Diskominfo Batola!');
     }
 
     /**
      * Display the specified user
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
      */
     public function show($id)
     {
@@ -174,6 +185,9 @@ class UserController extends Controller
 
     /**
      * Show the form for editing the specified user
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
      */
     public function edit($id)
     {
@@ -183,7 +197,6 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
-        // ✅ TAMBAHAN: Ambil semua unit untuk dropdown
         $units = User::select('unit')
             ->distinct()
             ->whereNotNull('unit')
@@ -196,6 +209,10 @@ class UserController extends Controller
 
     /**
      * Update the specified user
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
@@ -205,11 +222,12 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
+        // ✅ UPDATED: Validation include 'pimpinan'
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
-            'role' => 'required|in:admin,staff',
+            'role' => 'required|in:admin,staff,pimpinan',
             'unit' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
@@ -217,13 +235,15 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        // ✅ PESAN SUKSES UPDATE USER
         return redirect()->route('admin.user.index')
             ->with('success', 'Data user "' . $user->name . '" berhasil diperbarui!');
     }
 
     /**
      * Remove the specified user
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
@@ -241,13 +261,16 @@ class UserController extends Controller
         $userName = $user->name;
         $user->delete();
 
-        // ✅ PESAN SUKSES DELETE USER
         return redirect()->route('admin.user.index')
             ->with('success', 'User "' . $userName . '" berhasil dihapus dari sistem!');
     }
 
     /**
      * Reset user password
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function resetPassword(Request $request, $id)
     {
@@ -264,12 +287,14 @@ class UserController extends Controller
             'password' => Hash::make($validated['password'])
         ]);
 
-        // ✅ PESAN SUKSES RESET PASSWORD
         return back()->with('success', 'Password user "' . $user->name . '" berhasil direset!');
     }
 
     /**
      * Toggle user active status
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function toggleStatus($id)
     {
@@ -288,9 +313,105 @@ class UserController extends Controller
             'is_active' => !$user->is_active
         ]);
 
-        // ✅ PESAN SUKSES TOGGLE STATUS
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return back()->with('success', "User \"{$user->name}\" berhasil {$status} dalam sistem!");
+    }
+
+    /**
+     * ✅ NEW: Get users by role (API endpoint for dropdowns)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUsersByRole(Request $request)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $role = $request->get('role');
+        
+        $users = User::where('is_active', true);
+        
+        if ($role && in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            $users->where('role', $role);
+        }
+        
+        $users = $users->select('id', 'name', 'username', 'unit', 'role')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($users);
+    }
+
+    /**
+     * ✅ NEW: Get user statistics (API endpoint)
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUserStats($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $stats = [
+            'archives' => $user->archives()->count(),
+            'dispositions_sent' => $user->sentDispositions()->count(),
+            'dispositions_received' => $user->receivedDispositions()->count(),
+            'incoming_letters' => $user->incomingLetters()->count(),
+            'outgoing_letters' => $user->outgoingLetters()->count(),
+        ];
+
+        return response()->json($stats);
+    }
+
+    /**
+     * ✅ NEW: Bulk update users (activate/deactivate multiple)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function bulkUpdate(Request $request)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id',
+            'action' => 'required|in:activate,deactivate,delete'
+        ]);
+
+        $userIds = $validated['user_ids'];
+        
+        // Prevent affecting own account
+        $userIds = array_diff($userIds, [Auth::id()]);
+
+        $count = 0;
+
+        switch ($validated['action']) {
+            case 'activate':
+                $count = User::whereIn('id', $userIds)->update(['is_active' => true]);
+                $message = "$count user berhasil diaktifkan!";
+                break;
+                
+            case 'deactivate':
+                $count = User::whereIn('id', $userIds)->update(['is_active' => false]);
+                $message = "$count user berhasil dinonaktifkan!";
+                break;
+                
+            case 'delete':
+                $count = User::whereIn('id', $userIds)->delete();
+                $message = "$count user berhasil dihapus!";
+                break;
+        }
+
+        return back()->with('success', $message);
     }
 }

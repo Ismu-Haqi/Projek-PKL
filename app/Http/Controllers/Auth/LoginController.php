@@ -23,10 +23,20 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        // Jika sudah login, redirect ke dashboard
+        // ✅ UPDATED: Jika sudah login, redirect ke dashboard sesuai role (termasuk pimpinan)
         if (Auth::check()) {
             $role = Auth::user()->role;
-            return redirect()->route($role === 'admin' ? 'admin.dashboard' : 'staff.dashboard');
+            
+            if ($role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($role === 'staff') {
+                return redirect()->route('staff.dashboard');
+            } elseif ($role === 'pimpinan') {
+                return redirect()->route('pimpinan.dashboard');
+            }
+            
+            // Fallback jika role tidak dikenali
+            Auth::logout();
         }
         
         return view('auth.login');
@@ -37,17 +47,18 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        // Validasi input termasuk captcha
+        // ✅ UPDATED: Validasi input termasuk captcha dan role pimpinan
         $request->validate([
             'email' => 'required|string',
             'password' => 'required|string',
-            'role' => 'required|in:admin,staff',
+            'role' => 'required|in:admin,staff,pimpinan',
             'captcha' => 'required|string',
             'captcha_code' => 'required|string',
         ], [
-            'email.required' => 'Email harus diisi',
+            'email.required' => 'Email/Username harus diisi',
             'password.required' => 'Password harus diisi',
             'role.required' => 'Pilih role terlebih dahulu',
+            'role.in' => 'Role yang dipilih tidak valid',
             'captcha.required' => 'Captcha harus diisi',
             'captcha_code.required' => 'Kode captcha tidak valid',
         ]);
@@ -70,7 +81,7 @@ class LoginController extends Controller
         // ✅ Cek apakah user ada
         if (!$user) {
             return back()
-                ->with('login_error', 'Email/username tidak ditemukan atau role tidak sesuai. Pastikan Anda memilih role yang benar.')
+                ->with('login_error', 'Email/username tidak ditemukan atau role tidak sesuai. Pastikan Anda memilih role yang benar (Administrator, Staff, atau Pimpinan).')
                 ->withInput($request->only('email', 'role'));
         }
 
@@ -109,23 +120,34 @@ class LoginController extends Controller
                 $greeting = 'Selamat Malam';
             }
             
+            // ✅ Role-specific welcome message
+            $roleLabel = match($user->role) {
+                'admin' => 'Administrator',
+                'staff' => 'Staff',
+                'pimpinan' => 'Pimpinan',
+                default => 'User'
+            };
+            
             $welcomeMessage = $greeting . ', ' . $user->name . '! Selamat datang di GANDARIA - Sistem Arsip Digital Diskominfo Batola.';
             
-            // ✅ Redirect sesuai role dengan intended
+            // ✅ UPDATED: Redirect sesuai role dengan intended (termasuk pimpinan)
             if ($user->role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'))
                     ->with('success', $welcomeMessage);
             } elseif ($user->role === 'staff') {
                 return redirect()->intended(route('staff.dashboard'))
                     ->with('success', $welcomeMessage);
+            } elseif ($user->role === 'pimpinan') {
+                return redirect()->intended(route('pimpinan.dashboard'))
+                    ->with('success', $welcomeMessage);
             }
             
-            // Jika role tidak sesuai
+            // Jika role tidak sesuai (fallback - seharusnya tidak terjadi)
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
             
-            return back()->with('error', 'Role tidak valid untuk akses sistem.');
+            return back()->with('error', 'Role tidak valid untuk akses sistem. Hubungi administrator.');
         }
 
         // ✅ LOGIN GAGAL - PASSWORD SALAH
@@ -140,6 +162,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $userName = Auth::user()->name ?? 'User';
+        $userRole = Auth::user()->role ?? 'user';
         $currentHour = now()->format('H');
         
         // Ucapan sesuai waktu
@@ -154,6 +177,14 @@ class LoginController extends Controller
             $farewell = 'Selamat beristirahat';
         }
         
+        // ✅ Role-specific goodbye message (optional)
+        $roleMessage = match($userRole) {
+            'admin' => 'Terima kasih telah mengelola sistem GANDARIA.',
+            'staff' => 'Terima kasih atas kontribusi Anda hari ini.',
+            'pimpinan' => 'Terima kasih telah menggunakan Dashboard Pimpinan.',
+            default => 'Terima kasih telah menggunakan GANDARIA.'
+        };
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -161,5 +192,39 @@ class LoginController extends Controller
         // ✅ PESAN LOGOUT DENGAN UCAPAN
         return redirect()->route('login')
             ->with('success', 'Terima kasih, ' . $userName . '! Anda telah berhasil keluar dari sistem. ' . $farewell . '!');
+    }
+
+    /**
+     * ✅ NEW: Get redirect route based on role
+     * Helper method untuk mendapatkan route dashboard berdasarkan role
+     *
+     * @param string $role
+     * @return string
+     */
+    protected function redirectTo($role)
+    {
+        return match($role) {
+            'admin' => route('admin.dashboard'),
+            'staff' => route('staff.dashboard'),
+            'pimpinan' => route('pimpinan.dashboard'),
+            default => route('login')
+        };
+    }
+
+    /**
+     * ✅ NEW: Get role display name
+     * Helper method untuk mendapatkan nama role yang friendly
+     *
+     * @param string $role
+     * @return string
+     */
+    protected function getRoleDisplayName($role)
+    {
+        return match($role) {
+            'admin' => 'Administrator',
+            'staff' => 'Staff',
+            'pimpinan' => 'Pimpinan',
+            default => 'User'
+        };
     }
 }
