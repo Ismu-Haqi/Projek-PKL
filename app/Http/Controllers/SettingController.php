@@ -13,11 +13,18 @@ class SettingController extends Controller
 {
     /**
      * Display settings page
+     * ✅ UPDATED: Support all roles (admin, staff, pimpinan)
      */
     public function index()
     {
         $role = Auth::user()->role;
-        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+        
+        // ✅ All authenticated users can access settings
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
         
         // Get all settings as array
         $settings = [];
@@ -31,119 +38,116 @@ class SettingController extends Controller
     }
 
     /**
-     * Update user profile
+     * Update user profile (with avatar support)
+     * ✅ All roles can update their profile
      */
-/**
- * Update user profile (with avatar support)
- */
-/**
- * Update user profile (with avatar support)
- */
-public function updateProfil(Request $request)
-{
-    $user = Auth::user();
-    
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
-        'current_password' => 'nullable|required_with:password',
-        'password' => 'nullable|min:8|confirmed',
-    ], [
-        'name.required' => 'Nama harus diisi',
-        'email.required' => 'Email harus diisi',
-        'email.email' => 'Format email tidak valid',
-        'email.unique' => 'Email sudah digunakan',
-        'avatar.image' => 'File harus berupa gambar',
-        'avatar.mimes' => 'Format gambar harus: jpeg, jpg, png, atau gif',
-        'avatar.max' => 'Ukuran gambar maksimal 2MB',
-        'current_password.required_with' => 'Password saat ini harus diisi',
-        'password.min' => 'Password minimal 8 karakter',
-        'password.confirmed' => 'Konfirmasi password tidak cocok',
-    ]);
-
-    try {
-        // Update name and email
-        $user->name = $request->name;
-        $user->email = $request->email;
-
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            
-            // Store new avatar in avatars folder
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $avatarPath;
-        }
-
-        // Update password if provided
-        if ($request->filled('password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()
-                    ->withErrors(['current_password' => 'Password saat ini salah'])
-                    ->withInput();
-            }
-            $user->password = Hash::make($request->password);
-        }
-
-        $user->save();
-
-        return back()->with('success', 'Profil berhasil diperbarui!');
-        
-    } catch (\Exception $e) {
-        return back()
-            ->with('error', 'Gagal memperbarui profil: ' . $e->getMessage())
-            ->withInput();
-    }
-}
-
-/**
- * Remove user avatar
- */
-public function removeAvatar()
-{
-    try {
+    public function updateProfil(Request $request)
+    {
         $user = Auth::user();
         
-        if ($user->avatar) {
-            // Delete avatar file from storage
-            if (Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'current_password' => 'nullable|required_with:password',
+            'password' => 'nullable|min:8|confirmed',
+        ], [
+            'name.required' => 'Nama harus diisi',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan',
+            'avatar.image' => 'File harus berupa gambar',
+            'avatar.mimes' => 'Format gambar harus: jpeg, jpg, png, atau gif',
+            'avatar.max' => 'Ukuran gambar maksimal 2MB',
+            'current_password.required_with' => 'Password saat ini harus diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+        ]);
+
+        try {
+            // Update name and email
+            $user->name = $request->name;
+            $user->email = $request->email;
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                // Delete old avatar if exists
+                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                
+                // Store new avatar in avatars folder
+                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+                $user->avatar = $avatarPath;
             }
-            
-            // Update user record
-            $user->avatar = null;
+
+            // Update password if provided
+            if ($request->filled('password')) {
+                if (!Hash::check($request->current_password, $user->password)) {
+                    return back()
+                        ->withErrors(['current_password' => 'Password saat ini salah'])
+                        ->withInput();
+                }
+                $user->password = Hash::make($request->password);
+            }
+
             $user->save();
+
+            return back()->with('success', 'Profil berhasil diperbarui!');
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Foto profil berhasil dihapus'
-            ]);
+        } catch (\Exception $e) {
+            return back()
+                ->with('error', 'Gagal memperbarui profil: ' . $e->getMessage())
+                ->withInput();
         }
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Tidak ada foto untuk dihapus'
-        ], 400);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal menghapus foto: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     /**
-     * Update general settings (Admin only)
+     * Remove user avatar
+     * ✅ All roles can remove their avatar
+     */
+    public function removeAvatar()
+    {
+        try {
+            $user = Auth::user();
+            
+            if ($user->avatar) {
+                // Delete avatar file from storage
+                if (Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                
+                // Update user record
+                $user->avatar = null;
+                $user->save();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Foto profil berhasil dihapus'
+                ]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada foto untuk dihapus'
+            ], 400);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus foto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update general settings
+     * ✅ ADMIN ONLY
      */
     public function update(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
-            return back()->with('error', 'Unauthorized access');
+            return back()->with('error', 'Unauthorized access - Admin only');
         }
 
         try {
@@ -184,12 +188,70 @@ public function removeAvatar()
     }
 
     /**
-     * Clear cache (Admin only)
+     * Update appearance settings
+     * ✅ UPDATED: All roles can update appearance
+     */
+    public function updateAppearance(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            $appearanceSettings = [
+                'theme',
+                'accent_color',
+                'sidebar_style',
+                'navbar_position',
+                'font_size',
+                'animation_speed',
+                'text_size',
+            ];
+
+            // Update regular settings
+            foreach ($appearanceSettings as $key) {
+                if ($request->has($key)) {
+                    Setting::updateOrCreate(
+                        ['key' => $key],
+                        ['value' => $request->input($key)]
+                    );
+                }
+            }
+
+            // Handle checkboxes (boolean settings)
+            $checkboxSettings = [
+                'show_breadcrumbs',
+                'show_notifications',
+                'compact_mode',
+                'smooth_scrolling',
+            ];
+
+            foreach ($checkboxSettings as $key) {
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $request->has($key) ? '1' : '0']
+                );
+            }
+
+            // Clear appearance cache
+            cache()->forget('appearance_settings');
+            
+            // Clear other caches
+            \Artisan::call('view:clear');
+            \Artisan::call('cache:clear');
+
+            return back()->with('success', 'Pengaturan tampilan berhasil diperbarui! Refresh halaman (Ctrl+Shift+R) untuk melihat perubahan.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memperbarui pengaturan tampilan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clear cache
+     * ✅ ADMIN ONLY
      */
     public function clearCache()
     {
         if (Auth::user()->role !== 'admin') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized - Admin only'], 403);
         }
 
         try {
@@ -211,12 +273,13 @@ public function removeAvatar()
     }
 
     /**
-     * Create database backup (Admin only)
+     * Create database backup
+     * ✅ ADMIN ONLY
      */
     public function backup()
     {
         if (Auth::user()->role !== 'admin') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized - Admin only'], 403);
         }
 
         try {
@@ -289,12 +352,13 @@ public function removeAvatar()
     }
 
     /**
-     * Get list of backups (Admin only)
+     * Get list of backups
+     * ✅ ADMIN ONLY
      */
     public function backupList()
     {
         if (Auth::user()->role !== 'admin') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized - Admin only'], 403);
         }
 
         try {
@@ -332,70 +396,14 @@ public function removeAvatar()
         }
     }
 
-/**
- * Update appearance settings (Admin only)
- */
-public function updateAppearance(Request $request)
-{
-    if (Auth::user()->role !== 'admin') {
-        return back()->with('error', 'Unauthorized access');
-    }
-
-    try {
-        $appearanceSettings = [
-            'theme',
-            'accent_color',
-            'sidebar_style',
-            'navbar_position',
-            'font_size',
-            'animation_speed',
-            'text_size', // NEW: Text size setting
-        ];
-
-        // Update regular settings
-        foreach ($appearanceSettings as $key) {
-            if ($request->has($key)) {
-                Setting::updateOrCreate(
-                    ['key' => $key],
-                    ['value' => $request->input($key)]
-                );
-            }
-        }
-
-        // Handle checkboxes (boolean settings)
-        $checkboxSettings = [
-            'show_breadcrumbs',
-            'show_notifications',
-            'compact_mode',
-            'smooth_scrolling',
-        ];
-
-        foreach ($checkboxSettings as $key) {
-            Setting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $request->has($key) ? '1' : '0']
-            );
-        }
-
-        // Clear appearance cache
-        cache()->forget('appearance_settings');
-        
-        // Clear other caches
-        \Artisan::call('view:clear');
-        \Artisan::call('cache:clear');
-
-        return back()->with('success', 'Pengaturan tampilan berhasil diperbarui! Refresh halaman (Ctrl+Shift+R) untuk melihat perubahan.');
-    } catch (\Exception $e) {
-        return back()->with('error', 'Gagal memperbarui pengaturan tampilan: ' . $e->getMessage());
-    }
-}
     /**
-     * Download backup file (Admin only)
+     * Download backup file
+     * ✅ ADMIN ONLY
      */
     public function downloadBackup($filename)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $path = storage_path('app/backups/' . $filename);

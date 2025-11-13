@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Tambah User Baru')
 
@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center mb-4">
-            <a href="{{ route('admin.user.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <a href="{{ route('pimpinan.user.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -30,7 +30,7 @@
             </h2>
         </div>
 
-        <form action="{{ route('admin.user.store') }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('pimpinan.user.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
 
             <!-- Personal Information Section -->
@@ -110,7 +110,7 @@
                         <select name="role" id="role" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('role') border-red-500 @enderror">
                             <option value="">-- Pilih Role --</option>
-                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
+                            <option value="pimpinan" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>Administrator</option>
                             <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
                         </select>
                         @error('role')
@@ -218,7 +218,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.user.index') }}" 
+                <a href="{{ route('pimpinan.user.index') }}" 
                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Batal
                 </a>

@@ -1,129 +1,172 @@
 @extends('pimpinan.layouts.app')
 
-@section('title', 'Pengaturan Sistem')
+@section('title', 'Pengaturan')
 
 @section('content')
 {{-- Header --}}
 <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Pengaturan Sistem</h1>
-    <p class="text-gray-600 mt-1">Kelola pengaturan aplikasi dan profil Anda</p>
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Pengaturan</h1>
+            <p class="text-gray-600 mt-1">Kelola profil dan preferensi akun Anda</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                <i class="fas fa-user-tie mr-1"></i>
+                Pimpinan
+            </span>
+        </div>
+    </div>
 </div>
 
-{{-- Tabs Navigation --}}
-<div class="bg-white rounded-lg shadow-sm">
-    <div class="border-b border-gray-200">
-        <nav class="flex -mb-px" aria-label="Tabs">
-            <button onclick="switchTab('profil')" 
-                    id="tab-profil" 
-                    class="tab-button active border-b-2 border-blue-500 py-4 px-6 text-center font-medium text-blue-600 focus:outline-none">
-                <i class="fas fa-user mr-2"></i>
-                Profil
-            </button>
-            
-            @if(Auth::user()->role === 'pimpinan')
-            <button onclick="switchTab('sistem')" 
-                    id="tab-sistem" 
-                    class="tab-button border-b-2 border-transparent py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
-                <i class="fas fa-cog mr-2"></i>
-                Sistem
-            </button>
-            
-            <button onclick="switchTab('tampilan')" 
-                    id="tab-tampilan" 
-                    class="tab-button border-b-2 border-transparent py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
-                <i class="fas fa-palette mr-2"></i>
-                Tampilan
-            </button>
-            
-            <button onclick="switchTab('backup')" 
-                    id="tab-backup" 
-                    class="tab-button border-b-2 border-transparent py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
-                <i class="fas fa-database mr-2"></i>
-                Backup
-            </button>
-            @endif
-        </nav>
+{{-- Main Content --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    {{-- Sidebar Profile Card --}}
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-6">
+            {{-- Profile Header --}}
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-center">
+                <div class="relative inline-block">
+                    @if(Auth::user()->avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                             alt="Avatar" 
+                             class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
+                             id="sidebar-avatar">
+                    @else
+                        <div class="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-white flex items-center justify-center"
+                             id="sidebar-avatar-placeholder">
+                            <i class="fas fa-user text-4xl text-gray-400"></i>
+                        </div>
+                    @endif
+                    <div class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                </div>
+                <h3 class="mt-4 text-xl font-bold text-white">{{ Auth::user()->name }}</h3>
+                <p class="text-purple-100 text-sm">{{ Auth::user()->email }}</p>
+                <span class="inline-block mt-2 px-3 py-1 bg-purple-400 bg-opacity-30 text-white rounded-full text-xs font-medium">
+                    Pimpinan
+                </span>
+            </div>
+
+            {{-- Quick Info --}}
+            <div class="p-6 space-y-4">
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-calendar-alt text-gray-400 w-5"></i>
+                    <span class="text-gray-600 ml-3">Bergabung: </span>
+                    <span class="text-gray-800 ml-auto font-medium">
+                        {{ Auth::user()->created_at->format('d M Y') }}
+                    </span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-clock text-gray-400 w-5"></i>
+                    <span class="text-gray-600 ml-3">Terakhir login: </span>
+                    <span class="text-gray-800 ml-auto font-medium">
+                        {{ Auth::user()->updated_at->diffForHumans() }}
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    {{-- Tab Contents --}}
-    <div class="p-6">
-        {{-- Tab Profil --}}
-        <div id="content-profil" class="tab-content">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Profil Pengguna</h2>
-            
-            <form action="{{ route('pimpinan.pengaturan.update-profil') }}" method="POST" id="formProfil" class="space-y-4">
+    {{-- Main Settings Form --}}
+    <div class="lg:col-span-2 space-y-6">
+        
+        {{-- Profile Information Card --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-user-circle text-purple-500 mr-3"></i>
+                    Informasi Profil
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Update informasi profil dan foto Anda</p>
+            </div>
+
+            <form action="{{ route('pimpinan.pengaturan.update-profil') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
                 @csrf
                 @method('PUT')
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {{-- Avatar Upload Section --}}
+                <div class="flex flex-col items-center space-y-4 pb-6 border-b border-gray-200">
+                    <div class="relative group">
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                 alt="Avatar" 
+                                 class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg"
+                                 id="avatar-preview">
+                        @else
+                            <div class="w-32 h-32 rounded-full border-4 border-gray-200 shadow-lg bg-gray-100 flex items-center justify-center"
+                                 id="avatar-preview-placeholder">
+                                <i class="fas fa-user text-5xl text-gray-400"></i>
+                            </div>
+                        @endif
+                        <label for="avatar-input" 
+                               class="absolute bottom-0 right-0 bg-purple-500 hover:bg-purple-600 text-white rounded-full p-3 cursor-pointer shadow-lg transition-all duration-200 transform hover:scale-110">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" 
+                               id="avatar-input" 
+                               name="avatar" 
+                               accept="image/*" 
+                               class="hidden"
+                               onchange="previewAvatar(event)">
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Klik ikon kamera untuk mengubah foto</p>
+                        <p class="text-xs text-gray-500 mt-1">JPG, PNG atau GIF (Maks. 2MB)</p>
+                        @if(Auth::user()->avatar)
+                            <button type="button" 
+                                    onclick="removeAvatar()"
+                                    class="mt-2 text-red-500 hover:text-red-700 text-sm font-medium">
+                                <i class="fas fa-trash-alt mr-1"></i>
+                                Hapus Foto
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Form Fields --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Nama Lengkap --}}
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user text-gray-400 mr-1"></i>
+                            Nama Lengkap
+                        </label>
                         <input type="text" 
                                name="name" 
                                id="name" 
                                value="{{ old('name', Auth::user()->name) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                               placeholder="Masukkan nama lengkap"
                                required>
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     
+                    {{-- Email --}}
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope text-gray-400 mr-1"></i>
+                            Email
+                        </label>
                         <input type="email" 
                                name="email" 
                                id="email" 
                                value="{{ old('email', Auth::user()->email) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                               placeholder="email@example.com"
                                required>
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
-                
-                <div class="border-t border-gray-200 pt-4 mt-6">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Ubah Password</h3>
-                    <p class="text-sm text-gray-600 mb-4">Kosongkan jika tidak ingin mengubah password</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Password Saat Ini</label>
-                            <input type="password" 
-                                   name="current_password" 
-                                   id="current_password" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('current_password')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
-                            <input type="password" 
-                                   name="password" 
-                                   id="password" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('password')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password Baru</label>
-                            <input type="password" 
-                                   name="password_confirmation" 
-                                   id="password_confirmation" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end pt-4">
-                    <button type="button" 
-                            onclick="confirmSaveProfile()"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
+
+                {{-- Save Button --}}
+                <div class="flex justify-end pt-4 border-t border-gray-200">
+                    <button type="submit" 
+                            class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                         <i class="fas fa-save mr-2"></i>
                         Simpan Perubahan
                     </button>
@@ -131,957 +174,502 @@
             </form>
         </div>
 
-        @if(Auth::user()->role === 'pimpinan')
-        {{-- Tab Sistem --}}
-        <div id="content-sistem" class="tab-content hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Sistem</h2>
-            
-            <form action="{{ route('pimpinan.pengaturan.update') }}" method="POST" id="formSistem" class="space-y-4">
+        {{-- Security Settings Card --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-shield-alt text-green-500 mr-3"></i>
+                    Keamanan
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Ubah password untuk menjaga keamanan akun</p>
+            </div>
+
+            <form action="{{ route('pimpinan.pengaturan.update-profil') }}" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="app_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Aplikasi</label>
-                        <input type="text" 
-                               name="app_name" 
-                               id="app_name" 
-                               value="{{ old('app_name', $settings['app_name'] ?? 'GANDARIA') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
-                        <select name="timezone" 
-                                id="timezone" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="Asia/Jakarta" {{ ($settings['timezone'] ?? 'Asia/Jakarta') == 'Asia/Jakarta' ? 'selected' : '' }}>WIB - Jakarta</option>
-                            <option value="Asia/Makassar" {{ ($settings['timezone'] ?? '') == 'Asia/Makassar' ? 'selected' : '' }}>WITA - Makassar</option>
-                            <option value="Asia/Jayapura" {{ ($settings['timezone'] ?? '') == 'Asia/Jayapura' ? 'selected' : '' }}>WIT - Jayapura</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label for="items_per_page" class="block text-sm font-medium text-gray-700 mb-1">Items Per Halaman</label>
-                        <input type="number" 
-                               name="items_per_page" 
-                               id="items_per_page" 
-                               value="{{ old('items_per_page', $settings['items_per_page'] ?? 10) }}"
-                               min="5"
-                               max="100"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label for="date_format" class="block text-sm font-medium text-gray-700 mb-1">Format Tanggal</label>
-                        <select name="date_format" 
-                                id="date_format" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="d/m/Y" {{ ($settings['date_format'] ?? 'd/m/Y') == 'd/m/Y' ? 'selected' : '' }}>DD/MM/YYYY</option>
-                            <option value="Y-m-d" {{ ($settings['date_format'] ?? '') == 'Y-m-d' ? 'selected' : '' }}>YYYY-MM-DD</option>
-                            <option value="m/d/Y" {{ ($settings['date_format'] ?? '') == 'm/d/Y' ? 'selected' : '' }}>MM/DD/YYYY</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-4 mt-6">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Fitur Sistem</h3>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center">
-                            <input type="checkbox" 
-                                   name="enable_registration" 
-                                   id="enable_registration" 
-                                   value="1"
-                                   {{ ($settings['enable_registration'] ?? 0) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="enable_registration" class="ml-2 text-sm text-gray-700">
-                                Aktifkan Registrasi Pengguna Baru
-                            </label>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" 
-                                   name="enable_notifications" 
-                                   id="enable_notifications" 
-                                   value="1"
-                                   {{ ($settings['enable_notifications'] ?? 1) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="enable_notifications" class="ml-2 text-sm text-gray-700">
-                                Aktifkan Notifikasi Sistem
-                            </label>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" 
-                                   name="maintenance_mode" 
-                                   id="maintenance_mode" 
-                                   value="1"
-                                   {{ ($settings['maintenance_mode'] ?? 0) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="maintenance_mode" class="ml-2 text-sm text-gray-700">
-                                Mode Maintenance (Nonaktifkan akses sementara)
-                            </label>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-yellow-500 mt-0.5 mr-3"></i>
+                        <div class="text-sm text-yellow-800">
+                            <p class="font-medium mb-1">Tips Password Aman:</p>
+                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                <li>Minimal 8 karakter</li>
+                                <li>Kombinasi huruf besar, kecil, angka dan simbol</li>
+                                <li>Jangan gunakan informasi pribadi</li>
+                                <li>Berbeda dari password lain</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                
-                <div class="flex justify-between items-center pt-4 border-t border-gray-200 mt-6">
-                    <button type="button" 
-                            onclick="confirmClearCache()"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-trash-alt mr-2"></i>
-                        Bersihkan Cache
-                    </button>
+
+                <div class="space-y-5">
+                    {{-- Current Password --}}
+                    <div>
+                        <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock text-gray-400 mr-1"></i>
+                            Password Saat Ini
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   name="current_password" 
+                                   id="current_password" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                                   placeholder="Masukkan password saat ini">
+                            <button type="button" 
+                                    onclick="togglePassword('current_password')"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="current_password-icon"></i>
+                            </button>
+                        </div>
+                        @error('current_password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                     
-                    <button type="button" 
-                            onclick="confirmSaveSystem()"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-save mr-2"></i>
-                        Simpan Pengaturan
+                    {{-- New Password --}}
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-key text-gray-400 mr-1"></i>
+                            Password Baru
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   name="password" 
+                                   id="password" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                                   placeholder="Masukkan password baru"
+                                   onkeyup="checkPasswordStrength()">
+                            <button type="button" 
+                                    onclick="togglePassword('password')"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="password-icon"></i>
+                            </button>
+                        </div>
+                        {{-- Password Strength Indicator --}}
+                        <div id="password-strength" class="mt-2 hidden">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div id="strength-bar" class="h-full transition-all duration-300"></div>
+                                </div>
+                                <span id="strength-text" class="text-xs font-medium"></span>
+                            </div>
+                        </div>
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    {{-- Confirm Password --}}
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-check-circle text-gray-400 mr-1"></i>
+                            Konfirmasi Password Baru
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   name="password_confirmation" 
+                                   id="password_confirmation" 
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                                   placeholder="Konfirmasi password baru">
+                            <button type="button" 
+                                    onclick="togglePassword('password_confirmation')"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="password_confirmation-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Save Button --}}
+                <div class="flex justify-end pt-6 border-t border-gray-200 mt-6">
+                    <button type="submit" 
+                            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        Update Password
                     </button>
                 </div>
             </form>
         </div>
 
-        {{-- Tab Tampilan --}}
-        <div id="content-tampilan" class="tab-content hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Pengaturan Tampilan</h2>
-            
-            <form action="{{ route('pimpinan.pengaturan.update-appearance') }}" method="POST" id="formTampilan" class="space-y-6">
-                @csrf
-                @method('PUT')
-                
-                {{-- Theme Section --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-palette mr-2 text-purple-500"></i>
-                        Tema Aplikasi
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {{-- Light Theme --}}
-                        <div class="relative">
-                            <input type="radio" name="theme" id="theme-light" value="light" 
-                                   {{ ($settings['theme'] ?? 'light') == 'light' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="theme-light" 
-                                   class="flex flex-col p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                <div class="w-full h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-md mb-3 flex items-center justify-center">
-                                    <i class="fas fa-sun text-4xl text-yellow-500"></i>
-                                </div>
-                                <span class="font-semibold text-gray-800 text-center">Terang</span>
-                                <span class="text-xs text-gray-500 text-center mt-1">Mode terang (default)</span>
-                            </label>
-                            <div class="absolute top-2 right-2 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-blue-500 text-xl"></i>
-                            </div>
-                        </div>
-
-                        {{-- Dark Theme --}}
-                        <div class="relative">
-                            <input type="radio" name="theme" id="theme-dark" value="dark" 
-                                   {{ ($settings['theme'] ?? '') == 'dark' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="theme-dark" 
-                                   class="flex flex-col p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                <div class="w-full h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-md mb-3 flex items-center justify-center">
-                                    <i class="fas fa-moon text-4xl text-blue-300"></i>
-                                </div>
-                                <span class="font-semibold text-gray-800 text-center">Gelap</span>
-                                <span class="text-xs text-gray-500 text-center mt-1">Mode gelap</span>
-                            </label>
-                            <div class="absolute top-2 right-2 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-blue-500 text-xl"></i>
-                            </div>
-                        </div>
-
-                        {{-- Auto Theme --}}
-                        <div class="relative">
-                            <input type="radio" name="theme" id="theme-auto" value="auto" 
-                                   {{ ($settings['theme'] ?? '') == 'auto' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="theme-auto" 
-                                   class="flex flex-col p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                <div class="w-full h-32 bg-gradient-to-br from-gray-100 via-gray-300 to-gray-800 rounded-md mb-3 flex items-center justify-center">
-                                    <i class="fas fa-adjust text-4xl text-gray-600"></i>
-                                </div>
-                                <span class="font-semibold text-gray-800 text-center">Otomatis</span>
-                                <span class="text-xs text-gray-500 text-center mt-1">Sesuai sistem</span>
-                            </label>
-                            <div class="absolute top-2 right-2 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-blue-500 text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Color Scheme Section --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-swatchbook mr-2 text-pink-500"></i>
-                        Skema Warna Aksen
-                    </h3>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-blue" value="blue" 
-                                   {{ ($settings['accent_color'] ?? 'blue') == 'blue' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-blue" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Biru</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-blue-500"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-purple" value="purple" 
-                                   {{ ($settings['accent_color'] ?? '') == 'purple' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-purple" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 peer-checked:border-purple-500 peer-checked:ring-2 peer-checked:ring-purple-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Ungu</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-purple-500"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-green" value="green" 
-                                   {{ ($settings['accent_color'] ?? '') == 'green' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-green" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-green-500 peer-checked:border-green-500 peer-checked:ring-2 peer-checked:ring-green-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Hijau</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-green-500"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-red" value="red" 
-                                   {{ ($settings['accent_color'] ?? '') == 'red' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-red" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-red-500 peer-checked:border-red-500 peer-checked:ring-2 peer-checked:ring-red-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Merah</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-red-500"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-orange" value="orange" 
-                                   {{ ($settings['accent_color'] ?? '') == 'orange' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-orange" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-orange-500 peer-checked:border-orange-500 peer-checked:ring-2 peer-checked:ring-orange-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Oranye</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-orange-500"></i>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input type="radio" name="accent_color" id="color-indigo" value="indigo" 
-                                   {{ ($settings['accent_color'] ?? '') == 'indigo' ? 'checked' : '' }}
-                                   class="peer sr-only">
-                            <label for="color-indigo" 
-                                   class="flex flex-col items-center p-3 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all">
-                                <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full mb-2"></div>
-                                <span class="text-xs font-medium text-gray-700">Indigo</span>
-                            </label>
-                            <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                <i class="fas fa-check-circle text-indigo-500"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Text Size & Display Options --}}
-                <div class="bg-white border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-text-height mr-2 text-green-500"></i>
-                        Ukuran Teks & Tampilan
-                    </h3>
-                    
-                    {{-- Text Size Selector --}}
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Ukuran Teks</label>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            {{-- Text size options (xs, sm, md, lg, xl) --}}
-                            <div class="relative">
-                                <input type="radio" name="text_size" id="text-xs" value="xs" 
-                                       {{ ($settings['text_size'] ?? '') == 'xs' ? 'checked' : '' }}
-                                       class="peer sr-only">
-                                <label for="text-xs" 
-                                       class="flex flex-col items-center p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                    <span class="text-xs font-semibold mb-1">Aa</span>
-                                    <span class="text-xs text-gray-600">Sangat Kecil</span>
-                                    <span class="text-xs text-gray-400">12px</span>
-                                </label>
-                                <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                </div>
-                            </div>
-
-                            <div class="relative">
-                                <input type="radio" name="text_size" id="text-sm" value="sm" 
-                                       {{ ($settings['text_size'] ?? '') == 'sm' ? 'checked' : '' }}
-                                       class="peer sr-only">
-                                <label for="text-sm" 
-                                       class="flex flex-col items-center p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                    <span class="text-sm font-semibold mb-1">Aa</span>
-                                    <span class="text-xs text-gray-600">Kecil</span>
-                                    <span class="text-xs text-gray-400">13px</span>
-                                </label>
-                                <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                </div>
-                            </div>
-
-                            <div class="relative">
-                                <input type="radio" name="text_size" id="text-md" value="md" 
-                                       {{ ($settings['text_size'] ?? 'md') == 'md' ? 'checked' : '' }}
-                                       class="peer sr-only">
-                                <label for="text-md" 
-                                       class="flex flex-col items-center p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                    <span class="text-base font-semibold mb-1">Aa</span>
-                                    <span class="text-xs text-gray-600">Sedang</span>
-                                    <span class="text-xs text-gray-400">14px</span>
-                                </label>
-                                <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                </div>
-                            </div>
-
-                            <div class="relative">
-                                <input type="radio" name="text_size" id="text-lg" value="lg" 
-                                       {{ ($settings['text_size'] ?? '') == 'lg' ? 'checked' : '' }}
-                                       class="peer sr-only">
-                                <label for="text-lg" 
-                                       class="flex flex-col items-center p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                    <span class="text-lg font-semibold mb-1">Aa</span>
-                                    <span class="text-xs text-gray-600">Besar</span>
-                                    <span class="text-xs text-gray-400">16px</span>
-                                </label>
-                                <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                </div>
-                            </div>
-
-                            <div class="relative">
-                                <input type="radio" name="text_size" id="text-xl" value="xl" 
-                                       {{ ($settings['text_size'] ?? '') == 'xl' ? 'checked' : '' }}
-                                       class="peer sr-only">
-                                <label for="text-xl" 
-                                       class="flex flex-col items-center p-4 bg-white border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-200 transition-all">
-                                    <span class="text-xl font-semibold mb-1">Aa</span>
-                                    <span class="text-xs text-gray-600">Sangat Besar</span>
-                                    <span class="text-xs text-gray-400">18px</span>
-                                </label>
-                                <div class="absolute top-1 right-1 hidden peer-checked:block">
-                                    <i class="fas fa-check-circle text-blue-500"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Display Toggles --}}
-                    <div class="space-y-3 pt-4 border-t border-gray-200">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <label for="compact_mode" class="font-medium text-gray-700">Mode Kompak</label>
-                                <p class="text-sm text-gray-500">Mengurangi spacing untuk menampilkan lebih banyak konten</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="compact_mode" id="compact_mode" value="1"
-                                       {{ ($settings['compact_mode'] ?? 0) ? 'checked' : '' }}
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <label for="smooth_scrolling" class="font-medium text-gray-700">Smooth Scrolling</label>
-                                <p class="text-sm text-gray-500">Membuat scrolling lebih halus</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="smooth_scrolling" id="smooth_scrolling" value="1"
-                                       {{ ($settings['smooth_scrolling'] ?? 1) ? 'checked' : '' }}
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Action Buttons --}}
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <button type="button" 
-                            onclick="confirmResetAppearance()"
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-undo mr-2"></i>
-                        Reset ke Default
-                    </button>
-                    
-                    <button type="button" 
-                            onclick="confirmSaveAppearance()"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-save mr-2"></i>
-                        Simpan Pengaturan
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        {{-- Tab Backup --}}
-        <div id="content-backup" class="tab-content hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Backup Database</h2>
-            
-            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-                <div class="flex items-start">
-                    <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
-                    <div>
-                        <h3 class="font-medium text-blue-800 mb-1">Informasi Backup</h3>
-                        <p class="text-sm text-blue-700">
-                            Backup database akan disimpan di folder <code class="bg-blue-100 px-2 py-1 rounded">storage/app/backups</code>.
-                            Pastikan folder memiliki permission yang sesuai.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="flex gap-3">
-                    <button type="button" 
-                            onclick="confirmCreateBackup()"
-                            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-download mr-2"></i>
-                        Buat Backup Sekarang
-                    </button>
-                    
-                    <button type="button" 
-                            onclick="loadBackupList()"
-                            class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-list mr-2"></i>
-                        Lihat Daftar Backup
-                    </button>
-                </div>
-                
-                <div id="backup-list" class="mt-6 hidden">
-                    <h3 class="text-lg font-medium text-gray-800 mb-3">Daftar Backup</h3>
-                    <div id="backup-list-content" class="bg-gray-50 rounded-md p-4">
-                        <div class="text-center text-gray-500">
-                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                            <p>Memuat daftar backup...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
     </div>
 </div>
-
-{{-- Include SweetAlert --}}
-@include('partials.sweetalert')
 
 @endsection
 
 @push('scripts')
 <script>
-// Tab Switching Function
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-    
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('active', 'border-blue-500', 'text-blue-600');
-        button.classList.add('border-transparent', 'text-gray-500');
-    });
-    
-    const selectedContent = document.getElementById(`content-${tabName}`);
-    if (selectedContent) {
-        selectedContent.classList.remove('hidden');
-    }
-    
-    const selectedTab = document.getElementById(`tab-${tabName}`);
-    if (selectedTab) {
-        selectedTab.classList.add('active', 'border-blue-500', 'text-blue-600');
-        selectedTab.classList.remove('border-transparent', 'text-gray-500');
+// ========================================
+// ✅ PREVIEW AVATAR
+// ========================================
+function previewAvatar(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // Validate file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Terlalu Besar',
+                text: 'Ukuran file maksimal 2MB',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Mengerti'
+            });
+            event.target.value = '';
+            return;
+        }
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format File Tidak Valid',
+                text: 'Gunakan format JPG, PNG atau GIF',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Mengerti'
+            });
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Update main preview
+            const preview = document.getElementById('avatar-preview');
+            const placeholder = document.getElementById('avatar-preview-placeholder');
+            
+            if (preview) {
+                preview.src = e.target.result;
+            } else if (placeholder) {
+                placeholder.outerHTML = `<img src="${e.target.result}" alt="Avatar Preview" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg" id="avatar-preview">`;
+            }
+
+            // Update sidebar preview
+            const sidebarAvatar = document.getElementById('sidebar-avatar');
+            const sidebarPlaceholder = document.getElementById('sidebar-avatar-placeholder');
+            
+            if (sidebarAvatar) {
+                sidebarAvatar.src = e.target.result;
+            } else if (sidebarPlaceholder) {
+                sidebarPlaceholder.outerHTML = `<img src="${e.target.result}" alt="Avatar" class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover" id="sidebar-avatar">`;
+            }
+
+            // Show success toast
+            Swal.fire({
+                icon: 'success',
+                title: 'Preview berhasil',
+                text: 'Klik "Simpan Perubahan" untuk mengupload foto',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                backdrop: false
+            });
+        };
+        reader.readAsDataURL(file);
     }
 }
 
-// ============================================
-// CONFIRM SAVE PROFILE
-// ============================================
-function confirmSaveProfile() {
-    if (typeof Swal === 'undefined') {
-        document.getElementById('formProfil').submit();
-        return;
-    }
-
-    const password = document.getElementById('password').value;
-    const hasPasswordChange = password.length > 0;
-    
+// ========================================
+// ✅ REMOVE AVATAR WITH SWEETALERT
+// ========================================
+function removeAvatar() {
     Swal.fire({
-        title: '💾 Simpan Perubahan Profil?',
+        title: 'Hapus Foto Profil',
         html: `
             <div class="text-left">
-                <p class="text-gray-700 mb-3">Perubahan yang akan disimpan:</p>
-                <ul class="text-sm text-gray-600 space-y-1 mb-3">
-                    <li>✓ Informasi profil (nama, email)</li>
-                    ${hasPasswordChange ? '<li class="text-orange-600">⚠️ Password akan diubah</li>' : ''}
-                </ul>
-                ${hasPasswordChange ? '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded"><p class="text-sm text-yellow-800"><i class="fas fa-exclamation-triangle mr-2"></i>Anda harus login ulang dengan password baru</p></div>' : ''}
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            showLoading('Menyimpan perubahan profil...');
-            document.getElementById('formProfil').submit();
-        }
-    });
-}
-
-// ============================================
-// CONFIRM SAVE SYSTEM SETTINGS
-// ============================================
-function confirmSaveSystem() {
-    if (typeof Swal === 'undefined') {
-        document.getElementById('formSistem').submit();
-        return;
-    }
-
-    const maintenanceMode = document.getElementById('maintenance_mode').checked;
-    
-    Swal.fire({
-        title: '⚙️ Simpan Pengaturan Sistem?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">Pengaturan sistem akan diperbarui</p>
-                ${maintenanceMode ? '<div class="bg-red-50 border-l-4 border-red-400 p-3 rounded mb-3"><p class="text-sm text-red-600 font-semibold"><i class="fas fa-exclamation-circle mr-2"></i>Mode Maintenance akan <strong>AKTIF</strong>. User tidak dapat mengakses sistem!</p></div>' : ''}
-                <p class="text-sm text-gray-600">Pastikan pengaturan sudah benar sebelum menyimpan</p>
-            </div>
-        `,
-        icon: maintenanceMode ? 'warning' : 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            showLoading('Menyimpan pengaturan sistem...');
-            document.getElementById('formSistem').submit();
-        }
-    });
-}
-
-// ============================================
-// CONFIRM SAVE APPEARANCE
-// ============================================
-function confirmSaveAppearance() {
-    if (typeof Swal === 'undefined') {
-        document.getElementById('formTampilan').submit();
-        return;
-    }
-
-    Swal.fire({
-        title: '🎨 Simpan Pengaturan Tampilan?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">Pengaturan tampilan akan diterapkan:</p>
-                <ul class="text-sm text-gray-600 space-y-1">
-                    <li>✓ Tema dan warna aksen</li>
-                    <li>✓ Ukuran teks</li>
-                    <li>✓ Opsi tampilan lainnya</li>
-                </ul>
-                <p class="text-sm text-blue-600 mt-3"><i class="fas fa-info-circle mr-2"></i>Perubahan akan diterapkan setelah refresh halaman</p>
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-save mr-2"></i> Ya, Simpan',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            showLoading('Menyimpan pengaturan tampilan...');
-            document.getElementById('formTampilan').submit();
-        }
-    });
-}
-
-// ============================================
-// CONFIRM CLEAR CACHE
-// ============================================
-function confirmClearCache() {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Bersihkan semua cache sistem?')) {
-            clearCacheProcess();
-        }
-        return;
-    }
-
-    Swal.fire({
-        title: '🗑️ Bersihkan Cache?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">Cache yang akan dibersihkan:</p>
-                <ul class="text-sm text-gray-600 space-y-1 mb-3">
-                    <li>• Cache konfigurasi</li>
-                    <li>• Cache view/template</li>
-                    <li>• Cache route</li>
-                    <li>• Cache aplikasi</li>
-                </ul>
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        Proses ini akan meningkatkan performa sistem
+                <p class="text-gray-700 mb-3">Foto profil Anda akan dihapus secara permanen</p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                    <p class="text-sm text-yellow-700">
+                        <i class="fas fa-info-circle mr-2"></i>Anda dapat mengunggah foto baru kapan saja
                     </p>
                 </div>
             </div>
         `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#eab308',
+        confirmButtonColor: '#dc2626',
         cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Bersihkan',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Ya, Hapus',
+        cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
         reverseButtons: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true,
         customClass: {
             popup: 'animated-popup'
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            clearCacheProcess();
-        }
-    });
-}
-
-function clearCacheProcess() {
-    Swal.fire({
-        title: 'Membersihkan Cache...',
-        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-yellow-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    fetch('{{ route("pimpinan.pengaturan.clear-cache") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+            // Show loading
             Swal.fire({
-                icon: 'success',
-                title: '✅ Cache Berhasil Dibersihkan!',
-                html: `<p class="text-gray-700">${data.message}</p>`,
-                confirmButtonColor: '#22c55e',
-                confirmButtonText: 'OK'
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Membersihkan Cache',
-                html: `<p class="text-gray-700">${data.message || 'Terjadi kesalahan'}</p>`,
-                confirmButtonColor: '#dc2626'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Terjadi Kesalahan',
-            text: 'Gagal membersihkan cache. Silakan coba lagi.',
-            confirmButtonColor: '#dc2626'
-        });
-    });
-}
-
-// ============================================
-// CONFIRM CREATE BACKUP
-// ============================================
-function confirmCreateBackup() {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Buat backup database sekarang?')) {
-            createBackupProcess();
-        }
-        return;
-    }
-
-    Swal.fire({
-        title: '💾 Buat Backup Database?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">Backup akan menyimpan:</p>
-                <ul class="text-sm text-gray-600 space-y-1 mb-3">
-                    <li>• Semua data database</li>
-                    <li>• Struktur tabel</li>
-                    <li>• Data pengguna & arsip</li>
-                </ul>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                    <p class="text-sm text-yellow-800">
-                        <i class="fas fa-clock mr-2"></i>
-                        Proses mungkin memakan waktu tergantung ukuran database
-                    </p>
-                </div>
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#22c55e',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-database mr-2"></i> Ya, Buat Backup',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            createBackupProcess();
-        }
-    });
-}
-
-function createBackupProcess() {
-    Swal.fire({
-        title: 'Membuat Backup...',
-        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-green-500 mb-3"></i><p>Mohon tunggu, sedang memproses backup database...</p></div>',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    fetch('{{ route("pimpinan.pengaturan.backup") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: '✅ Backup Berhasil Dibuat!',
+                title: 'Sedang Memproses',
                 html: `
-                    <div class="text-left">
-                        <p class="text-gray-700 mb-2">${data.message}</p>
-                        <div class="bg-gray-50 p-3 rounded">
-                            <p class="text-sm text-gray-600">File:</p>
-                            <p class="text-sm font-mono font-semibold text-blue-600">${data.filename}</p>
+                    <div class="loading-smooth-container">
+                        <div class="spinner-wrapper">
+                            <i class="fas fa-spinner fa-pulse"></i>
+                        </div>
+                        <p class="loading-text">Menghapus foto profil...</p>
+                        <div class="loading-progress">
+                            <div class="loading-progress-bar"></div>
                         </div>
                     </div>
                 `,
-                confirmButtonColor: '#22c55e',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                const backupList = document.getElementById('backup-list');
-                if (backupList && !backupList.classList.contains('hidden')) {
-                    loadBackupList();
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                customClass: {
+                    popup: 'loading-popup-smooth'
+                },
+                didOpen: () => {
+                    const progressBar = document.querySelector('.loading-progress-bar');
+                    if (progressBar) {
+                        setTimeout(() => {
+                            progressBar.style.width = '100%';
+                        }, 100);
+                    }
                 }
             });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Membuat Backup',
-                html: `<p class="text-gray-700">${data.message || 'Terjadi kesalahan'}</p>`,
-                confirmButtonColor: '#dc2626'
+            
+            // Send delete request
+            fetch('{{ route("pimpinan.profil.avatar.remove") }}', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Foto profil berhasil dihapus',
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'animated-popup'
+                        }
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message || 'Gagal menghapus foto profil',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'Tutup'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Terjadi kesalahan saat menghapus foto',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Tutup'
+                });
             });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Terjadi Kesalahan',
-            text: 'Gagal membuat backup. Silakan coba lagi.',
-            confirmButtonColor: '#dc2626'
-        });
     });
 }
 
-// ============================================
-// CONFIRM RESET APPEARANCE
-// ============================================
-function confirmResetAppearance() {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Reset semua pengaturan tampilan ke default?')) {
-            resetAppearanceToDefault();
-        }
+// ========================================
+// TOGGLE PASSWORD VISIBILITY
+// ========================================
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '-icon');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// ========================================
+// CHECK PASSWORD STRENGTH
+// ========================================
+function checkPasswordStrength() {
+    const password = document.getElementById('password').value;
+    const strengthBar = document.getElementById('strength-bar');
+    const strengthText = document.getElementById('strength-text');
+    const strengthContainer = document.getElementById('password-strength');
+    
+    if (password.length === 0) {
+        strengthContainer.classList.add('hidden');
         return;
     }
-
-    Swal.fire({
-        title: '🔄 Reset Pengaturan Tampilan?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">Pengaturan akan dikembalikan ke default:</p>
-                <ul class="text-sm text-gray-600 space-y-1 mb-3">
-                    <li>• Tema: Light</li>
-                    <li>• Warna aksen: Biru</li>
-                    <li>• Ukuran teks: Sedang</li>
-                    <li>• Opsi tampilan: Default</li>
-                </ul>
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        Anda masih perlu klik "Simpan" untuk menerapkan
-                    </p>
-                </div>
-            </div>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#6b7280',
-        cancelButtonColor: '#dc2626',
-        confirmButtonText: '<i class="fas fa-undo mr-2"></i> Ya, Reset',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            resetAppearanceToDefault();
-            Swal.fire({
-                icon: 'success',
-                title: 'Pengaturan Direset!',
-                text: 'Jangan lupa klik "Simpan Pengaturan" untuk menerapkan perubahan',
-                confirmButtonColor: '#22c55e',
-                timer: 3000,
-                timerProgressBar: true
-            });
-        }
-    });
-}
-
-function resetAppearanceToDefault() {
-    document.getElementById('theme-light').checked = true;
-    document.getElementById('color-blue').checked = true;
-    document.getElementById('text-md').checked = true;
-    document.getElementById('compact_mode').checked = false;
-    document.getElementById('smooth_scrolling').checked = true;
-}
-
-// Load Backup List Function
-function loadBackupList() {
-    const backupListDiv = document.getElementById('backup-list');
-    const backupListContent = document.getElementById('backup-list-content');
     
-    backupListDiv.classList.remove('hidden');
-    backupListContent.innerHTML = `
-        <div class="text-center text-gray-500">
-            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-            <p>Memuat daftar backup...</p>
-        </div>
-    `;
+    strengthContainer.classList.remove('hidden');
     
-    fetch('{{ route("pimpinan.pengaturan.backup-list") }}', {
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.backups.length > 0) {
-            let html = '<div class="space-y-2">';
-            data.backups.forEach(backup => {
-                html += `
-                    <div class="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:border-blue-300 transition">
-                        <div class="flex items-center">
-                            <i class="fas fa-file-archive text-blue-500 mr-3"></i>
-                            <div>
-                                <p class="font-medium text-gray-800">${backup.name}</p>
-                                <p class="text-sm text-gray-500">${backup.size} - ${backup.date}</p>
-                            </div>
-                        </div>
-                        <a href="/pimpinan/pengaturan/backup/download/${backup.name}" 
-                           class="text-blue-500 hover:text-blue-700">
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            backupListContent.innerHTML = html;
-        } else {
-            backupListContent.innerHTML = `
-                <div class="text-center text-gray-500 py-8">
-                    <i class="fas fa-folder-open text-4xl mb-3"></i>
-                    <p class="text-lg font-medium">Belum ada backup</p>
-                    <p class="text-sm">Buat backup pertama Anda sekarang</p>
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        backupListContent.innerHTML = `
-            <div class="text-center text-red-500 py-8">
-                <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
-                <p>Gagal memuat daftar backup</p>
-            </div>
-        `;
-    });
+    let strength = 0;
+    
+    // Length check
+    if (password.length >= 8) strength += 25;
+    if (password.length >= 12) strength += 15;
+    
+    // Contains lowercase
+    if (/[a-z]/.test(password)) strength += 15;
+    
+    // Contains uppercase
+    if (/[A-Z]/.test(password)) strength += 15;
+    
+    // Contains numbers
+    if (/\d/.test(password)) strength += 15;
+    
+    // Contains special characters
+    if (/[^A-Za-z0-9]/.test(password)) strength += 15;
+    
+    // Update strength bar
+    strengthBar.style.width = strength + '%';
+    
+    if (strength < 40) {
+        strengthBar.className = 'h-full transition-all duration-300 bg-red-500';
+        strengthText.textContent = 'Lemah';
+        strengthText.className = 'text-xs font-medium text-red-500';
+    } else if (strength < 70) {
+        strengthBar.className = 'h-full transition-all duration-300 bg-yellow-500';
+        strengthText.textContent = 'Sedang';
+        strengthText.className = 'text-xs font-medium text-yellow-500';
+    } else {
+        strengthBar.className = 'h-full transition-all duration-300 bg-green-500';
+        strengthText.textContent = 'Kuat';
+        strengthText.className = 'text-xs font-medium text-green-500';
+    }
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    switchTab('profil');
-});
 </script>
+
+<style>
+/* Loading Smooth Container */
+.loading-smooth-container {
+    text-align: center;
+    padding: 30px 20px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 30px;
+}
+
+.spinner-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #e0e7ff;
+    animation: pulse-ring 1.5s ease-out infinite;
+}
+
+.spinner-wrapper i {
+    font-size: 48px !important;
+    color: #9333ea !important;
+    animation: spinPulse 1.2s ease-in-out infinite !important;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+
+@keyframes spinPulse {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.15);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+.loading-text {
+    color: #64748b !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    margin: 0 0 20px 0 !important;
+    animation: fadeInOut 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.loading-progress {
+    width: 100%;
+    max-width: 300px;
+    height: 4px;
+    background: #e0e7ff;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #9333ea, #c084fc, #9333ea);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.loading-popup-smooth {
+    animation: loadingPopupIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes loadingPopupIn {
+    from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+</style>
 @endpush

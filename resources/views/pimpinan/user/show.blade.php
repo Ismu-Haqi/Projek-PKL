@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Detail User')
 
@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div class="flex items-center">
-            <a href="{{ route('admin.user.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <a href="{{ route('pimpinan.user.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -19,7 +19,7 @@
         </div>
 
         <div class="flex space-x-2">
-            <a href="{{ route('admin.user.edit', $user->id) }}" 
+            <a href="{{ route('pimpinan.user.edit', $user->id) }}" 
                class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -60,7 +60,7 @@
                         <p class="text-sm text-gray-600">{{ $user->email }}</p>
                         
                         <!-- Role Badge -->
-                        @if($user->role === 'admin')
+                        @if($user->role === 'pimpinan')
                             <span class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
@@ -174,7 +174,7 @@
                     @endif
 
                     <!-- Dispositions Sent (Admin only) -->
-                    @if($user->role === 'admin')
+                    @if($user->role === 'pimpinan')
                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
                         <div class="flex items-center justify-between">
                             <div>
@@ -280,7 +280,7 @@
                                 {{ $user->is_active ? 'User tidak akan bisa login ke sistem' : 'User dapat kembali login ke sistem' }}
                             </p>
                         </div>
-                        <form action="{{ route('admin.user.toggleStatus', $user->id) }}" method="POST" id="toggleStatusForm">
+                        <form action="{{ route('pimpinan.user.toggleStatus', $user->id) }}" method="POST" id="toggleStatusForm">
                             @csrf
                             @method('PUT')
                             <button type="button" 
@@ -297,7 +297,7 @@
                             <p class="font-semibold text-red-800">Hapus User</p>
                             <p class="text-sm text-red-600 mt-1">Tindakan ini tidak dapat dibatalkan. Semua data user akan dihapus permanen.</p>
                         </div>
-                        <form action="{{ route('admin.user.destroy', $user->id) }}" method="POST" id="deleteUserForm">
+                        <form action="{{ route('pimpinan.user.destroy', $user->id) }}" method="POST" id="deleteUserForm">
                             @csrf
                             @method('DELETE')
                             <button type="button" 
@@ -328,7 +328,7 @@ function showResetPasswordModal() {
     Swal.fire({
         title: '🔑 Reset Password User',
         html: `
-            <form id="resetPasswordForm" action="{{ route('admin.user.reset-password', $user->id) }}" method="POST">
+            <form id="resetPasswordForm" action="{{ route('pimpinan.user.reset-password', $user->id) }}" method="POST">
                 @csrf
                 <div class="text-left space-y-4">
                     <div>

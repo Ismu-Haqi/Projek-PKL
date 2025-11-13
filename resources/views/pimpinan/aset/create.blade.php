@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('content')
 <div class="container mx-auto px-4 py-6 max-w-4xl">
@@ -6,7 +6,7 @@
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
-            <a href="{{ route('admin.aset.index') }}" class="hover:text-blue-600">Manajemen Aset</a>
+            <a href="{{ route('pimpinan.aset.index') }}" class="hover:text-blue-600">Manajemen Aset</a>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Form -->
-    <form action="{{ route('admin.aset.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6">
+    <form action="{{ route('pimpinan.aset.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6">
         @csrf
         
         <!-- Informasi Dasar -->
@@ -283,7 +283,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-3 pt-6 border-t">
-            <a href="{{ route('admin.aset.index') }}" 
+            <a href="{{ route('pimpinan.aset.index') }}" 
                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
                 Batal
             </a>

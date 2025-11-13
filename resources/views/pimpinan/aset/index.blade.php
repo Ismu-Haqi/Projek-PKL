@@ -14,13 +14,13 @@
         
         @if(Auth::user()->role === 'pimpinan')
         {{-- Tombol Tambah Aset --}}
-        <a href="{{ route('pimpinan.aset.create') }}" 
+        {{-- <a href="{{ route('pimpinan.aset.create') }}" 
            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg flex items-center transition duration-200 transform hover:scale-105">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             Tambah Aset
-        </a>
+        </a> --}}
         @endif
     </div>
 
@@ -279,15 +279,15 @@
                     @if(Auth::user()->role === 'pimpinan')
                     {{-- Button Edit & Hapus (1 Baris) --}}
                     <div class="flex gap-2">
-                        <a href="{{ route('pimpinan.aset.edit', $asset->id) }}" 
+                        {{-- <a href="{{ route('pimpinan.aset.edit', $asset->id) }}" 
                            class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span>Edit</span>
-                        </a>
+                        </a> --}}
 
-                        <form action="{{ route('pimpinan.aset.destroy', $asset->id) }}" method="POST" class="flex-1">
+                        {{-- <form action="{{ route('pimpinan.aset.destroy', $asset->id) }}" method="POST" class="flex-1">
                             @csrf
                             @method('DELETE')
                             <button type="button" 
@@ -298,7 +298,7 @@
                                 </svg>
                                 <span>Hapus</span>
                             </button>
-                        </form>
+                        </form> --}}
                     </div>
                     @endif
                 </div>

@@ -51,8 +51,8 @@
             </a>
 
             <!-- 3. Laporan Aktivitas User -->
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.laporan.user') }}" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            @if(Auth::user()->role === 'pimpinan')
+            <a href="{{ route('pimpinan.laporan.user') }}" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,9 +158,9 @@
     </div>
 
 <!-- Tombol Untuk Print dan Download -->
-    @if(auth()->user()->role === 'admin')
+    @if(auth()->user()->role === 'pimpinan')
 <div class="flex gap-2 mb-4">
-    <a href="{{ route('admin.laporan.print-pdf', ['type' => 'summary']) }}" 
+    <a href="{{ route('pimpinan.laporan.print-pdf', ['type' => 'summary']) }}" 
        target="_blank"
        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@
         Print PDF
     </a>
     
-    <a href="{{ route('admin.laporan.export-pdf', ['type' => 'summary']) }}" 
+    <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'summary']) }}" 
        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>

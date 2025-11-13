@@ -94,15 +94,20 @@
                         @endif
                     </div>
                     
-                    {{-- Favorite Star (Filled) --}}
-                  <form action="{{ route('pimpinan.arsip.favorite', $archive->id) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="button" 
-                            onclick="confirmToggleFavorite(this, {{ $archive->is_favorite ? 'true' : 'false' }})"
-                            class="btn btn-warning">
-                        <i class="fas fa-star"></i>
-                    </button>
-                </form>
+                    {{-- ✅ FIXED: Favorite Star Button - Gunakan Route Pimpinan --}}
+                    <form action="{{ route('pimpinan.arsip.favorite', $archive->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="button" 
+                                onclick="confirmToggleFavorite(this, {{ $archive->is_favorite ? 'true' : 'false' }}, '{{ addslashes($archive->judul) }}')"
+                                class="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2 rounded-lg transition-all duration-300 transform hover:scale-110">
+                            <svg class="w-6 h-6 {{ $archive->is_favorite ? 'text-yellow-300 fill-current' : 'text-white' }}" 
+                                 fill="{{ $archive->is_favorite ? 'currentColor' : 'none' }}" 
+                                 stroke="currentColor" 
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -173,6 +178,7 @@
                         <span>Detail</span>
                     </a>
                     <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
+                       onclick="event.preventDefault(); confirmDownload('{{ route('pimpinan.arsip.download', $archive->id) }}', '{{ addslashes($archive->file_name ?? 'file') }}'); return false;"
                        class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -283,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * Confirm Toggle Favorite Function
  * @param {HTMLElement} button - Button element yang diklik
  * @param {boolean} isFavorite - Status favorit saat ini
- * @param {string} title - Judul arsip (optional)
+ * @param {string} title - Judul arsip
  */
 function confirmToggleFavorite(button, isFavorite, title = 'arsip ini') {
     const form = button.closest('form');

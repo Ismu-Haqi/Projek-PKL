@@ -75,6 +75,8 @@
                 <span>Manajemen Aset</span>
             </a>
 
+            
+
             {{-- Manajemen User --}}
             <a href="{{ route('admin.user.index') }}" 
                class="sidebar-link {{ Request::routeIs('admin.user.*') ? 'active' : '' }}">

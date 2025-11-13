@@ -14,7 +14,7 @@
             </div>
             
             {{-- Modal Body --}}
-            <form action="{{ route('admin.user.store') }}" method="POST">
+            <form action="{{ route('pimpinan.user.store') }}" method="POST">
                 @csrf
                 <div class="p-6 space-y-4">
                     
@@ -50,7 +50,7 @@
                             <select name="role" id="role" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
                                 <option value="" disabled selected>-- Pilih Role --</option>
                                 <option value="staff">Staff</option>
-                                <option value="admin">Admin</option>
+                                <option value="pimpinan">Admin</option>
                             </select>
                         </div>
                         <div>

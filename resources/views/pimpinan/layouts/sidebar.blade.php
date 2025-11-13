@@ -1,11 +1,5 @@
 @php
-    // Helper untuk menentukan rute yang sedang aktif di grup 'pimpinan.'
-    $currentRoute = Request::routeIs('pimpinan.*') ? Request::route()->getName() : '';
-    $activeRouteClass = 'active';
     $baseIconClass = 'w-5 h-5 mr-3 flex-shrink-0';
-    
-    // Fungsi untuk cek apakah rute spesifik aktif
-    $isActive = fn ($route) => Request::routeIs($route) ? $activeRouteClass : '';
 @endphp
 
 {{-- SIDEBAR CONTAINER --}}
@@ -20,86 +14,92 @@
         </button>
 
         {{-- Logo GANDARIA --}}
-        <div class="text-2xl font-bold text-gray-800 mb-8 border-b border-gray-100 pb-4 flex items-center sidebar-title">
+        <a href="{{ route('pimpinan.dashboard') }}" class="text-2xl font-bold text-gray-800 mb-8 border-b border-gray-100 pb-4 flex items-center sidebar-title hover:opacity-80 transition-opacity">
             <img src="https://ui-avatars.com/api/?name=G&background=2563eb&color=fff&size=40" alt="Logo" class="w-8 h-8 mr-2 rounded-full">
             <span class="text-blue-700">GANDARIA</span>
-        </div>
+        </a>
         
         {{-- Navigasi Menu (Scrollable) --}}
-        <nav class="space-y-1 sidebar-menu">
+        <nav class="space-y-1 sidebar-menu overflow-y-auto flex-1">
             
             <p class="text-xs text-gray-400 font-semibold uppercase mb-2 sidebar-title">BERANDA</p>
+            
             {{-- Dashboard --}}
             <a href="{{ route('pimpinan.dashboard') }}" 
-               class="sidebar-link {{ $isActive('pimpinan.dashboard') }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-7 7m7-7V4a1 1 0 00-1-1h-1m-4 17V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v16a1 1 0 001 1h4a1 1 0 001-1z"></path></svg>
+               class="sidebar-link {{ Request::routeIs('pimpinan.dashboard') ? 'active' : '' }}">
+                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
                 <span>Dashboard</span>
             </a>
 
             <p class="text-xs text-gray-400 font-semibold uppercase pt-4 pb-2 sidebar-title">MANAJEMEN</p>
-            
-            {{-- Arsip Digital --}}
-            <a href="{{ route('pimpinan.arsip.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.arsip.index') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                <span>Arsip Digital</span>
-            </a>
-            
-            {{-- ARSIP FAVORIT --}}
-            <a href="{{ route('pimpinan.arsip.favorit') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.arsip.favorit') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span>Arsip Favorit</span>
-            </a>
-            
-            {{-- DISPOSISI - FIXED ROUTE --}}
-            <a href="{{ route('pimpinan.disposisi.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.disposisi.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span>Disposisi</span>
-            </a>
-            
-            {{-- NOTIFIKASI - FIXED ROUTE --}}
-            <a href="{{ route('pimpinan.notifikasi.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.notifikasi.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                <span>Notifikasi</span>
-            </a>
 
-            {{-- Manajemen Aset - FIXED ROUTE --}}
-            <a href="{{ route('pimpinan.aset.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.aset.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m8-12h2M12 7h1m-1 4h1m-1 4h1m8-4h2"></path></svg>
-                <span>Manajemen Aset</span>
-            </a>
+<!-- Arsip Digital -->
+<a href="{{ route('pimpinan.arsip.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.arsip.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+    </svg>
+    Arsip Digital
+</a>
 
-            {{-- Manajemen User --}}
-            <a href="{{ route('pimpinan.user.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.user.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2a3 3 0 015.644-1.857M7 20H2v-2a3 3 0 015.356-1.857M12 12a3 3 0 100-6 3 3 0 000 6zm-5.356-2.143A9.006 9.006 0 0112 3h1.344a9 9 0 110 18H12a9 9 0 01-5.356-1.857z"></path></svg>
-                <span>Manajemen User</span>
-            </a>
-            
-            {{-- Laporan - FIXED ROUTE --}}
-            <a href="{{ route('pimpinan.laporan.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.laporan.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-4m3 4v-4m3 4v-4m-9-4h18M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"></path></svg>
-                <span>Laporan</span>
-            </a>
+<!-- Disposisi -->
+<a href="{{ route('pimpinan.disposisi.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.disposisi.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    Disposisi
+</a>
 
-            {{-- Pengaturan - FIXED ROUTE --}}
-            <a href="{{ route('pimpinan.pengaturan.index') }}" 
-               class="sidebar-link {{ Request::routeIs('pimpinan.pengaturan.*') ? 'active' : '' }}">
-                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>Pengaturan</span>
-            </a>
-        </nav>
-    </div>
-    
-    {{-- Footer Sidebar (Placeholder) --}}
-    <div class="p-4 border-t border-gray-100 sidebar-footer">
-        <p class="text-xs text-gray-400">Versi 1.0.0</p>
-    </div>
-</div>
+<!-- Manajemen User -->
+<a href="{{ route('pimpinan.user.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.user.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+    </svg>
+    Manajemen User
+</a>
+
+<!-- Manajemen Aset -->
+<a href="{{ route('pimpinan.aset.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.aset.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+    </svg>
+    Manajemen Aset
+</a>
+
+<!-- Laporan -->
+<a href="{{ route('pimpinan.laporan.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.laporan.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    Laporan
+</a>
+
+<!-- Notifikasi -->
+<a href="{{ route('pimpinan.notifikasi.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.notifikasi.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+    </svg>
+    Notifikasi
+    @if(isset($unreadNotifications) && $unreadNotifications > 0)
+    <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+        {{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}
+    </span>
+    @endif
+</a>
+
+<!-- Pengaturan -->
+<a href="{{ route('pimpinan.pengaturan.index') }}" 
+   class="flex items-center px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors {{ request()->routeIs('pimpinan.pengaturan.*') ? 'bg-purple-50 text-purple-600 font-semibold' : '' }}">
+    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    Pengaturan
+</a>

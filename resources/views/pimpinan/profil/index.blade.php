@@ -67,7 +67,7 @@
                         <!-- User Info -->
                         <h2 class="mt-4 text-xl font-bold text-gray-800">{{ $user->name }}</h2>
                         <p class="text-sm text-gray-600">{{ $user->email }}</p>
-                        <span class="mt-2 px-3 py-1 rounded-full text-xs font-semibold {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                        <span class="mt-2 px-3 py-1 rounded-full text-xs font-semibold {{ $user->role === 'pimpinan' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
                             {{ ucfirst($user->role) }}
                         </span>
                     </div>

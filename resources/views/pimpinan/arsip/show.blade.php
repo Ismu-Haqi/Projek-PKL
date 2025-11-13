@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Detail Arsip')
 
@@ -11,14 +11,14 @@
             <p class="text-sm text-gray-500 mt-1">Informasi lengkap arsip digital</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('admin.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
+            <a href="{{ route('pimpinan.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Kembali
             </a>
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.arsip.edit', $archive->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center">
+            @if(Auth::user()->role === 'pimpinan')
+            <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
@@ -194,14 +194,14 @@
                         </div>
                         
                         <div class="flex gap-3">
-                            <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                            <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
                                class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 Download File
                             </a>
-                            <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                            <a href="{{ route('pimpinan.arsip.preview', $archive->id) }}" 
                                target="_blank"
                                rel="noopener noreferrer"
                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg">
@@ -233,7 +233,7 @@
                     {{-- Favorit --}}
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Favorit</span>
-                        <form action="{{ route('admin.arsip.favorite', $archive->id) }}" method="POST">
+                        <form action="{{ route('pimpinan.arsip.favorite', $archive->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="text-yellow-600 hover:text-yellow-700">
                                 <svg class="w-6 h-6 {{ $archive->is_favorite ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,12 +266,12 @@
             </div>
 
             {{-- Actions Card --}}
-            @if(Auth::user()->role === 'admin')
+            @if(Auth::user()->role === 'pimpinan')
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-4">Aksi</h3>
                 
                 <div class="space-y-3">
-                    <a href="{{ route('admin.arsip.edit', $archive->id) }}" 
+                    <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" 
                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -279,7 +279,7 @@
                         Edit Arsip
                     </a>
                     
-                    <form action="{{ route('admin.arsip.destroy', $archive->id) }}" method="POST">
+                    <form action="{{ route('pimpinan.arsip.destroy', $archive->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="button" onclick="confirmDelete(this, 'Arsip akan dihapus permanen!')" 
@@ -314,7 +314,7 @@
                     </svg>
                     Preview Dokumen PDF
                 </h2>
-                <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                <a href="{{ route('pimpinan.arsip.preview', $archive->id) }}" 
                    target="_blank"
                    rel="noopener noreferrer"
                    class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
@@ -325,7 +325,7 @@
                 </a>
             </div>
             <div class="border-2 border-gray-200 rounded-lg overflow-hidden">
-                <iframe src="{{ route('admin.arsip.preview', $archive->id) }}" 
+                <iframe src="{{ route('pimpinan.arsip.preview', $archive->id) }}" 
                         class="w-full"
                         style="height: 800px;"
                         frameborder="0">
@@ -342,7 +342,7 @@
                     </svg>
                     Preview Gambar
                 </h2>
-                <a href="{{ route('admin.arsip.preview', $archive->id) }}" 
+                <a href="{{ route('pimpinan.arsip.preview', $archive->id) }}" 
                    target="_blank"
                    rel="noopener noreferrer"
                    class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
@@ -353,7 +353,7 @@
                 </a>
             </div>
             <div class="border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-                <img src="{{ route('admin.arsip.preview', $archive->id) }}" 
+                <img src="{{ route('pimpinan.arsip.preview', $archive->id) }}" 
                      alt="{{ $archive->file_name ?? 'Preview' }}"
                      class="max-w-full h-auto rounded shadow-lg">
             </div>
@@ -424,7 +424,7 @@
                     </svg>
                     <p class="text-gray-700 font-medium mb-2">Preview tidak dapat dimuat</p>
                     <p class="text-sm text-gray-500 mb-4">Google Docs Viewer mungkin tidak dapat mengakses file. Silakan download file untuk melihat isinya.</p>
-                    <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                    <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
                        class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition font-medium">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -464,7 +464,7 @@
                 </svg>
                 <p class="text-gray-700 font-medium mb-2">Preview tidak tersedia untuk file {{ strtoupper($fileExtension) }}</p>
                 <p class="text-sm text-gray-500 mb-4">Silakan download file untuk melihat isinya</p>
-                <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
                    class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg transition font-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>

@@ -69,21 +69,20 @@
                         </div>
 
                         {{-- Unit/Bidang --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Unit/Bidang <span class="text-red-500">*</span>
-                            </label>
-                            <select name="unit" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- Pilih Unit --</option>
-                                <option value="Sekretariat">Sekretariat</option>
-                                <option value="IKP">IKP (Informasi & Komunikasi Publik)</option>
-                                <option value="Aptika">Aptika (Aplikasi Informatika)</option>
-                                <option value="Komtel">Komtel (Komunikasi & Telematika)</option>
-                                <option value="Statistik">Statistik & Persandian</option>
-                                <option value="E-Gov">E-Government</option>
-                            </select>
-                        </div>
+                     <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Unit/Bidang <span class="text-red-500">*</span>
+                        </label>
+                        <select name="unit" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="{{ Auth::user()->unit ?? '' }}" selected>{{ Auth::user()->unit ?? 'Pilih Unit' }}</option>
+                            <option value="Sekretariat">Sekretariat</option>
+                            <option value="IKP">IKP (Informasi & Komunikasi Publik)</option>
+                            <option value="SP">SP (Statistik & Persandian)</option>
+                            <option value="E-Government">E-Government</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Unit Anda: <strong>{{ Auth::user()->unit ?? 'Belum diset' }}</strong></p>
+                    </div>
 
                         {{-- Kategori --}}
                         <div>

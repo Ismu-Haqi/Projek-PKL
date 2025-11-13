@@ -48,16 +48,13 @@ class Asset extends Model
         $year = date('Y');
         $month = date('m');
         
-        // Ambil kode asset terakhir untuk tahun dan bulan ini
         $lastAsset = self::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->orderBy('id', 'desc')
             ->first();
         
-        // Ekstrak nomor urut dari kode terakhir
         $number = $lastAsset ? intval(substr($lastAsset->kode_asset, -4)) + 1 : 1;
         
-        // Format: AST/MM/YYYY/0001
         return sprintf('%s/%s/%s/%04d', strtoupper(substr($kategori, 0, 3)), $month, $year, $number);
     }
 
@@ -107,6 +104,15 @@ class Asset extends Model
     }
 
     /**
+     * Scope untuk aset yang bisa dipinjam (tersedia)
+     */
+    public function scopeAvailableForBorrow($query)
+    {
+        return $query->where('status', 'tersedia')
+                    ->whereIn('kondisi', ['baik', 'cukup']);
+    }
+
+    /**
      * Get status badge color
      */
     public function getStatusBadgeAttribute()
@@ -114,7 +120,8 @@ class Asset extends Model
         $badges = [
             'tersedia' => ['text' => 'Tersedia', 'color' => 'green'],
             'digunakan' => ['text' => 'Digunakan', 'color' => 'blue'],
-            'maintenance' => ['text' => 'Maintenance', 'color' => 'yellow'],
+            'dipinjam' => ['text' => 'Dipinjam', 'color' => 'orange'], // NEW
+            'diperbaiki' => ['text' => 'Diperbaiki', 'color' => 'yellow'],
             'rusak' => ['text' => 'Rusak', 'color' => 'red'],
         ];
 
@@ -149,7 +156,7 @@ class Asset extends Model
     }
 
     /**
-     * Get sisa garansi dalam bulan
+     * Get sisa garansi
      */
     public function getSisaGaransiAttribute()
     {
@@ -172,7 +179,7 @@ class Asset extends Model
     }
 
     /**
-     * Get umur asset dalam tahun
+     * Get umur asset
      */
     public function getUmurAssetAttribute()
     {
@@ -203,15 +210,43 @@ class Asset extends Model
     }
 
     /**
-     * Relasi ke history peminjaman (jika nanti ada fitur peminjaman)
+     * ✅ NEW: Relasi ke history peminjaman
      */
     public function borrowHistory()
     {
-        return $this->hasMany(AssetBorrow::class);
+        return $this->hasMany(AssetBorrow::class)->orderBy('created_at', 'desc');
     }
 
     /**
-     * Relasi ke maintenance history (jika nanti ada fitur maintenance)
+     * ✅ NEW: Get peminjaman aktif saat ini
+     */
+    public function activeBorrow()
+    {
+        return $this->hasOne(AssetBorrow::class)
+                    ->whereIn('status', ['approved', 'borrowed', 'overdue'])
+                    ->latest();
+    }
+
+    /**
+     * ✅ NEW: Cek apakah aset sedang dipinjam
+     */
+    public function isBorrowed()
+    {
+        return $this->activeBorrow()->exists();
+    }
+
+    /**
+     * ✅ NEW: Cek apakah aset bisa dipinjam
+     */
+    public function canBeBorrowed()
+    {
+        return $this->status === 'tersedia' 
+            && in_array($this->kondisi, ['baik', 'cukup'])
+            && !$this->isBorrowed();
+    }
+
+    /**
+     * Relasi ke maintenance history (untuk fitur future)
      */
     public function maintenanceHistory()
     {

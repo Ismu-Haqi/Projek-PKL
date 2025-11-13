@@ -11,7 +11,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
-            <form action="{{ route('admin.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <form action="{{ route('pimpinan.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
                 @csrf
                 <div class="modal-body p-6">
                     {{-- Alert Info --}}

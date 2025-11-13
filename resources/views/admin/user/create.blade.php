@@ -102,7 +102,7 @@
                         <p class="text-xs text-gray-500 mt-1">Username harus unik dan tidak boleh sama dengan user lain</p>
                     </div>
 
-                    <!-- Role -->
+                    <!-- Role - CRITICAL PART -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Role <span class="text-red-500">*</span>
@@ -112,13 +112,19 @@
                             <option value="">-- Pilih Role --</option>
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
                             <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="pimpinan" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>Pimpinan</option>
                         </select>
                         @error('role')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        <p class="text-xs text-gray-500 mt-1">
+                            <span class="font-semibold text-purple-600">Admin:</span> Akses penuh | 
+                            <span class="font-semibold text-green-600">Staff:</span> Terbatas | 
+                            <span class="font-semibold text-orange-600">Pimpinan:</span> Monitoring
+                        </p>
                     </div>
 
-                    <!-- Unit Kerja - DROPDOWN DINAMIS -->
+                    <!-- Unit Kerja -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Unit Kerja
@@ -126,11 +132,10 @@
                         <select name="unit" id="unit"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('unit') border-red-500 @enderror">
                             <option value="">Semua Unit</option>
-                            @foreach($units ?? [] as $unit)
-                                <option value="{{ $unit }}" {{ old('unit') == $unit ? 'selected' : '' }}>
-                                    {{ $unit }}
-                                </option>
-                            @endforeach
+                            <option value="Sekretariat" {{ old('unit') == 'Sekretariat' ? 'selected' : '' }}>Sekretariat</option>
+                            <option value="IKP" {{ old('unit') == 'IKP' ? 'selected' : '' }}>IKP</option>
+                            <option value="SP" {{ old('unit') == 'SP' ? 'selected' : '' }}>SP (Statistik & Persandian)</option>
+                            <option value="E-Government" {{ old('unit') == 'E-Government' ? 'selected' : '' }}>E-Government</option>
                         </select>
                         @error('unit')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -244,7 +249,7 @@ function togglePassword(fieldId) {
     field.type = field.type === 'password' ? 'text' : 'password';
 }
 
-// Generate random password with SweetAlert2 confirmation
+// Generate random password
 function generatePassword() {
     if (typeof Swal === 'undefined') {
         generatePasswordFallback();
@@ -252,7 +257,7 @@ function generatePassword() {
     }
 
     Swal.fire({
-        title: '🔑 Generate Password Otomatis?',
+        title: '🔐 Generate Password Otomatis?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Password akan di-generate secara acak dengan ketentuan:</p>
@@ -262,24 +267,15 @@ function generatePassword() {
                     <li>✓ Angka dan simbol khusus</li>
                     <li>✓ Aman dan sulit ditebak</li>
                 </ul>
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        Password akan ditampilkan dan diisi otomatis ke form
-                    </p>
-                </div>
             </div>
         `,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4f46e5',
         cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-random mr-2"></i> Generate Password',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
+        confirmButtonText: 'Generate Password',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
             const length = 12;
@@ -290,41 +286,34 @@ function generatePassword() {
                 password += charset.charAt(Math.floor(Math.random() * charset.length));
             }
             
-            // Set password
             document.getElementById('password').value = password;
             document.getElementById('password_confirmation').value = password;
             document.getElementById('password').type = 'text';
             document.getElementById('password_confirmation').type = 'text';
             
-            // Show generated password
             Swal.fire({
                 title: '✅ Password Berhasil Di-generate!',
                 html: `
                     <div class="text-left">
                         <p class="text-gray-700 mb-3">Password yang di-generate:</p>
                         <div class="bg-gray-100 p-4 rounded-lg mb-3">
-                            <p class="font-mono text-lg font-bold text-center text-blue-600 break-all">${password}</p>
+                            <p class="font-mono text-lg font-bold text-center text-blue-600">${password}</p>
                         </div>
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
                             <p class="text-sm text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <strong>Penting:</strong> Pastikan untuk mencatat password ini! Password sudah diisi ke form.
+                                <strong>Penting:</strong> Pastikan untuk mencatat password ini!
                             </p>
                         </div>
                     </div>
                 `,
                 icon: 'success',
-                confirmButtonColor: '#4f46e5',
-                confirmButtonText: '<i class="fas fa-check mr-2"></i> OK, Saya Sudah Catat',
-                customClass: {
-                    popup: 'animated-popup'
-                }
+                confirmButtonColor: '#4f46e5'
             });
         }
     });
 }
 
-// Fallback for when SweetAlert is not loaded
+// Fallback
 function generatePasswordFallback() {
     const length = 12;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
@@ -339,7 +328,7 @@ function generatePasswordFallback() {
     document.getElementById('password').type = 'text';
     document.getElementById('password_confirmation').type = 'text';
     
-    alert('Password berhasil di-generate:\n' + password + '\n\nPastikan untuk mencatat password ini!');
+    alert('Password: ' + password);
 }
 
 // Auto-generate username from name

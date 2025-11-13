@@ -13,17 +13,20 @@ class ProfileController extends Controller
 {
     /**
      * Display user profile page
+     * ✅ UPDATED: Support all roles (admin, staff, pimpinan)
      */
     public function index()
     {
         $role = Auth::user()->role;
         $user = Auth::user();
         
+        // ✅ All authenticated users can access their profile
         return view("{$role}.profil.index", compact('user'));
     }
 
     /**
      * Update user profile information
+     * ✅ UPDATED: Support all roles
      */
     public function update(Request $request)
     {
@@ -71,7 +74,8 @@ class ProfileController extends Controller
     }
 
     /**
-     * ✅ NEW: Upload avatar only (tanpa validasi field lain)
+     * ✅ Upload avatar only (tanpa validasi field lain)
+     * Support all roles
      */
     public function updateAvatar(Request $request)
     {
@@ -95,6 +99,7 @@ class ProfileController extends Controller
 
     /**
      * Update user password
+     * ✅ UPDATED: Support all roles
      */
     public function updatePassword(Request $request)
     {
@@ -120,6 +125,7 @@ class ProfileController extends Controller
 
     /**
      * Remove user avatar
+     * ✅ UPDATED: Support all roles
      */
     public function removeAvatar()
     {

@@ -181,8 +181,10 @@
                         @foreach($units as $unit)
                             <option value="{{ $unit }}">
                         @endforeach
-                        <option value="Diskominfo">
                         <option value="Sekretariat">
+                        <option value="IKP">
+                        <option value="SP">
+                        <option value="E-Government">
                     </datalist>
                     @error('unit')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>

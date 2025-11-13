@@ -11,16 +11,24 @@ use Illuminate\Validation\Rules\Password;
 class UserController extends Controller
 {
     /**
+     * ✅ Hardcoded units list
+     */
+    private function getUnits()
+    {
+        return ['Sekretariat', 'IKP', 'SP', 'E-Government'];
+    }
+
+    /**
      * Display a listing of users
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * ✅ UPDATED: Allow admin and pimpinan to view
      */
     public function index(Request $request)
     {
-        // Only admin can access
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+        $role = Auth::user()->role;
+
+        // ✅ Admin dan Pimpinan dapat mengakses
+        if (!in_array($role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized - Admin and Pimpinan only');
         }
 
         $query = User::orderBy('created_at', 'desc');
@@ -28,6 +36,12 @@ class UserController extends Controller
         // Filter by role
         if ($request->filled('role')) {
             $query->where('role', $request->role);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $isActive = $request->status === 'active';
+            $query->where('is_active', $isActive);
         }
 
         // Search
@@ -43,60 +57,53 @@ class UserController extends Controller
 
         $users = $query->paginate(15);
 
-        // ✅ UPDATED: Statistics with pimpinan
+        // Statistics with pimpinan
         $stats = [
             'total' => User::count(),
             'admin' => User::where('role', 'admin')->count(),
             'staff' => User::where('role', 'staff')->count(),
             'pimpinan' => User::where('role', 'pimpinan')->count(),
             'active' => User::where('is_active', true)->count(),
+            'inactive' => User::where('is_active', false)->count(),
         ];
 
-        // Ambil semua unit unik untuk dropdown di modal
-        $units = User::select('unit')
-            ->distinct()
-            ->whereNotNull('unit')
-            ->where('unit', '!=', '')
-            ->orderBy('unit', 'asc')
-            ->pluck('unit');
+        // ✅ Use hardcoded units instead of database query
+        $units = $this->getUnits();
 
-        return view('admin.user.index', compact('users', 'stats', 'units'));
+        // Tentukan view berdasarkan role
+        $viewPath = $role === 'pimpinan' 
+            ? 'pimpinan.user.index' 
+            : 'admin.user.index';
+
+        return view($viewPath, compact('users', 'stats', 'units'));
     }
 
     /**
      * Show the form for creating a new user
-     *
-     * @return \Illuminate\View\View
+     * ✅ ADMIN ONLY
      */
     public function create()
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
-        $units = User::select('unit')
-            ->distinct()
-            ->whereNotNull('unit')
-            ->where('unit', '!=', '')
-            ->orderBy('unit', 'asc')
-            ->pluck('unit');
+        // ✅ Use hardcoded units
+        $units = $this->getUnits();
 
         return view('admin.user.create', compact('units'));
     }
 
     /**
      * Store a newly created user
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * ✅ ADMIN ONLY
      */
     public function store(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
-        // ✅ UPDATED: Validation include 'pimpinan'
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
@@ -105,6 +112,15 @@ class UserController extends Controller
             'role' => 'required|in:admin,staff,pimpinan',
             'unit' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
+        ], [
+            'name.required' => 'Nama wajib diisi',
+            'username.required' => 'Username wajib diisi',
+            'username.unique' => 'Username sudah digunakan',
+            'email.required' => 'Email wajib diisi',
+            'email.unique' => 'Email sudah digunakan',
+            'password.required' => 'Password wajib diisi',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'role.required' => 'Role wajib dipilih',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -113,19 +129,20 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('admin.user.index')
-            ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan ke sistem Diskominfo Batola!');
+            ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan ke sistem!');
     }
 
     /**
      * Display the specified user
-     *
-     * @param int $id
-     * @return \Illuminate\View\View
+     * ✅ UPDATED: Allow admin and pimpinan
      */
     public function show($id)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+        $role = Auth::user()->role;
+
+        // ✅ Admin dan Pimpinan dapat melihat detail
+        if (!in_array($role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized - Admin and Pimpinan only');
         }
 
         $user = User::findOrFail($id);
@@ -140,7 +157,7 @@ class UserController extends Controller
         ];
 
         // Check if methods exist before calling
-        if (method_exists($user, 'receivedDispositions') && $user->role === 'staff') {
+        if (method_exists($user, 'receivedDispositions') && in_array($user->role, ['staff', 'pimpinan'])) {
             try {
                 $userStats['dispositions_received'] = $user->receivedDispositions()->count();
             } catch (\Exception $e) {
@@ -148,7 +165,7 @@ class UserController extends Controller
             }
         }
 
-        if (method_exists($user, 'sentDispositions') && $user->role === 'admin') {
+        if (method_exists($user, 'sentDispositions') && in_array($user->role, ['admin', 'pimpinan'])) {
             try {
                 $userStats['dispositions_sent'] = $user->sentDispositions()->count();
             } catch (\Exception $e) {
@@ -164,65 +181,58 @@ class UserController extends Controller
             }
         }
 
-        if (method_exists($user, 'incomingLetters')) {
+        // Recent activities
+        $recentArchives = [];
+        if (method_exists($user, 'archives')) {
             try {
-                $userStats['incoming_letters'] = $user->incomingLetters()->count();
+                $recentArchives = $user->archives()
+                    ->with('category')
+                    ->latest()
+                    ->limit(5)
+                    ->get();
             } catch (\Exception $e) {
-                $userStats['incoming_letters'] = 0;
+                $recentArchives = [];
             }
         }
 
-        if (method_exists($user, 'outgoingLetters')) {
-            try {
-                $userStats['outgoing_letters'] = $user->outgoingLetters()->count();
-            } catch (\Exception $e) {
-                $userStats['outgoing_letters'] = 0;
-            }
-        }
+        // Tentukan view berdasarkan role
+        $viewPath = $role === 'pimpinan' 
+            ? 'pimpinan.user.show' 
+            : 'admin.user.show';
 
-        return view('admin.user.show', compact('user', 'userStats'));
+        return view($viewPath, compact('user', 'userStats', 'recentArchives'));
     }
 
     /**
      * Show the form for editing the specified user
-     *
-     * @param int $id
-     * @return \Illuminate\View\View
+     * ✅ ADMIN ONLY
      */
     public function edit($id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $user = User::findOrFail($id);
 
-        $units = User::select('unit')
-            ->distinct()
-            ->whereNotNull('unit')
-            ->where('unit', '!=', '')
-            ->orderBy('unit', 'asc')
-            ->pluck('unit');
+        // ✅ Use hardcoded units
+        $units = $this->getUnits();
 
         return view('admin.user.edit', compact('user', 'units'));
     }
 
     /**
      * Update the specified user
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * ✅ ADMIN ONLY
      */
     public function update(Request $request, $id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $user = User::findOrFail($id);
 
-        // ✅ UPDATED: Validation include 'pimpinan'
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
@@ -241,14 +251,12 @@ class UserController extends Controller
 
     /**
      * Remove the specified user
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * ✅ ADMIN ONLY
      */
     public function destroy($id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $user = User::findOrFail($id);
@@ -267,15 +275,12 @@ class UserController extends Controller
 
     /**
      * Reset user password
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * ✅ ADMIN ONLY
      */
     public function resetPassword(Request $request, $id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $validated = $request->validate([
@@ -292,14 +297,12 @@ class UserController extends Controller
 
     /**
      * Toggle user active status
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
+     * ✅ ADMIN ONLY
      */
     public function toggleStatus($id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $user = User::findOrFail($id);
@@ -315,18 +318,16 @@ class UserController extends Controller
 
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
-        return back()->with('success', "User \"{$user->name}\" berhasil {$status} dalam sistem!");
+        return back()->with('success', "User \"{$user->name}\" berhasil {$status}!");
     }
 
     /**
-     * ✅ NEW: Get users by role (API endpoint for dropdowns)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Get users by role (API endpoint for dropdowns)
+     * ✅ UPDATED: Allow admin and pimpinan
      */
     public function getUsersByRole(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'pimpinan'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -338,48 +339,50 @@ class UserController extends Controller
             $users->where('role', $role);
         }
         
-        $users = $users->select('id', 'name', 'username', 'unit', 'role')
+        $users = $users->select('id', 'name', 'username', 'unit', 'role', 'email')
             ->orderBy('name')
             ->get();
 
-        return response()->json($users);
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ]);
     }
 
     /**
-     * ✅ NEW: Get user statistics (API endpoint)
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * Get user statistics (API endpoint)
+     * ✅ UPDATED: Allow admin and pimpinan
      */
     public function getUserStats($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'pimpinan'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $user = User::findOrFail($id);
 
         $stats = [
-            'archives' => $user->archives()->count(),
-            'dispositions_sent' => $user->sentDispositions()->count(),
-            'dispositions_received' => $user->receivedDispositions()->count(),
-            'incoming_letters' => $user->incomingLetters()->count(),
-            'outgoing_letters' => $user->outgoingLetters()->count(),
+            'archives' => method_exists($user, 'archives') ? $user->archives()->count() : 0,
+            'dispositions_sent' => method_exists($user, 'sentDispositions') ? $user->sentDispositions()->count() : 0,
+            'dispositions_received' => method_exists($user, 'receivedDispositions') ? $user->receivedDispositions()->count() : 0,
+            'incoming_letters' => method_exists($user, 'incomingLetters') ? $user->incomingLetters()->count() : 0,
+            'outgoing_letters' => method_exists($user, 'outgoingLetters') ? $user->outgoingLetters()->count() : 0,
         ];
 
-        return response()->json($stats);
+        return response()->json([
+            'success' => true,
+            'data' => $stats
+        ]);
     }
 
     /**
-     * ✅ NEW: Bulk update users (activate/deactivate multiple)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Bulk update users (activate/deactivate multiple)
+     * ✅ ADMIN ONLY
      */
     public function bulkUpdate(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
 
         $validated = $request->validate([
@@ -413,5 +416,30 @@ class UserController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * ✅ Export users data (Excel/PDF)
+     * Admin and Pimpinan access
+     */
+    public function export(Request $request)
+    {
+        if (!in_array(Auth::user()->role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized - Admin and Pimpinan only');
+        }
+
+        $format = $request->get('format', 'excel');
+        
+        // Get filtered users
+        $users = User::orderBy('name')->get();
+
+        // TODO: Implement actual export logic
+        // For now, return JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Export feature coming soon',
+            'format' => $format,
+            'count' => $users->count()
+        ]);
     }
 }

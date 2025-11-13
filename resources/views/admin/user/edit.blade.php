@@ -108,13 +108,14 @@
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('role') border-red-500 @enderror">
                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Administrator</option>
                             <option value="staff" {{ old('role', $user->role) == 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="pimpinan" {{ old('role', $user->role) == 'pimpinan' ? 'selected' : '' }}>pimpinan</option>
                         </select>
                         @error('role')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Unit Kerja - DROPDOWN DINAMIS -->
+                    <!-- Unit Kerja -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Unit Kerja
@@ -122,11 +123,10 @@
                         <select name="unit" id="unit"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('unit') border-red-500 @enderror">
                             <option value="">Semua Unit</option>
-                            @foreach($units ?? [] as $unit)
-                                <option value="{{ $unit }}" {{ old('unit', $user->unit) == $unit ? 'selected' : '' }}>
-                                    {{ $unit }}
-                                </option>
-                            @endforeach
+                            <option value="Sekretariat" {{ old('unit', $user->unit) == 'Sekretariat' ? 'selected' : '' }}>Sekretariat</option>
+                            <option value="IKP" {{ old('unit', $user->unit) == 'IKP' ? 'selected' : '' }}>IKP</option>
+                            <option value="SP" {{ old('unit', $user->unit) == 'SP' ? 'selected' : '' }}>SP (Statistik & Persandian)</option>
+                            <option value="E-Government" {{ old('unit', $user->unit) == 'E-Government' ? 'selected' : '' }}>E-Government</option>
                         </select>
                         @error('unit')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

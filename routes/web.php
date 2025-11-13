@@ -14,13 +14,15 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DispositionController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AssetBorrowController as AdminAssetBorrowController;
+use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowController;
 
 // Halaman Login
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('login', [LoginController::class, 'login'])->middleware('guest');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ✅ UPDATED: Redirect Root URL - Support Pimpinan
+// Redirect Root URL
 Route::get('/', function () {
     if (auth()->check()) {
         $role = auth()->user()->role;
@@ -77,6 +79,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{id}/edit', [DispositionController::class, 'edit'])->name('edit');
         Route::put('/{id}', [DispositionController::class, 'update'])->name('update');
         Route::delete('/{id}', [DispositionController::class, 'destroy'])->name('destroy');
+        Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/api/items', [DispositionController::class, 'getItems'])->name('api.items');
+        Route::post('/{id}/forward', [DispositionController::class, 'forwardDisposition'])->name('forward');
+        Route::get('/needs-forwarding', [DispositionController::class, 'needsForwarding'])->name('needsForwarding');
+        Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
+    });
+    
+    // ✅ NEW: Peminjaman Aset (Admin)
+    Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+        Route::get('/', [AdminAssetBorrowController::class, 'index'])->name('index');
+        Route::get('/menunggu', [AdminAssetBorrowController::class, 'pending'])->name('pending');
+        Route::get('/jatuh-tempo', [AdminAssetBorrowController::class, 'duesoon'])->name('duesoon');
+        Route::get('/terlambat', [AdminAssetBorrowController::class, 'overdue'])->name('overdue');
+        Route::get('/{id}', [AdminAssetBorrowController::class, 'show'])->name('show');
+        Route::post('/{id}/setujui', [AdminAssetBorrowController::class, 'approve'])->name('approve');
+        Route::post('/{id}/tolak', [AdminAssetBorrowController::class, 'reject'])->name('reject');
+        Route::post('/{id}/serahkan', [AdminAssetBorrowController::class, 'handover'])->name('handover');
+        Route::post('/{id}/terima-kembali', [AdminAssetBorrowController::class, 'returnAsset'])->name('return');
+        Route::delete('/{id}', [AdminAssetBorrowController::class, 'destroy'])->name('destroy');
     });
     
     // Notifikasi
@@ -156,12 +177,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::get('/aset/view/{id}', [AssetController::class, 'publicShow'])->name('aset.public.show');
 
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function () {
+    
+    // Dashboard
     Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
+    
+    // Profil
     Route::get('profil', [ProfileController::class, 'index'])->name('profil');
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
     
+    // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
@@ -175,12 +201,30 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
     });
     
+    // Disposisi
     Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/', [DispositionController::class, 'index'])->name('index');
+        Route::get('/create', [DispositionController::class, 'create'])->name('create');
+        Route::post('/', [DispositionController::class, 'store'])->name('store');
         Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [DispositionController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [DispositionController::class, 'update'])->name('update');
+        Route::delete('/{id}', [DispositionController::class, 'destroy'])->name('destroy');
         Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
     });
     
+    // Peminjaman Aset (Staff)
+    Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+        Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
+        Route::get('/', [StaffAssetBorrowController::class, 'index'])->name('index');
+        Route::get('/create', [StaffAssetBorrowController::class, 'create'])->name('create');
+        Route::post('/store', [StaffAssetBorrowController::class, 'store'])->name('store');
+        Route::get('/{id}', [StaffAssetBorrowController::class, 'show'])->name('show');
+        Route::delete('/{id}', [StaffAssetBorrowController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
         Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
@@ -191,12 +235,14 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
     });
     
+    // Manajemen Aset (Read-Only + Upload unit sendiri)
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
+    // Laporan
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
@@ -208,6 +254,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
     
+    // Pengaturan
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
@@ -216,7 +263,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
 });
 
 // ==================================================
-// ✅ PIMPINAN ROUTES (READ-ONLY MONITORING)
+// PIMPINAN ROUTES
 // ==================================================
 Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
     
@@ -241,10 +288,17 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
     });
     
-    // Disposisi (Read-Only)
+    // Disposisi
     Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/', [DispositionController::class, 'index'])->name('index');
+        Route::get('/create', [DispositionController::class, 'create'])->name('create');
+        Route::post('/', [DispositionController::class, 'store'])->name('store');
         Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [DispositionController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [DispositionController::class, 'update'])->name('update');
+        Route::delete('/{id}', [DispositionController::class, 'destroy'])->name('destroy');
+        Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
     });
     
     // Notifikasi
@@ -265,7 +319,7 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
-    // ✅ TAMBAHAN: Manajemen User (Read-Only untuk Pimpinan)
+    // Manajemen User (Read-Only)
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/{id}', [UserController::class, 'show'])->name('show');
@@ -285,9 +339,14 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
     });
     
     // Pengaturan (Limited)
+   // Pengaturan (Profile & Password Only - Sama seperti Staff)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');
-        Route::put('/update-appearance', [SettingController::class, 'updateAppearance'])->name('update-appearance');
+    });
+
+    // Profil - Avatar Management
+    Route::prefix('profil')->name('profil.')->group(function () {
+        Route::delete('/avatar', [SettingController::class, 'removeAvatar'])->name('avatar.remove');
     });
 });

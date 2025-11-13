@@ -99,8 +99,13 @@ class ArchiveController extends Controller
             'E-Gov'
         ];
 
-        // Determine view prefix based on role
-        $viewPrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
+        // ✅ UPDATED: Support pimpinan role
+        $role = Auth::user()->role;
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
 
         return view("{$viewPrefix}.arsip.index", compact(
             'archives',
@@ -137,9 +142,15 @@ class ArchiveController extends Controller
 
     /**
      * Show the form for creating a new archive.
+     * ✅ ADMIN ONLY
      */
     public function create()
     {
+        // Only admin can create
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized - Only Admin can create archives');
+        }
+
         $categories = [];
         if (Schema::hasTable('categories')) {
             $categories = Category::all();
@@ -153,9 +164,15 @@ class ArchiveController extends Controller
 
     /**
      * Store a newly created archive (Multiple Files Support + Email Notification).
+     * ✅ ADMIN ONLY
      */
     public function store(Request $request)
     {
+        // Only admin can store
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized - Only Admin can create archives');
+        }
+
         // Validation rules
         $rules = [
             'nomor_surat' => 'required|string|max:255|unique:archives,nomor_surat',
@@ -293,15 +310,13 @@ class ArchiveController extends Controller
                 // Email gagal, tapi arsip tetap tersimpan
             }
 
-            $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
-
             // ✅ PESAN SUKSES DENGAN SWEETALERT2
             $fileCount = count($uploadedFiles);
             $successMessage = $fileCount > 1 
                 ? "Data arsip berhasil disimpan dengan {$fileCount} file ke sistem Diskominfo Batola!" 
                 : "Data arsip \"{$validated['judul']}\" berhasil disimpan ke sistem Diskominfo Batola!";
 
-            return redirect()->route("{$routePrefix}.arsip.index")
+            return redirect()->route('admin.arsip.index')
                            ->with('success', $successMessage);
         } catch (\Exception $e) {
             // ✅ PESAN ERROR DENGAN SWEETALERT2
@@ -313,20 +328,33 @@ class ArchiveController extends Controller
 
     /**
      * Display the specified archive (Halaman Detail).
+     * ✅ UPDATED: Support pimpinan
      */
     public function show($id)
     {
         $archive = Archive::findOrFail($id);
         
-        $viewPrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
+        $role = Auth::user()->role;
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
+        
         return view("{$viewPrefix}.arsip.show", compact('archive'));
     }
 
     /**
      * Show the form for editing the specified resource.
+     * ✅ ADMIN ONLY
      */
     public function edit($id)
     {
+        // Only admin can edit
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized - Only Admin can edit archives');
+        }
+
         $archive = Archive::findOrFail($id);
         
         $categories = [];
@@ -339,9 +367,15 @@ class ArchiveController extends Controller
 
     /**
      * Update the specified archive (FIXED - File tidak terhapus jika tidak upload baru).
+     * ✅ ADMIN ONLY
      */
     public function update(Request $request, $id)
     {
+        // Only admin can update
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized - Only Admin can update archives');
+        }
+
         $archive = Archive::findOrFail($id);
 
         $rules = [
@@ -410,10 +444,8 @@ class ArchiveController extends Controller
             // UPDATE archive
             $archive->update($validated);
 
-            $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
-
             // ✅ PESAN SUKSES UPDATE
-            return redirect()->route("{$routePrefix}.arsip.show", $archive->id)
+            return redirect()->route('admin.arsip.show', $archive->id)
                            ->with('success', 'Data arsip "' . $archive->judul . '" berhasil diperbarui dalam sistem!');
         } catch (\Exception $e) {
             // ✅ PESAN ERROR UPDATE
@@ -425,9 +457,15 @@ class ArchiveController extends Controller
 
     /**
      * Remove the specified archive.
+     * ✅ ADMIN ONLY
      */
     public function destroy($id)
     {
+        // Only admin can delete
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized - Only Admin can delete archives');
+        }
+
         try {
             $archive = Archive::findOrFail($id);
             $judulArsip = $archive->judul;
@@ -439,10 +477,8 @@ class ArchiveController extends Controller
 
             $archive->delete();
 
-            $routePrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
-
             // ✅ PESAN SUKSES DELETE
-            return redirect()->route("{$routePrefix}.arsip.index")
+            return redirect()->route('admin.arsip.index')
                            ->with('success', 'Arsip "' . $judulArsip . '" berhasil dihapus dari sistem Diskominfo Batola!');
         } catch (\Exception $e) {
             // ✅ PESAN ERROR DELETE
@@ -453,6 +489,7 @@ class ArchiveController extends Controller
 
     /**
      * Toggle favorite status (FIXED - Return Redirect).
+     * ✅ UPDATED: All roles can favorite
      */
     public function toggleFavorite($id)
     {
@@ -480,6 +517,7 @@ class ArchiveController extends Controller
 
     /**
      * Display favorite archives.
+     * ✅ UPDATED: Support pimpinan
      */
     public function favorit(Request $request)
     {
@@ -518,13 +556,19 @@ class ArchiveController extends Controller
             'E-Gov'
         ];
 
-        $viewPrefix = Auth::user()->role === 'admin' ? 'admin' : 'staff';
+        $role = Auth::user()->role;
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
 
         return view("{$viewPrefix}.arsip.favorit", compact('archives', 'categories', 'units'));
     }
 
     /**
      * Preview archive file in browser (for PDF/Images).
+     * ✅ UPDATED: All roles can preview
      */
     public function preview($id)
     {
@@ -558,6 +602,7 @@ class ArchiveController extends Controller
 
     /**
      * Download archive file (FIXED - Force download).
+     * ✅ UPDATED: All roles can download
      */
     public function download($id)
     {

@@ -85,6 +85,7 @@
             text-decoration: none;
             transition: all 0.2s;
             font-size: 13px;
+            position: relative;
         }
         
         .sidebar-link:hover {
@@ -378,12 +379,58 @@
                     <span>Notifikasi</span>
                 </a>
                 
-                <a href="{{ route('admin.aset.index') }}" class="sidebar-link {{ Request::routeIs('admin.aset.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.aset.index') }}" class="sidebar-link {{ Request::routeIs('admin.aset.*') && !Request::routeIs('admin.peminjaman.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                     </svg>
                     <span>Manajemen Aset</span>
                 </a>
+                
+                {{-- ============================================= --}}
+                {{-- MENU PEMINJAMAN ASET - BARU --}}
+                {{-- ============================================= --}}
+                @if(Auth::user()->role === 'admin')
+                    {{-- ADMIN: Menu Peminjaman Aset dengan Badge --}}
+                    <a href="{{ route('admin.peminjaman.index') }}" 
+                       class="sidebar-link {{ Request::routeIs('admin.peminjaman.*') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                        <span>Peminjaman Aset</span>
+                        
+                        @php
+                            $pendingCount = \App\Models\AssetBorrow::where('status', 'pending')->count();
+                        @endphp
+                        
+                        @if($pendingCount > 0)
+                        <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $pendingCount }}
+                        </span>
+                        @endif
+                    </a>
+
+                @elseif(Auth::user()->role === 'staff')
+                    {{-- STAFF: Menu Peminjaman Saya --}}
+                    <a href="{{ route('staff.peminjaman.index') }}" 
+                       class="sidebar-link {{ Request::routeIs('staff.peminjaman.index') || Request::routeIs('staff.peminjaman.show') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span>Peminjaman Saya</span>
+                    </a>
+                    
+                    {{-- STAFF: Menu Cari & Pinjam Aset --}}
+                    <a href="{{ route('staff.peminjaman.browse') }}" 
+                       class="sidebar-link {{ Request::routeIs('staff.peminjaman.browse') || Request::routeIs('staff.peminjaman.create') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span>Cari & Pinjam Aset</span>
+                    </a>
+                @endif
+                {{-- ============================================= --}}
+                {{-- END MENU PEMINJAMAN --}}
+                {{-- ============================================= --}}
                 
                 <a href="{{ route('admin.user.index') }}" class="sidebar-link {{ Request::routeIs('admin.user.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -3,7 +3,7 @@
 @section('title', 'Edit Disposisi')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto" x-data="{ itemType: '{{ old('item_type', $disposition->item_type === 'Arsip' ? 'arsip' : 'aset') }}' }">
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center mb-4">
@@ -34,21 +34,89 @@
             @csrf
             @method('PUT')
 
-            <!-- Select Archive -->
+            <!-- Select Item Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Pilih Arsip/Surat <span class="text-red-500">*</span>
+                    Tipe Item <span class="text-red-500">*</span>
                 </label>
-                <select name="archive_id" id="archive_id" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('archive_id') border-red-500 @enderror">
-                    <option value="">-- Pilih Arsip/Surat --</option>
-                    @foreach($archives as $archive)
-                    <option value="{{ $archive->id }}" {{ (old('archive_id', $disposition->archive_id) == $archive->id) ? 'selected' : '' }}>
-                        {{ $archive->nomor_surat }} - {{ $archive->judul }}
-                    </option>
-                    @endforeach
-                </select>
-                @error('archive_id')
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500" 
+                           :class="itemType === 'arsip' ? 'border-purple-500 bg-purple-50' : 'border-gray-300'"
+                           @click="itemType = 'arsip'">
+                        <input type="radio" name="item_type" value="arsip" class="sr-only" 
+                               :checked="itemType === 'arsip'">
+                        <div class="flex items-center w-full">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Arsip/Surat</p>
+                                <p class="text-xs text-gray-500">Disposisi dokumen arsip</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-pink-500"
+                           :class="itemType === 'aset' ? 'border-pink-500 bg-pink-50' : 'border-gray-300'"
+                           @click="itemType = 'aset'">
+                        <input type="radio" name="item_type" value="aset" class="sr-only"
+                               :checked="itemType === 'aset'">
+                        <div class="flex items-center w-full">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
+                                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Aset</p>
+                                <p class="text-xs text-gray-500">Disposisi inventaris aset</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                @error('item_type')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Select Item (Dynamic) -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <span x-text="itemType === 'aset' ? 'Pilih Aset' : 'Pilih Arsip/Surat'"></span>
+                    <span class="text-red-500">*</span>
+                </label>
+                
+                <!-- Arsip Select -->
+                <div x-show="itemType === 'arsip'" x-cloak>
+                    <select name="item_id" id="item_select_arsip" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('item_id') border-red-500 @enderror">
+                        <option value="">-- Pilih Arsip/Surat --</option>
+                        @foreach($archives as $archive)
+                        <option value="{{ $archive->id }}" 
+                                {{ old('item_id', $disposition->disposable_id) == $archive->id && $disposition->item_type === 'Arsip' ? 'selected' : '' }}>
+                            {{ $archive->nomor_surat }} - {{ $archive->judul }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Aset Select -->
+                <div x-show="itemType === 'aset'" x-cloak>
+                    <select name="item_id" id="item_select_aset" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('item_id') border-red-500 @enderror">
+                        <option value="">-- Pilih Aset --</option>
+                        @foreach($assets as $asset)
+                        <option value="{{ $asset->id }}" 
+                                {{ old('item_id', $disposition->disposable_id) == $asset->id && $disposition->item_type === 'Aset' ? 'selected' : '' }}>
+                            {{ $asset->kode_asset }} - {{ $asset->nama }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                @error('item_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -138,7 +206,7 @@
                     </svg>
                     <div>
                         <h4 class="text-sm font-bold text-yellow-800 mb-1">⚠️ Perhatian</h4>
-                        <p class="text-sm text-yellow-700">Perubahan pada disposisi akan mempengaruhi tracking dan status yang sudah ada. Pastikan perubahan yang Anda Lakukan sudah benar.</p>
+                        <p class="text-sm text-yellow-700">Perubahan pada disposisi akan mempengaruhi tracking dan status yang sudah ada. Pastikan perubahan yang Anda lakukan sudah benar.</p>
                     </div>
                 </div>
             </div>
@@ -149,8 +217,7 @@
                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Batal
                 </a>
-               <button type="button" 
-                    onclick="confirmAction(this, 'Simpan Perubahan?', 'Disposisi akan diperbarui dengan data baru', 'Ya, Simpan')"
+                <button type="submit"
                     class="px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg hover:from-yellow-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -161,4 +228,13 @@
         </form>
     </div>
 </div>
+
+<!-- Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<style>
+[x-cloak] { 
+    display: none !important; 
+}
+</style>
 @endsection

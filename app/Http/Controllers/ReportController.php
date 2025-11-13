@@ -15,11 +15,17 @@ class ReportController extends Controller
 {
     /**
      * Display main report dashboard
+     * ✅ UPDATED: Support pimpinan
      */
     public function index(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
+
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
 
         // Date range filter
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
@@ -35,6 +41,7 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $archiveQuery->where('user_id', $user->id);
         }
+        // Admin dan Pimpinan lihat semua
 
         $archiveStats = [
             'total' => $archiveQuery->count(),
@@ -56,6 +63,7 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $dispositionQuery->where('to_user_id', $user->id);
         }
+        // Admin dan Pimpinan lihat semua
 
         $dispositionStats = [
             'total' => $dispositionQuery->count(),
@@ -67,13 +75,14 @@ class ReportController extends Controller
                 ->count(),
         ];
 
-        // User Statistics (Admin only)
+        // ✅ UPDATED: User Statistics (Admin and Pimpinan only)
         $userStats = [];
-        if ($role === 'admin') {
+        if (in_array($role, ['admin', 'pimpinan'])) {
             $userStats = [
                 'total' => User::count(),
                 'admin' => User::where('role', 'admin')->count(),
                 'staff' => User::where('role', 'staff')->count(),
+                'pimpinan' => User::where('role', 'pimpinan')->count(),
                 'active' => User::count(),
             ];
         }
@@ -93,11 +102,17 @@ class ReportController extends Controller
 
     /**
      * Archive report
+     * ✅ UPDATED: Support pimpinan
      */
     public function arsip(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
+
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
 
         $query = Archive::with(['category', 'uploader']);
 
@@ -122,6 +137,7 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $query->where('user_id', $user->id);
         }
+        // Admin dan Pimpinan lihat semua
 
         $archives = $query->orderBy('archives.created_at', 'desc')->paginate(20);
 
@@ -130,11 +146,17 @@ class ReportController extends Controller
 
     /**
      * Disposition report
+     * ✅ UPDATED: Support pimpinan
      */
     public function disposisi(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
+
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
 
         $query = Disposition::with(['archive', 'fromUser', 'toUser']);
 
@@ -159,6 +181,7 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $query->where('to_user_id', $user->id);
         }
+        // Admin dan Pimpinan lihat semua
 
         $dispositions = $query->orderBy('dispositions.created_at', 'desc')->paginate(20);
 
@@ -166,12 +189,15 @@ class ReportController extends Controller
     }
 
     /**
-     * User activity report (Admin only)
+     * User activity report
+     * ✅ UPDATED: Admin and Pimpinan only
      */
     public function user(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+        $role = Auth::user()->role;
+
+        if (!in_array($role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized - Admin and Pimpinan only');
         }
 
         // Get users with manual count (avoid withCount issue)
@@ -201,15 +227,21 @@ class ReportController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        return view('admin.laporan.user', ['users' => $paginator]);
+        return view("{$role}.laporan.user", ['users' => $paginator]);
     }
 
     /**
      * Periode statistics report (Monthly & Annual)
+     * ✅ UPDATED: Support pimpinan
      */
     public function periode(Request $request)
     {
         $role = Auth::user()->role;
+        
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
         
         $type = $request->input('type', 'monthly'); // monthly or yearly
         $month = $request->input('month', Carbon::now()->month);
@@ -302,10 +334,16 @@ class ReportController extends Controller
 
     /**
      * Unit productivity report
+     * ✅ UPDATED: Support pimpinan
      */
     public function unitKerja(Request $request)
     {
         $role = Auth::user()->role;
+        
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
         
         // Date range
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
@@ -380,6 +418,7 @@ class ReportController extends Controller
 
     /**
      * PRINT PDF - Preview di browser untuk dicetak
+     * ✅ UPDATED: Support pimpinan
      */
     public function printPdf(Request $request)
     {
@@ -394,6 +433,7 @@ class ReportController extends Controller
 
     /**
      * DOWNLOAD PDF - Download langsung
+     * ✅ UPDATED: Support pimpinan
      */
     public function exportPdf(Request $request)
     {
@@ -408,6 +448,7 @@ class ReportController extends Controller
 
     /**
      * Export report to Excel
+     * ✅ UPDATED: Support pimpinan
      */
     public function exportExcel(Request $request)
     {

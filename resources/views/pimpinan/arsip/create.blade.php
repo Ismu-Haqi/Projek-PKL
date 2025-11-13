@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Unggah Arsip Baru')
 
@@ -10,7 +10,7 @@
             <h1 class="text-3xl font-bold text-gray-800">📤 Unggah Arsip Digital Baru</h1>
             <p class="text-sm text-gray-500 mt-1">Lengkapi informasi dan unggah file arsip digital</p>
         </div>
-        <a href="{{ route('admin.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
+        <a href="{{ route('pimpinan.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -38,7 +38,7 @@
     @endif
 
     {{-- Form --}}
-    <form action="{{ route('admin.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+    <form action="{{ route('pimpinan.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
         @csrf
         
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -211,7 +211,7 @@
 
         {{-- Action Buttons --}}
         <div class="flex justify-end gap-3">
-            <a href="{{ route('admin.arsip.index') }}" 
+            <a href="{{ route('pimpinan.arsip.index') }}" 
                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
                 Batal
             </a>

@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Laporan Aktivitas User')
 
@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-center">
-            <a href="{{ route('admin.laporan.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <a href="{{ route('pimpinan.laporan.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
@@ -44,7 +44,7 @@
                 </div>
             </div>
             <p class="text-sm text-gray-600 mb-1">Admin</p>
-            <p class="text-3xl font-bold text-purple-600">{{ $users->where('role', 'admin')->count() }}</p>
+            <p class="text-3xl font-bold text-purple-600">{{ $users->where('role', 'pimpinan')->count() }}</p>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -73,9 +73,9 @@
     </div>
 
     <!-- Tombol Untuk Print dan Download -->
-    @if(auth()->user()->role === 'admin')
+    @if(auth()->user()->role === 'pimpinan')
 <div class="flex gap-2 mb-4">
-    <a href="{{ route('admin.laporan.print-pdf', ['type' => 'user']) }}" 
+    <a href="{{ route('pimpinan.laporan.print-pdf', ['type' => 'user']) }}" 
        target="_blank"
        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@
         Print PDF
     </a>
     
-    <a href="{{ route('admin.laporan.export-pdf', ['type' => 'user']) }}" 
+    <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'user']) }}" 
        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -126,7 +126,7 @@
                             {{ $user->email }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            @if($user->role === 'admin')
+                            @if($user->role === 'pimpinan')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
                                     Admin
                                 </span>

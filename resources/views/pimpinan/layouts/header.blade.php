@@ -18,9 +18,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
-                <input type="text" 
-                    class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    placeholder="Cari arsip, surat, atau dokumen...">
+                <form action="{{ route(Auth::user()->role . '.arsip.index') }}" method="GET">
+                    <input type="text" 
+                        name="search"
+                        class="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Cari arsip, surat, atau dokumen...">
+                </form>
             </div>
         </div>
 
@@ -33,7 +36,14 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
-                    <span class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">3</span>
+                    @php
+                        $unreadCount = Auth::user()->notifications()->where('read_at', null)->count();
+                    @endphp
+                    @if($unreadCount > 0)
+                    <span class="notification-badge absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                        {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                    </span>
+                    @endif
                 </button>
 
                 <!-- Notification Dropdown -->
@@ -41,11 +51,15 @@
                     <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-gray-800">Notifikasi</h3>
-                            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">3 Baru</span>
+                            @if($unreadCount > 0)
+                            <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">{{ $unreadCount }} Baru</span>
+                            @endif
                         </div>
                     </div>
                     <div class="max-h-96 overflow-y-auto">
-                        <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                        @forelse(Auth::user()->notifications()->latest()->take(5)->get() as $notification)
+                        <a href="{{ route(Auth::user()->role . '.notifikasi.read', $notification->id) }}" 
+                           class="flex items-start p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notification->read_at ? 'opacity-60' : '' }}">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                                 <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -53,13 +67,21 @@
                                 </svg>
                             </div>
                             <div class="ml-3 flex-1">
-                                <p class="text-sm font-medium text-gray-800">Arsip baru diunggah</p>
-                                <p class="text-xs text-gray-500 mt-1">Surat Edaran COVID-19 telah ditambahkan</p>
-                                <p class="text-xs text-blue-600 mt-1">5 menit lalu</p>
+                                <p class="text-sm font-medium text-gray-800">{{ $notification->data['title'] ?? 'Notifikasi' }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ Str::limit($notification->data['message'] ?? '', 60) }}</p>
+                                <p class="text-xs text-blue-600 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
                             </div>
                         </a>
+                        @empty
+                        <div class="p-8 text-center">
+                            <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                            </svg>
+                            <p class="text-sm text-gray-500">Tidak ada notifikasi</p>
+                        </div>
+                        @endforelse
                     </div>
-                    <div class="p-3 bg-gray-50 text-center">
+                    <div class="p-3 bg-gray-50 text-center border-t border-gray-200">
                         <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Lihat Semua Notifikasi</a>
                     </div>
                 </div>
@@ -76,14 +98,14 @@
                                  class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                                {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                                {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                             </div>
                         @endif
                     </div>
                     
                     <div class="hidden md:block text-left">
-                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Pimpinan' }}</p>
-                        <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role ?? 'pimpinan') }}</p>
+                        <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-gray-500 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -102,14 +124,14 @@
                                          class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                                        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                                        {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                                     </div>
                                 @endif
                             </div>
                             
                             <div>
-                                <p class="font-bold text-gray-800">{{ Auth::user()->name ?? 'Pimpinan' }}</p>
-                                <p class="text-xs text-gray-600">{{ Auth::user()->email ?? 'kepala@diskominfo.batola.go.id' }}</p>
+                                <p class="font-bold text-gray-800">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-gray-600">{{ Auth::user()->email }}</p>
                             </div>
                         </div>
                     </div>
@@ -146,21 +168,22 @@
 </header>
 
 <script>
+// Global Variables
+const USER_ROLE = '{{ Auth::user()->role }}';
+
 // Toggle Notification Dropdown
 function toggleNotification() {
     const dropdown = document.getElementById('notificationDropdown');
     const profileDropdown = document.getElementById('profileDropdown');
     
     // Close profile dropdown
-    if (profileDropdown.style.display === 'block') {
+    if (profileDropdown && profileDropdown.style.display === 'block') {
         profileDropdown.style.display = 'none';
     }
     
     // Toggle notification dropdown
-    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-        dropdown.style.display = 'block';
-    } else {
-        dropdown.style.display = 'none';
+    if (dropdown) {
+        dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
     }
 }
 
@@ -170,23 +193,33 @@ function toggleProfile() {
     const notificationDropdown = document.getElementById('notificationDropdown');
     
     // Close notification dropdown
-    if (notificationDropdown.style.display === 'block') {
+    if (notificationDropdown && notificationDropdown.style.display === 'block') {
         notificationDropdown.style.display = 'none';
     }
     
     // Toggle profile dropdown
-    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-        dropdown.style.display = 'block';
-    } else {
-        dropdown.style.display = 'none';
+    if (dropdown) {
+        dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
     }
 }
 
-// Confirm Logout
+// Confirm Logout with SweetAlert2
 function confirmLogout() {
-    if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-        document.getElementById('logoutForm').submit();
-    }
+    Swal.fire({
+        title: 'Konfirmasi Keluar',
+        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="fas fa-sign-out-alt me-2"></i>Ya, Keluar',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('logoutForm').submit();
+        }
+    });
 }
 
 // Close dropdowns when clicking outside
@@ -196,14 +229,32 @@ document.addEventListener('click', function(event) {
     
     // Check if click is outside notification dropdown
     const notificationBtn = event.target.closest('button[onclick="toggleNotification()"]');
-    if (!notificationBtn && !notificationDropdown.contains(event.target)) {
+    if (notificationDropdown && !notificationBtn && !notificationDropdown.contains(event.target)) {
         notificationDropdown.style.display = 'none';
     }
     
     // Check if click is outside profile dropdown
     const profileBtn = event.target.closest('button[onclick="toggleProfile()"]');
-    if (!profileBtn && !profileDropdown.contains(event.target)) {
+    if (profileDropdown && !profileBtn && !profileDropdown.contains(event.target)) {
         profileDropdown.style.display = 'none';
     }
 });
+
+// Auto-update notification count
+setInterval(function() {
+    fetch('{{ route(Auth::user()->role . ".notifikasi.unread-count") }}')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching notification count:', error));
+}, 60000); // Update setiap 60 detik
 </script>

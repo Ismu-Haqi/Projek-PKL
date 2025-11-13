@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Edit Arsip')
 
@@ -10,7 +10,7 @@
             <h1 class="text-3xl font-bold text-gray-800">✏️ Edit Arsip Digital</h1>
             <p class="text-sm text-gray-500 mt-1">Perbarui informasi arsip digital</p>
         </div>
-        <a href="{{ route('admin.arsip.show', $archive->id) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
+        <a href="{{ route('pimpinan.arsip.show', $archive->id) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -38,7 +38,7 @@
     @endif
 
     {{-- Form --}}
-    <form action="{{ route('admin.arsip.update', $archive->id) }}" method="POST" enctype="multipart/form-data" id="editForm">
+    <form action="{{ route('pimpinan.arsip.update', $archive->id) }}" method="POST" enctype="multipart/form-data" id="editForm">
         @csrf
         @method('PUT')
         
@@ -153,7 +153,7 @@
                                 @endif
                             </div>
                         </div>
-                        <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                        <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
                            class="text-blue-600 hover:text-blue-700 text-sm font-medium">
                             Download
                         </a>
@@ -218,7 +218,7 @@
            
 
             <div class="flex gap-3">
-                <a href="{{ route('admin.arsip.show', $archive->id) }}" 
+                <a href="{{ route('pimpinan.arsip.show', $archive->id) }}" 
                    class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
                     Batal
                 </a>

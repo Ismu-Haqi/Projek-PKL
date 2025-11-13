@@ -117,7 +117,7 @@ class DashboardController extends Controller
                 return [
                     'type' => 'disposition',
                     'user' => $disposition->fromUser->name ?? 'Unknown',
-                    'title' => $disposition->archive->judul ?? $disposition->subject,
+                    'title' => $disposition->archive->judul ?? $disposition->subject, // ❌ Ini error
                     'time' => $disposition->created_at->diffForHumans(),
                     'timestamp' => $disposition->created_at,
                     'color' => 'green'

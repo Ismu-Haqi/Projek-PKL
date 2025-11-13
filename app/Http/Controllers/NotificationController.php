@@ -10,6 +10,7 @@ class NotificationController extends Controller
 {
     /**
      * Display a listing of notifications
+     * ✅ UPDATED: Support all roles (admin, staff, pimpinan)
      */
     public function index()
     {
@@ -35,6 +36,7 @@ class NotificationController extends Controller
 
     /**
      * Mark notification as read
+     * ✅ All roles can mark as read
      */
     public function markAsRead($id)
     {
@@ -53,6 +55,7 @@ class NotificationController extends Controller
 
     /**
      * Mark all notifications as read
+     * ✅ All roles can mark all as read
      */
     public function markAllAsRead()
     {
@@ -67,6 +70,7 @@ class NotificationController extends Controller
 
     /**
      * Delete notification
+     * ✅ All roles can delete their notifications
      */
     public function destroy($id)
     {
@@ -80,6 +84,7 @@ class NotificationController extends Controller
 
     /**
      * Get unread notifications count (for AJAX)
+     * ✅ All roles can get unread count
      */
     public function getUnreadCount()
     {
@@ -91,6 +96,7 @@ class NotificationController extends Controller
 
     /**
      * Get recent notifications (for dropdown)
+     * ✅ All roles can get recent notifications
      */
     public function getRecent()
     {
@@ -109,6 +115,7 @@ class NotificationController extends Controller
 
     /**
      * Delete all read notifications
+     * ✅ All roles can clear read notifications
      */
     public function clearRead()
     {

@@ -1,6 +1,6 @@
 @extends(Auth::user()->role . '.layouts.app')
 
-@section('title', 'Disposisi Surat')
+@section('title', 'Disposisi Surat & Aset')
 
 @section('content')
 <div class="space-y-6">
@@ -13,13 +13,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
-                Disposisi Surat
+                Disposisi Surat & Aset
             </h1>
-            <p class="text-gray-600 mt-1 ml-15">Kelola dan pantau disposisi surat masuk</p>
+            <p class="text-gray-600 mt-1 ml-15">Kelola dan pantau disposisi surat masuk dan aset inventaris</p>
         </div>
         
-        @if(Auth::user()->role === 'admin')
-        <a href="{{ route('admin.disposisi.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        @if(Auth::user()->role === 'pimpinan')
+        <a href="{{ route('pimpinan.disposisi.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -93,7 +93,7 @@
 
     <!-- Filters & Search -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <form method="GET" action="{{ route(Auth::user()->role . '.disposisi.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route(Auth::user()->role . '.disposisi.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <!-- Search -->
             <div class="md:col-span-2">
                 <div class="relative">
@@ -104,6 +104,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
+            </div>
+
+            <!-- ✅ NEW - Item Type Filter -->
+            <div>
+                <select name="item_type" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="">Semua Tipe</option>
+                    <option value="arsip" {{ request('item_type') == 'arsip' ? 'selected' : '' }}>📄 Arsip/Surat</option>
+                    <option value="aset" {{ request('item_type') == 'aset' ? 'selected' : '' }}>📦 Aset</option>
+                </select>
             </div>
 
             <!-- Status Filter -->
@@ -137,9 +146,11 @@
                 <thead class="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No. Disposisi</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tipe</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Item</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Subjek</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            @if(Auth::user()->role === 'admin')
+                            @if(Auth::user()->role === 'pimpinan')
                                 Penerima
                             @else
                                 Pengirim
@@ -162,13 +173,35 @@
                                 <span class="font-semibold text-gray-800">{{ $disposition->nomor_disposisi }}</span>
                             </div>
                         </td>
+                        <!-- ✅ NEW - Item Type Column -->
+                        <td class="px-6 py-4">
+                            @if($disposition->item_type === 'Arsip')
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Arsip
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-pink-100 text-pink-700">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    Aset
+                                </span>
+                            @endif
+                        </td>
+                        <!-- ✅ NEW - Item Info Column -->
+                        <td class="px-6 py-4">
+                            <p class="font-medium text-gray-800 text-sm">{{ $disposition->item_identifier }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ Str::limit($disposition->item_name, 30) }}</p>
+                        </td>
                         <td class="px-6 py-4">
                             <p class="font-medium text-gray-800">{{ Str::limit($disposition->subject, 40) }}</p>
-                            <p class="text-sm text-gray-500 mt-1">{{ $disposition->archive->nomor_surat ?? '-' }}</p>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                @if(Auth::user()->role === 'admin')
+                                @if(Auth::user()->role === 'pimpinan')
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs mr-2">
                                         {{ strtoupper(substr($disposition->toUser->name, 0, 2)) }}
                                     </div>
@@ -245,8 +278,8 @@
                                     </svg>
                                 </a>
                                 
-                                @if(Auth::user()->role === 'admin')
-                                <a href="{{ route('admin.disposisi.edit', $disposition->id) }}" 
+                                @if(Auth::user()->role === 'pimpinan')
+                                <a href="{{ route('pimpinan.disposisi.edit', $disposition->id) }}" 
                                    class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" 
                                    title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,7 +287,7 @@
                                     </svg>
                                 </a>
                                 
-                               <form action="{{ route('admin.disposisi.destroy', $disposition->id) }}" method="POST" class="inline-block">
+                                <form action="{{ route('pimpinan.disposisi.destroy', $disposition->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" 
@@ -272,7 +305,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
+                        <td colspan="9" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center justify-center">
                                 <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -298,7 +331,7 @@
 
 <script>
 // Auto-submit form when filter changes
-document.querySelectorAll('select[name="status"], select[name="priority"]').forEach(select => {
+document.querySelectorAll('select[name="item_type"], select[name="status"], select[name="priority"]').forEach(select => {
     select.addEventListener('change', function() {
         this.form.submit();
     });

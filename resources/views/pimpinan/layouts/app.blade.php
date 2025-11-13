@@ -352,7 +352,7 @@
                 
                 <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">MANAJEMEN</p>
                 
-                {{-- Arsip Digital --}}
+                {{-- ✅ Arsip Digital --}}
                 <a href="{{ route('pimpinan.arsip.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.arsip.index') || Request::routeIs('pimpinan.arsip.show') || Request::routeIs('pimpinan.arsip.preview') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,7 +361,7 @@
                     <span>Arsip Digital</span>
                 </a>
                 
-                {{-- Arsip Favorit --}}
+                {{-- ✅ Arsip Favorit - FIXED --}}
                 <a href="{{ route('pimpinan.arsip.favorit') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.arsip.favorit') ? 'active' : '' }}">
                     <svg fill="currentColor" viewBox="0 0 20 20">
@@ -370,7 +370,7 @@
                     <span>Arsip Favorit</span>
                 </a>
                 
-                {{-- Disposisi --}}
+                {{-- ✅ Disposisi --}}
                 <a href="{{ route('pimpinan.disposisi.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.disposisi.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,7 +379,7 @@
                     <span>Disposisi</span>
                 </a>
                 
-                {{-- Notifikasi --}}
+                {{-- ✅ Notifikasi --}}
                 <a href="{{ route('pimpinan.notifikasi.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.notifikasi.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,7 +388,7 @@
                     <span>Notifikasi</span>
                 </a>
                 
-                {{-- Manajemen Aset --}}
+                {{-- ✅ Manajemen Aset --}}
                 <a href="{{ route('pimpinan.aset.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.aset.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +397,16 @@
                     <span>Manajemen Aset</span>
                 </a>
                 
-                {{-- Laporan --}}
+                {{-- ✅ Manajemen User --}}
+                <a href="{{ route('pimpinan.user.index') }}" 
+                   class="sidebar-link {{ Request::routeIs('pimpinan.user.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <span>Manajemen User</span>
+                </a>
+                
+                {{-- ✅ Laporan --}}
                 <a href="{{ route('pimpinan.laporan.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.laporan.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,7 +415,7 @@
                     <span>Laporan</span>
                 </a>
                 
-                {{-- Pengaturan --}}
+                {{-- ✅ Pengaturan --}}
                 <a href="{{ route('pimpinan.pengaturan.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.pengaturan.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

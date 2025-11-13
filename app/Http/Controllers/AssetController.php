@@ -12,10 +12,16 @@ class AssetController extends Controller
 {
     /**
      * Display a listing of assets
+     * ✅ UPDATED: Support pimpinan
      */
     public function index(Request $request)
     {
         $role = Auth::user()->role;
+        
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
         
         $query = Asset::query();
         
@@ -59,17 +65,24 @@ class AssetController extends Controller
         $categories = Asset::select('kategori')->distinct()->pluck('kategori');
         $units = Asset::select('unit')->distinct()->whereNotNull('unit')->pluck('unit');
         
-        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+        // ✅ UPDATED: Support pimpinan
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
+        
         return view("{$viewPrefix}.aset.index", compact('assets', 'stats', 'categories', 'units'));
     }
 
     /**
      * Show the form for creating a new asset
+     * ✅ ADMIN ONLY
      */
     public function create()
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         // Get existing categories and units for dropdown
@@ -81,11 +94,12 @@ class AssetController extends Controller
 
     /**
      * Store a newly created asset
+     * ✅ ADMIN ONLY
      */
     public function store(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         $validated = $request->validate([
@@ -135,23 +149,36 @@ class AssetController extends Controller
 
     /**
      * Display the specified asset
+     * ✅ UPDATED: Support pimpinan
      */
     public function show($id)
     {
         $role = Auth::user()->role;
+        
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+        
         $asset = Asset::findOrFail($id);
         
-        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
+        
         return view("{$viewPrefix}.aset.show", compact('asset'));
     }
 
     /**
      * Show the form for editing the specified asset
+     * ✅ ADMIN ONLY
      */
     public function edit($id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         $asset = Asset::findOrFail($id);
@@ -165,11 +192,12 @@ class AssetController extends Controller
 
     /**
      * Update the specified asset
+     * ✅ ADMIN ONLY
      */
     public function update(Request $request, $id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         $asset = Asset::findOrFail($id);
@@ -220,11 +248,12 @@ class AssetController extends Controller
 
     /**
      * Remove the specified asset
+     * ✅ ADMIN ONLY
      */
     public function destroy($id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         $asset = Asset::findOrFail($id);
@@ -247,11 +276,12 @@ class AssetController extends Controller
 
     /**
      * Update status asset (quick update)
+     * ✅ ADMIN ONLY
      */
     public function updateStatus(Request $request, $id)
     {
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
+            abort(403, 'Unauthorized - Admin only');
         }
         
         $asset = Asset::findOrFail($id);
@@ -269,32 +299,36 @@ class AssetController extends Controller
     /**
      * Generate QR Code for asset
      */
-private function generateQrCode($asset)
-{
-    // Ganti ke route public
-    $qrContent = route('aset.public.show', $asset->id);
-    
-    $qrCode = QrCode::format('svg')
-        ->size(300)
-        ->errorCorrection('H')
-        ->generate($qrContent);
-    
-    $filename = 'qr_' . $asset->kode_asset . '.svg';
-    $path = 'qrcodes/' . $filename;
-    
-    Storage::disk('public')->put($path, $qrCode);
-    
-    $asset->update(['qr_code' => $path]);
-}
+    private function generateQrCode($asset)
+    {
+        // Ganti ke route public
+        $qrContent = route('aset.public.show', $asset->id);
+        
+        $qrCode = QrCode::format('svg')
+            ->size(300)
+            ->errorCorrection('H')
+            ->generate($qrContent);
+        
+        $filename = 'qr_' . $asset->kode_asset . '.svg';
+        $path = 'qrcodes/' . $filename;
+        
+        Storage::disk('public')->put($path, $qrCode);
+        
+        $asset->update(['qr_code' => $path]);
+    }
 
-public function publicShow($id)
-{
-    $asset = Asset::findOrFail($id);
-    return view('public.aset-detail', compact('asset'));
-}
+    /**
+     * Public asset detail view (for QR code scanning)
+     */
+    public function publicShow($id)
+    {
+        $asset = Asset::findOrFail($id);
+        return view('public.aset-detail', compact('asset'));
+    }
     
     /**
      * Download QR Code
+     * ✅ UPDATED: All roles can download QR
      */
     public function downloadQr($id)
     {
