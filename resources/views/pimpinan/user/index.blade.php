@@ -17,13 +17,6 @@
             </h1>
             <p class="text-gray-600 mt-1 ml-15">Kelola pengguna sistem aplikasi</p>
         </div>
-        
-        {{-- <a href="{{ route('pimpinan.user.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah User Baru
-        </a> --}}
     </div>
 
     <!-- Statistics Cards -->
@@ -43,16 +36,16 @@
             </div>
         </div>
 
-        <!-- Admin -->
+        <!-- Pimpinan -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600 font-medium mb-1">Administrator</p>
-                    <p class="text-3xl font-bold text-purple-600">{{ $stats['pimpinan'] }}</p>
+                    <p class="text-sm text-gray-600 font-medium mb-1">Pimpinan</p>
+                    <p class="text-3xl font-bold text-amber-600">{{ $stats['pimpinan'] }}</p>
                 </div>
-                <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center">
-                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                <div class="w-14 h-14 rounded-xl bg-amber-100 flex items-center justify-center">
+                    <svg class="w-7 h-7 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                 </div>
             </div>
@@ -108,7 +101,7 @@
             <div>
                 <select name="role" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Semua Role</option>
-                    <option value="pimpinan" {{ request('role') == 'pimpinan' ? 'selected' : '' }}>Administrator</option>
+                    <option value="pimpinan" {{ request('role') == 'pimpinan' ? 'selected' : '' }}>Pimpinan</option>
                     <option value="staff" {{ request('role') == 'staff' ? 'selected' : '' }}>Staff</option>
                 </select>
             </div>
@@ -134,8 +127,16 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold mr-3">
-                                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                                <div class="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 shadow-md">
+                                    @if($user->avatar)
+                                        <img src="{{ asset('storage/' . $user->avatar) }}" 
+                                            alt="{{ $user->name }}" 
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800">{{ $user->name }}</p>
@@ -147,12 +148,19 @@
                             <span class="font-medium text-gray-700">{{ $user->username }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            @if($user->role === 'pimpinan')
+                            @if($user->role === 'admin')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200">
                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
                                     </svg>
                                     Admin
+                                </span>
+                            @elseif($user->role === 'pimpinan')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    Pimpinan
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
@@ -189,29 +197,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </a>
-                                
-                                {{-- <a href="{{ route('pimpinan.user.edit', $user->id) }}" 
-                                   class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" 
-                                   title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </a> --}}
-                                
-                                @if($user->id !== Auth::id())
-                                {{-- <form action="{{ route('pimpinan.user.destroy', $user->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" 
-                                            onclick="confirmDeleteUser(this, '{{ $user->name }}', '{{ $user->email }}')"
-                                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
-                                            title="Hapus">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form> --}}
-                                @endif
                             </div>
                         </td>
                     </tr>
@@ -249,61 +234,5 @@
 document.querySelector('select[name="role"]').addEventListener('change', function() {
     this.form.submit();
 });
-
-// Fungsi konfirmasi hapus user
-function confirmDeleteUser(button, userName, userEmail) {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-            button.closest('form').submit();
-        }
-        return;
-    }
-
-    Swal.fire({
-        title: '⚠️ Hapus User?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>
-                <div class="bg-gray-50 p-3 rounded mb-3">
-                    <p class="text-sm text-gray-600">Email: <strong>${userEmail}</strong></p>
-                </div>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                    <p class="text-sm text-yellow-800">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <strong>Peringatan:</strong> Semua data user akan dihapus permanen dan tidak dapat dikembalikan!
-                    </p>
-                </div>
-            </div>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus User!',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        focusCancel: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Menghapus User...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            button.disabled = true;
-            button.closest('form').submit();
-        }
-    });
-}
 </script>
 @endsection

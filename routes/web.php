@@ -237,6 +237,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     
     // Manajemen Aset (Read-Only + Upload unit sendiri)
     Route::prefix('aset')->name('aset.')->group(function () {
+        Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
@@ -281,8 +282,13 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
     // Arsip Digital (Read-Only + Favorit)
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
+        Route::get('/create', [ArchiveController::class, 'create'])->name('create'); 
+        Route::post('/', [ArchiveController::class, 'store'])->name('store'); 
         Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
         Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit'); 
+        Route::put('/{id}', [ArchiveController::class, 'update'])->name('update'); 
+        Route::delete('/{id}', [ArchiveController::class, 'destroy'])->name('destroy'); 
         Route::get('/{id}/preview', [ArchiveController::class, 'preview'])->name('preview');
         Route::get('/{id}/download', [ArchiveController::class, 'download'])->name('download');
         Route::post('/{id}/favorite', [ArchiveController::class, 'toggleFavorite'])->name('favorite');
@@ -316,6 +322,10 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AssetController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/status', [AssetController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     

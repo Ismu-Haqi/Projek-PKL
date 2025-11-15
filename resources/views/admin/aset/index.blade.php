@@ -72,7 +72,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Diperbaiki</p>
-                    <h3 class="text-2xl font-bold text-gray-800">{{ $stats['diperbaiki'] }}</h3>
+                    <h3 class="text-2xl font-bold text-gray-800">{{ $stats['maintenance'] }}</h3>
                 </div>
                 <div class="bg-yellow-100 p-3 rounded-full">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@
                     <option value="">Semua Status</option>
                     <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                     <option value="digunakan" {{ request('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
-                    <option value="diperbaiki" {{ request('status') == 'diperbaiki' ? 'selected' : '' }}>Diperbaiki</option>
+                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Diperbaiki</option>
                     <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                 </select>
             </div>
@@ -143,6 +143,18 @@
                     @foreach($units as $unit)
                         <option value="{{ $unit }}" {{ request('unit') == $unit ? 'selected' : '' }}>
                             {{ $unit }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Lokasi --}}
+            <div>
+                <select name="lokasi" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Semua Lokasi</option>
+                    @foreach($lokasis as $lokasi)
+                        <option value="{{ $lokasi }}" {{ request('lokasi') == $lokasi ? 'selected' : '' }}>
+                            {{ $lokasi }}
                         </option>
                     @endforeach
                 </select>
@@ -189,13 +201,13 @@
                         $statusColors = [
                             'tersedia' => 'bg-green-500',
                             'digunakan' => 'bg-blue-500',
-                            'diperbaiki' => 'bg-yellow-500',
+                            'maintenance' => 'bg-yellow-500',
                             'rusak' => 'bg-red-500'
                         ];
                         $statusLabels = [
                             'tersedia' => 'Tersedia',
                             'digunakan' => 'Digunakan',
-                            'diperbaiki' => 'Diperbaiki',
+                            'maintenance' => 'Diperbaiki',
                             'rusak' => 'Rusak'
                         ];
                     @endphp

@@ -67,7 +67,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 font-medium mb-1">Diperbaiki</p>
-                    <h3 class="text-3xl font-bold text-yellow-600">{{ $stats['diperbaiki'] }}</h3>
+                    <h3 class="text-3xl font-bold text-yellow-600">{{ $stats['maintenance'] }}</h3>
                 </div>
                 <div class="w-14 h-14 rounded-xl bg-yellow-100 flex items-center justify-center">
                     <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                     <option value="">Semua Status</option>
                     <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                     <option value="digunakan" {{ request('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
-                    <option value="diperbaiki" {{ request('status') == 'diperbaiki' ? 'selected' : '' }}>Diperbaiki</option>
+                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Diperbaiki</option>
                     <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                 </select>
             </div>
@@ -184,7 +184,7 @@
                     $statusConfig = [
                         'tersedia' => ['bg' => 'bg-green-500', 'text' => 'Tersedia'],
                         'digunakan' => ['bg' => 'bg-blue-500', 'text' => 'Digunakan'],
-                        'diperbaiki' => ['bg' => 'bg-yellow-500', 'text' => 'Diperbaiki'],
+                        'maintenance' => ['bg' => 'bg-yellow-500', 'text' => 'Diperbaiki'],
                         'rusak' => ['bg' => 'bg-red-500', 'text' => 'Rusak']
                     ];
                     $status = $statusConfig[$asset->status] ?? ['bg' => 'bg-gray-500', 'text' => ucfirst($asset->status)];

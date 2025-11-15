@@ -18,12 +18,12 @@
                 Kembali
             </a>
             @if(Auth::user()->role === 'pimpinan')
-            <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center">
+            {{-- <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 Edit
-            </a>
+            </a> --}}
             @endif
         </div>
     </div>
@@ -267,19 +267,19 @@
 
             {{-- Actions Card --}}
             @if(Auth::user()->role === 'pimpinan')
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">Aksi</h3>
+            {{-- <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Pimpinan</h3> --}}
                 
                 <div class="space-y-3">
-                    <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" 
+                    {{-- <a href="{{ route('pimpinan.arsip.edit', $archive->id) }}" 
                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                         Edit Arsip
-                    </a>
+                    </a> --}}
                     
-                    <form action="{{ route('pimpinan.arsip.destroy', $archive->id) }}" method="POST">
+                    {{-- <form action="{{ route('pimpinan.arsip.destroy', $archive->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="button" onclick="confirmDelete(this, 'Arsip akan dihapus permanen!')" 
@@ -289,7 +289,7 @@
                             </svg>
                             Hapus Arsip
                         </button>
-                    </form>
+                    </form> --}}
                 </div>
             </div>
             @endif

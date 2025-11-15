@@ -339,10 +339,15 @@
                 <span class="text-xl font-bold text-gray-800">GANDARIA</span>
             </div>
             
+            {{-- ============================================= --}}
+            {{-- NAVIGATION MENU - STAFF ONLY                --}}
+            {{-- ============================================= --}}
             <nav>
                 <p class="text-xs text-gray-400 font-semibold uppercase mb-2 px-2">BERANDA</p>
                 
-                <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ Request::routeIs('staff.dashboard') ? 'active' : '' }}">
+                {{-- Dashboard --}}
+                <a href="{{ route('staff.dashboard') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.dashboard') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v8a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>
@@ -351,35 +356,45 @@
                 
                 <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">MANAJEMEN</p>
                 
-                <a href="{{ route('staff.arsip.index') }}" class="sidebar-link {{ Request::routeIs('staff.arsip.index') ? 'active' : '' }}">
+                {{-- Arsip Digital --}}
+                <a href="{{ route('staff.arsip.index') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.arsip.index') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
                     </svg>
                     <span>Arsip Digital</span>
                 </a>
                 
-                <a href="{{ route('staff.arsip.favorit') }}" class="sidebar-link {{ Request::routeIs('staff.arsip.favorit') ? 'active' : '' }}">
+                {{-- Arsip Favorit --}}
+                <a href="{{ route('staff.arsip.favorit') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.arsip.favorit') ? 'active' : '' }}">
                     <svg fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                     <span>Arsip Favorit</span>
                 </a>
                 
-                <a href="{{ route('staff.disposisi.index') }}" class="sidebar-link {{ Request::routeIs('staff.disposisi.*') ? 'active' : '' }}">
+                {{-- Disposisi --}}
+                <a href="{{ route('staff.disposisi.index') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.disposisi.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <span>Disposisi</span>
                 </a>
                 
-                <a href="{{ route('staff.notifikasi.index') }}" class="sidebar-link {{ Request::routeIs('staff.notifikasi.*') ? 'active' : '' }}">
+                {{-- Notifikasi --}}
+                <a href="{{ route('staff.notifikasi.index') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.notifikasi.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
                     <span>Notifikasi</span>
                 </a>
                 
-                <a href="{{ route('staff.aset.index') }}" class="sidebar-link {{ Request::routeIs('staff.aset.*') && !Request::routeIs('staff.peminjaman.*') ? 'active' : '' }}">
+                {{-- Lihat Aset --}}
+                <a href="{{ route('staff.aset.index') }}" 
+                   class="sidebar-link {{ Request::routeIs('staff.aset.index') || Request::routeIs('staff.aset.show') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                     </svg>
@@ -387,11 +402,11 @@
                 </a>
                 
                 {{-- ============================================= --}}
-                {{-- MENU PEMINJAMAN ASET - STAFF --}}
+                {{-- SECTION: PEMINJAMAN (STAFF ONLY)            --}}
                 {{-- ============================================= --}}
                 <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">PEMINJAMAN</p>
                 
-                {{-- Menu Peminjaman Saya --}}
+                {{-- Peminjaman Saya --}}
                 <a href="{{ route('staff.peminjaman.index') }}" 
                    class="sidebar-link {{ Request::routeIs('staff.peminjaman.index') || Request::routeIs('staff.peminjaman.show') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +415,7 @@
                     <span>Peminjaman Saya</span>
                 </a>
                 
-                {{-- Menu Cari & Pinjam Aset --}}
+                {{-- Cari & Pinjam Aset --}}
                 <a href="{{ route('staff.peminjaman.browse') }}" 
                    class="sidebar-link {{ Request::routeIs('staff.peminjaman.browse') || Request::routeIs('staff.peminjaman.create') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,7 +424,7 @@
                     <span>Cari & Pinjam Aset</span>
                 </a>
                 {{-- ============================================= --}}
-                {{-- END MENU PEMINJAMAN --}}
+                {{-- END SECTION: PEMINJAMAN                     --}}
                 {{-- ============================================= --}}
             </nav>
             

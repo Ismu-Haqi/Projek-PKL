@@ -45,16 +45,15 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Kategori <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="kategori" value="{{ old('kategori', $asset->kategori) }}" required list="kategoris"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('kategori') border-red-500 @enderror">
-                    <datalist id="kategoris">
+                    <select name="kategori" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('kategori') border-red-500 @enderror">
+                        <option value="">Pilih Kategori</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category }}">
+                            <option value="{{ $category }}" {{ old('kategori', $asset->kategori) == $category ? 'selected' : '' }}>
+                                {{ $category }}
+                            </option>
                         @endforeach
-                        <option value="Komputer">
-                        <option value="Printer">
-                        <option value="Proyektor">
-                    </datalist>
+                    </select>
                     @error('kategori')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -120,7 +119,8 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="tersedia" {{ old('status', $asset->status) == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                         <option value="digunakan" {{ old('status', $asset->status) == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
-                        <option value="diperbaiki" {{ old('status', $asset->status) == 'diperbaiki' ? 'selected' : '' }}>Diperbaiki</option>
+                        <option value="dipinjam" {{ old('status', $asset->status) == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                        <option value="maintenance" {{ old('status', $asset->status) == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                         <option value="rusak" {{ old('status', $asset->status) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                     </select>
                 </div>
@@ -137,20 +137,29 @@
                 <!-- Lokasi -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
-                    <input type="text" name="lokasi" value="{{ old('lokasi', $asset->lokasi) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select name="lokasi" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Pilih Lokasi</option>
+                        @foreach($lokasis as $lokasi)
+                            <option value="{{ $lokasi }}" {{ old('lokasi', $asset->lokasi) == $lokasi ? 'selected' : '' }}>
+                                {{ $lokasi }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <!-- Unit -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Unit Kerja</label>
-                    <input type="text" name="unit" value="{{ old('unit', $asset->unit) }}" list="units"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <datalist id="units">
+                    <select name="unit" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Pilih Unit</option>
                         @foreach($units as $unit)
-                            <option value="{{ $unit }}">
+                            <option value="{{ $unit }}" {{ old('unit', $asset->unit) == $unit ? 'selected' : '' }}>
+                                {{ $unit }}
+                            </option>
                         @endforeach
-                    </datalist>
+                    </select>
                 </div>
 
                 <!-- Penanggung Jawab -->

@@ -45,20 +45,15 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Kategori <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="kategori" value="{{ old('kategori') }}" required list="kategoris"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('kategori') border-red-500 @enderror"
-                           placeholder="Contoh: Komputer">
-                    <datalist id="kategoris">
+                    <select name="kategori" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('kategori') border-red-500 @enderror">
+                        <option value="">Pilih Kategori</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category }}">
+                            <option value="{{ $category }}" {{ old('kategori') == $category ? 'selected' : '' }}>
+                                {{ $category }}
+                            </option>
                         @endforeach
-                        <option value="Komputer">
-                        <option value="Printer">
-                        <option value="Proyektor">
-                        <option value="Scanner">
-                        <option value="Furniture">
-                        <option value="Elektronik">
-                    </datalist>
+                    </select>
                     @error('kategori')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -141,8 +136,9 @@
                     </label>
                     <select name="status" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="tersedia" {{ old('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                        <option value="tersedia" {{ old('status', 'tersedia') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                         <option value="digunakan" {{ old('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
+                        <option value="dipinjam" {{ old('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                         <option value="maintenance" {{ old('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
                         <option value="rusak" {{ old('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                     </select>
@@ -163,9 +159,15 @@
                 <!-- Lokasi -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
-                    <input type="text" name="lokasi" value="{{ old('lokasi') }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Contoh: Ruang IT Lantai 2">
+                    <select name="lokasi" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Pilih Lokasi</option>
+                        @foreach($lokasis as $lokasi)
+                            <option value="{{ $lokasi }}" {{ old('lokasi') == $lokasi ? 'selected' : '' }}>
+                                {{ $lokasi }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('lokasi')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -174,29 +176,31 @@
                 <!-- Unit -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Unit Kerja</label>
-                    <input type="text" name="unit" value="{{ old('unit') }}" list="units"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Contoh: Diskominfo">
-                    <datalist id="units">
+                    <select name="unit" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Pilih Unit</option>
                         @foreach($units as $unit)
-                            <option value="{{ $unit }}">
+                            <option value="{{ $unit }}" {{ old('unit') == $unit ? 'selected' : '' }}>
+                                {{ $unit }}
+                            </option>
                         @endforeach
-                        <option value="Sekretariat">
-                        <option value="IKP">
-                        <option value="SP">
-                        <option value="E-Government">
-                    </datalist>
+                    </select>
                     @error('unit')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Penanggung Jawab -->
+                <!-- Penanggung Jawab (Auto-fill dari user login) -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Penanggung Jawab</label>
-                    <input type="text" name="penanggung_jawab" value="{{ old('penanggung_jawab') }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Contoh: John Doe">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Penanggung Jawab
+                        <span class="text-xs text-gray-500">(Otomatis terisi)</span>
+                    </label>
+                    <input type="text" name="penanggung_jawab" 
+                           value="{{ old('penanggung_jawab', $penanggungJawab) }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Nama penanggung jawab">
+                    <p class="text-xs text-gray-500 mt-1">💡 Terisi otomatis dengan nama Anda, bisa diubah jika diperlukan</p>
                     @error('penanggung_jawab')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror

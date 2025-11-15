@@ -104,29 +104,31 @@ class Asset extends Model
     }
 
     /**
-     * Scope untuk aset yang bisa dipinjam (tersedia)
+     * ✅ FIXED: Scope untuk aset yang bisa dipinjam
+     * Status ENUM yang benar: aktif, non-aktif, dalam_perbaikan, rusak, dihapus
      */
-    public function scopeAvailableForBorrow($query)
-    {
-        return $query->where('status', 'tersedia')
-                    ->whereIn('kondisi', ['baik', 'cukup']);
-    }
+   public function scopeAvailableForBorrow($query)
+{
+    return $query->where('status', 'tersedia')  // ✅ Sesuai migration
+                ->whereIn('kondisi', ['baik', 'cukup']);
+}
 
-    /**
-     * Get status badge color
-     */
-    public function getStatusBadgeAttribute()
-    {
-        $badges = [
-            'tersedia' => ['text' => 'Tersedia', 'color' => 'green'],
-            'digunakan' => ['text' => 'Digunakan', 'color' => 'blue'],
-            'dipinjam' => ['text' => 'Dipinjam', 'color' => 'orange'], // NEW
-            'diperbaiki' => ['text' => 'Diperbaiki', 'color' => 'yellow'],
-            'rusak' => ['text' => 'Rusak', 'color' => 'red'],
-        ];
+/**
+ * ✅ FIXED: Get status badge
+ */
+public function getStatusBadgeAttribute()
+{
+    $badges = [
+        'tersedia' => ['text' => 'Tersedia', 'color' => 'green'],
+        'digunakan' => ['text' => 'Digunakan', 'color' => 'blue'],
+        'dipinjam' => ['text' => 'Dipinjam', 'color' => 'orange'],
+        'maintenance' => ['text' => 'Maintenance', 'color' => 'yellow'],
+        'rusak' => ['text' => 'Rusak', 'color' => 'red'],
+    ];
 
-        return $badges[$this->status] ?? ['text' => 'Unknown', 'color' => 'gray'];
-    }
+    return $badges[$this->status] ?? ['text' => 'Unknown', 'color' => 'gray'];
+}
+
 
     /**
      * Get kondisi badge color
@@ -210,7 +212,7 @@ class Asset extends Model
     }
 
     /**
-     * ✅ NEW: Relasi ke history peminjaman
+     * ✅ Relasi ke history peminjaman
      */
     public function borrowHistory()
     {
@@ -218,7 +220,7 @@ class Asset extends Model
     }
 
     /**
-     * ✅ NEW: Get peminjaman aktif saat ini
+     * ✅ Get peminjaman aktif saat ini
      */
     public function activeBorrow()
     {
@@ -228,7 +230,7 @@ class Asset extends Model
     }
 
     /**
-     * ✅ NEW: Cek apakah aset sedang dipinjam
+     * ✅ Cek apakah aset sedang dipinjam
      */
     public function isBorrowed()
     {
@@ -236,11 +238,11 @@ class Asset extends Model
     }
 
     /**
-     * ✅ NEW: Cek apakah aset bisa dipinjam
+     * ✅ FIXED: Cek apakah aset bisa dipinjam
      */
     public function canBeBorrowed()
     {
-        return $this->status === 'tersedia' 
+        return $this->status === 'tersedia'  // ✅ Sesuai migration
             && in_array($this->kondisi, ['baik', 'cukup'])
             && !$this->isBorrowed();
     }

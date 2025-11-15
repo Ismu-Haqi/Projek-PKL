@@ -92,7 +92,7 @@ class AssetBorrowController extends Controller
     /**
      * Setujui peminjaman
      * 
-     * ✅ FIXED: Tidak mengubah status asset
+     * ✅ FIXED: Ubah status asset ke 'dipinjam' saat disetujui
      */
     public function approve(Request $request, $id)
     {
@@ -117,10 +117,13 @@ class AssetBorrowController extends Controller
                 'catatan_admin' => $validated['catatan_admin'] ?? null,
             ]);
             
-            // ✅ FIXED: TIDAK mengubah status aset
-            // Status aset tetap seperti semula (aktif/non-aktif/dll)
-            // Tracking peminjaman cukup di table asset_borrows
-            // $borrow->asset->update(['status' => 'dipinjam']); // ❌ BARIS INI DIHAPUS
+            // ✅ FIXED: Update status aset ke 'dipinjam' menggunakan DB::table
+            DB::table('assets')
+                ->where('id', $borrow->asset_id)
+                ->update([
+                    'status' => 'dipinjam',
+                    'updated_at' => now()
+                ]);
             
             // Kirim notifikasi ke peminjam
             $this->sendNotification(
@@ -263,7 +266,7 @@ class AssetBorrowController extends Controller
     /**
      * Terima pengembalian aset
      * 
-     * ✅ FIXED: Update status asset ke 'aktif' (bukan 'tersedia')
+     * ✅ FIXED: Update status asset sesuai ENUM yang benar
      */
     public function returnAsset(Request $request, $id)
     {
@@ -299,17 +302,22 @@ class AssetBorrowController extends Controller
             ]);
             
             // ✅ FIXED: Update status aset sesuai ENUM yang ada
-            $newAssetStatus = 'aktif'; // Default kembali ke aktif
+            $newAssetStatus = 'tersedia'; // Default kembali ke tersedia
+            
             if ($validated['kondisi_kembali'] === 'rusak') {
                 $newAssetStatus = 'rusak';
             } elseif ($validated['kondisi_kembali'] === 'kurang') {
-                $newAssetStatus = 'dalam_perbaikan'; // Sesuai ENUM
+                $newAssetStatus = 'maintenance'; // ✅ Sesuai ENUM
             }
             
-            $borrow->asset->update([
-                'status' => $newAssetStatus,
-                'kondisi' => $validated['kondisi_kembali']
-            ]);
+            // ✅ Gunakan DB::table untuk update yang aman
+            DB::table('assets')
+                ->where('id', $borrow->asset_id)
+                ->update([
+                    'status' => $newAssetStatus,
+                    'kondisi' => $validated['kondisi_kembali'],
+                    'updated_at' => now()
+                ]);
             
             // Kirim notifikasi ke peminjam
             $this->sendNotification(
