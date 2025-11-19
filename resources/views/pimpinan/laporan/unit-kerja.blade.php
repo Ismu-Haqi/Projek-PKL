@@ -13,73 +13,118 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Laporan Produktivitas Unit Kerja</h1>
+                <h1 class="text-3xl font-bold text-gray-800">🏢 Laporan Produktivitas Unit Kerja</h1>
                 <p class="text-gray-600 mt-1">Perbandingan kinerja & aktivitas antar unit kerja</p>
             </div>
         </div>
-        
-        
     </div>
 
-    <!-- Filter -->
+    <!-- ✅ FILTER PERIODE (Modern UI - Replace Manual Date Range) -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <form method="GET" action="{{ route(Auth::user()->role . '.laporan.unit-kerja') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
-                <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
-                <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Urutkan Berdasarkan</label>
-                <select name="sort_by" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <option value="archives" {{ request('sort_by') == 'archives' ? 'selected' : '' }}>Total Arsip</option>
-                    <option value="dispositions" {{ request('sort_by') == 'dispositions' ? 'selected' : '' }}>Total Disposisi</option>
-                    <option value="completion_rate" {{ request('sort_by') == 'completion_rate' ? 'selected' : '' }}>Completion Rate</option>
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="w-full px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg font-medium">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Filter
+        <form method="GET" action="{{ route(Auth::user()->role . '.laporan.unit-kerja') }}">
+            
+            <!-- Period Toggle Buttons -->
+            <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b">
+                <button type="submit" name="period" value="1month" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period', '1month') === '1month' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Bulan
                 </button>
+                <button type="submit" name="period" value="3months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '3months' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 3 Bulan
+                </button>
+                <button type="submit" name="period" value="6months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '6months' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 6 Bulan
+                </button>
+                <button type="submit" name="period" value="1year" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '1year' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Tahun
+                </button>
+                <button type="button" onclick="toggleCustomDate()" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === 'custom' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    🗓️ Custom
+                </button>
+            </div>
+
+            <!-- Custom Date Range (Hidden by default) -->
+            <div id="customDateRange" class="mb-4 pb-4 border-b {{ request('period') === 'custom' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <input type="hidden" name="period" value="custom">
+                <button type="submit" class="mt-4 px-6 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-all shadow-lg font-medium">
+                    Terapkan Custom Range
+                </button>
+            </div>
+
+            <!-- Sort By Filter -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Urutkan Berdasarkan</label>
+                    <select name="sort_by" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="archives" {{ request('sort_by') == 'archives' ? 'selected' : '' }}>Total Arsip</option>
+                        <option value="dispositions" {{ request('sort_by') == 'dispositions' ? 'selected' : '' }}>Total Disposisi</option>
+                        <option value="completion_rate" {{ request('sort_by') == 'completion_rate' ? 'selected' : '' }}>Completion Rate</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg font-medium">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Filter
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-600">
+                <strong>Periode:</strong> {{ $dateRange['label'] ?? 'Semua Periode' }}
+                <span class="ml-3">
+                    ({{ $dateRange['start']->format('d M Y') }} - {{ $dateRange['end']->format('d M Y') }})
+                </span>
             </div>
         </form>
     </div>
 
-    <!-- Tombol Untuk Print dan Download -->
+    <!-- Export Buttons -->
     @if(auth()->user()->role === 'pimpinan')
-<div class="flex gap-2 mb-4">
-    <a href="{{ route('pimpinan.laporan.print-pdf', ['type' => 'unit'] + request()->query()) }}" 
-       target="_blank"
-       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-        </svg>
-        Print PDF
-    </a>
-    
-    <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'unit'] + request()->query()) }}" 
-       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Download PDF
-    </a>
-</div>
-@endif
+    <div class="flex gap-2">
+        <a href="{{ route('pimpinan.laporan.print-pdf', ['type' => 'unit'] + request()->query()) }}" 
+           target="_blank"
+           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print PDF
+        </a>
+        
+        <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'unit'] + request()->query()) }}" 
+           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Download PDF
+        </a>
+    </div>
+    @endif
+
     <!-- Period Info -->
-    <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-6 text-white">
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm opacity-90 mb-1">Periode Laporan</p>
-                <h2 class="text-2xl font-bold">{{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }}</h2>
+                <h2 class="text-2xl font-bold">{{ $dateRange['start']->format('d M Y') }} - {{ $dateRange['end']->format('d M Y') }}</h2>
             </div>
             <div class="text-right">
                 <p class="text-sm opacity-90 mb-1">Total Unit Kerja</p>
@@ -146,7 +191,7 @@
         @endforeach
     </div>
 
-    <!-- Simple Charts Section with Fixed Height -->
+    <!-- Charts Section with Fixed Height -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Chart 1: Total Arsip per Unit -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -193,7 +238,7 @@
         <h3 class="text-lg font-bold text-gray-800 mb-4">Detail Produktivitas per Unit</h3>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200">
+                <thead class="bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-purple-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Ranking</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Unit Kerja</th>
@@ -328,6 +373,12 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Toggle Custom Date Range
+function toggleCustomDate() {
+    const customDiv = document.getElementById('customDateRange');
+    customDiv.classList.toggle('hidden');
+}
+
 // Prevent auto-scroll issue - wrap in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
     // Chart 1: Total Arsip per Unit (Horizontal Bar)

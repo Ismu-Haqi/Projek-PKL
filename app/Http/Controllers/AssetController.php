@@ -135,14 +135,16 @@ public function create()
     }
     
     // ✅ PENTING: Gunakan method getKategoris()
-    $categories = $this->getKategoris(); // ← HARUS INI, bukan dari database!
+    $categories = $this->getKategoris();
     
     // ✅ Predefined options
     $lokasis = $this->getLokasis();
     $units = $this->getUnits();
     
-    // ✅ Auto-fill Penanggung Jawab dan Unit
+    // ✅ Auto-fill Penanggung Jawab dan Unit untuk Staff
     $penanggungJawab = Auth::user()->name;
+    
+    // ✅ FIXED: Untuk staff, unit harus dari user yang login
     $userUnit = Auth::user()->unit;
     
     $viewPrefix = $role === 'admin' ? 'admin' : 'staff';

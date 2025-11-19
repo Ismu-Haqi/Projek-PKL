@@ -17,7 +17,7 @@ use Carbon\Carbon;
 class ArchiveController extends Controller
 {
     /**
-     * Display a listing of the archives.
+     * Display a listing of the archives with auto-load filters.
      */
     public function index(Request $request)
     {
@@ -49,6 +49,15 @@ class ArchiveController extends Controller
         // Filter by Unit
         if ($request->filled('unit') && Schema::hasColumn('archives', 'unit')) {
             $query->where('unit', $request->unit);
+        }
+
+        // Filter by Month
+        if ($request->filled('month')) {
+            if (Schema::hasColumn('archives', 'tanggal_surat')) {
+                $query->whereMonth('tanggal_surat', $request->month);
+            } else {
+                $query->whereMonth('tanggal_arsip', $request->month);
+            }
         }
 
         // Filter by Year
@@ -93,13 +102,18 @@ class ArchiveController extends Controller
         $units = [
             'Sekretariat',
             'IKP',
-            'Aptika',
-            'Komtel',
-            'Statistik',
-            'E-Gov'
+            'SP(Statistik & Persandian',
+            'E-Government'
         ];
 
-        // ✅ UPDATED: Support pimpinan role
+        // Generate years for filter (last 5 years)
+        $years = [];
+        $currentYear = date('Y');
+        for ($i = 0; $i < 5; $i++) {
+            $years[] = $currentYear - $i;
+        }
+
+        // Support pimpinan role
         $role = Auth::user()->role;
         $viewPrefix = match($role) {
             'admin' => 'admin',
@@ -111,6 +125,7 @@ class ArchiveController extends Controller
             'archives',
             'categories',
             'units',
+            'years',
             'totalArchives',
             'favoritesCount',
             'categoriesCount',
@@ -142,37 +157,38 @@ class ArchiveController extends Controller
 
     /**
      * Show the form for creating a new archive.
-     * ✅ ADMIN ONLY
+     * ✅ ADMIN & STAFF can create
      */
     public function create()
     {
-        // Only admin can create
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized - Only Admin can create archives');
-        }
-
         $categories = [];
         if (Schema::hasTable('categories')) {
             $categories = Category::all();
         }
 
+        $user = Auth::user();
+        
         // Generate nomor surat otomatis
-        $nomorSurat = $this->generateNomorSurat(Auth::user()->unit ?? 'UMUM');
+        $nomorSurat = $this->generateNomorSurat($user->unit ?? 'UMUM');
 
-        return view('admin.arsip.create', compact('categories', 'nomorSurat'));
+        // Tentukan view berdasarkan role
+        $role = $user->role;
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            default => 'staff'
+        };
+
+        return view("{$viewPrefix}.arsip.create", compact('categories', 'nomorSurat'));
     }
 
     /**
      * Store a newly created archive (Multiple Files Support + Email Notification).
-     * ✅ ADMIN ONLY
+     * ✅ ADMIN & STAFF can store
      */
     public function store(Request $request)
     {
-        // Only admin can store
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized - Only Admin can create archives');
-        }
-
+        $user = Auth::user();
+        
         // Validation rules
         $rules = [
             'nomor_surat' => 'required|string|max:255|unique:archives,nomor_surat',
@@ -185,9 +201,12 @@ class ArchiveController extends Controller
         if (Schema::hasColumn('archives', 'tanggal_surat')) {
             $rules['tanggal_surat'] = 'required|date';
         }
-        if (Schema::hasColumn('archives', 'pengirim')) {
+        
+        // Staff tidak perlu validasi pengirim (auto-filled)
+        if ($user->role === 'admin' && Schema::hasColumn('archives', 'pengirim')) {
             $rules['pengirim'] = 'required|string|max:255';
         }
+        
         if (Schema::hasColumn('archives', 'unit')) {
             $rules['unit'] = 'required|string|max:100';
         }
@@ -239,6 +258,12 @@ class ArchiveController extends Controller
             // Add required fields
             $validated['user_id'] = Auth::id();
             
+            // ✅ STAFF: Auto-fill pengirim dengan nama user dan unit
+            if ($user->role === 'staff') {
+                $validated['pengirim'] = $user->name;
+                $validated['unit'] = $user->unit ?? 'Umum';
+            }
+            
             // Set tanggal_arsip
             if (isset($validated['tanggal_surat'])) {
                 $validated['tanggal_arsip'] = $validated['tanggal_surat'];
@@ -289,7 +314,7 @@ class ArchiveController extends Controller
             // ✅ SEND EMAIL NOTIFICATION TO ALL ADMINS
             try {
                 $admins = User::where('role', 'admin')
-                             ->where('id', '!=', Auth::id()) // Exclude uploader
+                             ->where('id', '!=', Auth::id())
                              ->whereNotNull('email')
                              ->get();
                 
@@ -306,20 +331,19 @@ class ArchiveController extends Controller
                     'archive_id' => $archive->id,
                     'error' => $e->getMessage()
                 ]);
-                
-                // Email gagal, tapi arsip tetap tersimpan
             }
 
-            // ✅ PESAN SUKSES DENGAN SWEETALERT2
             $fileCount = count($uploadedFiles);
             $successMessage = $fileCount > 1 
                 ? "Data arsip berhasil disimpan dengan {$fileCount} file ke sistem Diskominfo Batola!" 
                 : "Data arsip \"{$validated['judul']}\" berhasil disimpan ke sistem Diskominfo Batola!";
 
-            return redirect()->route('admin.arsip.index')
+            // Redirect based on role
+            $routeName = $user->role === 'admin' ? 'admin.arsip.index' : 'staff.arsip.index';
+            
+            return redirect()->route($routeName)
                            ->with('success', $successMessage);
         } catch (\Exception $e) {
-            // ✅ PESAN ERROR DENGAN SWEETALERT2
             return redirect()->back()
                            ->with('error', 'Gagal menyimpan arsip ke sistem. Error: ' . $e->getMessage())
                            ->withInput();
@@ -328,7 +352,6 @@ class ArchiveController extends Controller
 
     /**
      * Display the specified archive (Halaman Detail).
-     * ✅ UPDATED: Support pimpinan
      */
     public function show($id)
     {
@@ -350,7 +373,6 @@ class ArchiveController extends Controller
      */
     public function edit($id)
     {
-        // Only admin can edit
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Unauthorized - Only Admin can edit archives');
         }
@@ -366,12 +388,11 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Update the specified archive (FIXED - File tidak terhapus jika tidak upload baru).
+     * Update the specified archive.
      * ✅ ADMIN ONLY
      */
     public function update(Request $request, $id)
     {
-        // Only admin can update
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Unauthorized - Only Admin can update archives');
         }
@@ -385,7 +406,6 @@ class ArchiveController extends Controller
             'files.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:10240',
         ];
 
-        // Add conditional validation
         if (Schema::hasColumn('archives', 'tanggal_surat')) {
             $rules['tanggal_surat'] = 'required|date';
         }
@@ -402,14 +422,11 @@ class ArchiveController extends Controller
         $validated = $request->validate($rules);
 
         try {
-            // Upload new files HANYA jika ada file baru yang diupload
             if ($request->hasFile('files') && count($request->file('files')) > 0) {
-                // Delete old file
                 if ($archive->file_path && Storage::disk('public')->exists($archive->file_path)) {
                     Storage::disk('public')->delete($archive->file_path);
                 }
 
-                // Upload first file to replace old one
                 $file = $request->file('files')[0];
                 $fileName = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
                 $filePath = $file->storeAs('archives', $fileName, 'public');
@@ -427,28 +444,22 @@ class ArchiveController extends Controller
                 }
             }
 
-            // Update tanggal_arsip
             if (isset($validated['tanggal_surat'])) {
                 $validated['tanggal_arsip'] = $validated['tanggal_surat'];
             }
 
-            // Update jenis_arsip from category
             if (isset($validated['category_id'])) {
                 $category = Category::find($validated['category_id']);
                 $validated['jenis_arsip'] = $category ? $category->name : $archive->jenis_arsip;
             }
 
-            // Hapus key 'files' dari validated agar tidak error saat update
             unset($validated['files']);
 
-            // UPDATE archive
             $archive->update($validated);
 
-            // ✅ PESAN SUKSES UPDATE
             return redirect()->route('admin.arsip.show', $archive->id)
                            ->with('success', 'Data arsip "' . $archive->judul . '" berhasil diperbarui dalam sistem!');
         } catch (\Exception $e) {
-            // ✅ PESAN ERROR UPDATE
             return redirect()->back()
                            ->with('error', 'Gagal memperbarui data arsip. Error: ' . $e->getMessage())
                            ->withInput();
@@ -461,7 +472,6 @@ class ArchiveController extends Controller
      */
     public function destroy($id)
     {
-        // Only admin can delete
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Unauthorized - Only Admin can delete archives');
         }
@@ -470,26 +480,22 @@ class ArchiveController extends Controller
             $archive = Archive::findOrFail($id);
             $judulArsip = $archive->judul;
 
-            // Delete file from storage
             if ($archive->file_path && Storage::disk('public')->exists($archive->file_path)) {
                 Storage::disk('public')->delete($archive->file_path);
             }
 
             $archive->delete();
 
-            // ✅ PESAN SUKSES DELETE
             return redirect()->route('admin.arsip.index')
                            ->with('success', 'Arsip "' . $judulArsip . '" berhasil dihapus dari sistem Diskominfo Batola!');
         } catch (\Exception $e) {
-            // ✅ PESAN ERROR DELETE
             return redirect()->back()
                            ->with('error', 'Gagal menghapus arsip dari sistem. Error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Toggle favorite status (FIXED - Return Redirect).
-     * ✅ UPDATED: All roles can favorite
+     * Toggle favorite status.
      */
     public function toggleFavorite($id)
     {
@@ -500,7 +506,6 @@ class ArchiveController extends Controller
                 $archive->is_favorite = !$archive->is_favorite;
                 $archive->save();
 
-                // ✅ PESAN TOGGLE FAVORITE
                 $message = $archive->is_favorite 
                     ? 'Arsip "' . $archive->judul . '" berhasil ditambahkan ke favorit!' 
                     : 'Arsip "' . $archive->judul . '" berhasil dihapus dari favorit!';
@@ -517,7 +522,6 @@ class ArchiveController extends Controller
 
     /**
      * Display favorite archives.
-     * ✅ UPDATED: Support pimpinan
      */
     public function favorit(Request $request)
     {
@@ -531,7 +535,6 @@ class ArchiveController extends Controller
             $query->with('category');
         }
 
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -550,10 +553,8 @@ class ArchiveController extends Controller
         $units = [
             'Sekretariat',
             'IKP',
-            'Aptika',
-            'Komtel',
-            'Statistik',
-            'E-Gov'
+            'SP(Statistik & Persandian',
+            'E-Government'
         ];
 
         $role = Auth::user()->role;
@@ -567,8 +568,7 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Preview archive file in browser (for PDF/Images).
-     * ✅ UPDATED: All roles can preview
+     * Preview archive file in browser.
      */
     public function preview($id)
     {
@@ -588,7 +588,6 @@ class ArchiveController extends Controller
             $mimeType = mime_content_type($fullPath);
             $fileName = $archive->file_name ?? basename($archive->file_path);
 
-            // Return file untuk preview di browser (inline)
             return response()->file($fullPath, [
                 'Content-Type' => $mimeType,
                 'Content-Disposition' => 'inline; filename="' . $fileName . '"',
@@ -601,8 +600,7 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Download archive file (FIXED - Force download).
-     * ✅ UPDATED: All roles can download
+     * Download archive file.
      */
     public function download($id)
     {
@@ -621,7 +619,6 @@ class ArchiveController extends Controller
 
             $downloadName = $archive->file_name ?? basename($archive->file_path);
             
-            // Force download (attachment)
             return response()->download($fullPath, $downloadName);
             
         } catch (\Exception $e) {

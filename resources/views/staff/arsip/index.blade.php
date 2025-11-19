@@ -34,14 +34,23 @@
         <div class="relative z-10">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold text-white mb-2">📁 Arsip Digital</h1>
+                    <h1 class="text-4xl font-bold text-white mb-2">📂 Arsip Digital</h1>
                     <p class="text-blue-100 text-lg">Akses dan kelola dokumen arsip digital</p>
                 </div>
-                <div class="hidden md:block">
+                <div class="hidden md:flex gap-4">
                     <div class="bg-white/20 backdrop-blur-lg rounded-xl p-4 text-white text-center border border-white/30">
                         <p class="text-3xl font-bold">{{ $totalArchives ?? 0 }}</p>
                         <p class="text-sm text-white/80">Total Arsip</p>
                     </div>
+                    {{-- Tombol Upload untuk Staff --}}
+                    @if(Auth::user()->role === 'staff')
+                    <a href="{{ route('staff.arsip.create') }}" class="bg-white/20 backdrop-blur-lg hover:bg-white/30 text-white px-6 py-4 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span class="font-semibold">Upload Arsip</span>
+                    </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -106,11 +115,11 @@
         </div>
     </div>
 
-    {{-- Filter Section --}}
-    <form action="{{ route('staff.arsip.index') }}" method="GET" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+    {{-- Filter Section with Auto-Load --}}
+    <form action="{{ route('staff.arsip.index') }}" method="GET" id="filterForm" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
             {{-- Search --}}
-            <div class="md:col-span-5">
+            <div class="md:col-span-3">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,14 +127,14 @@
                         </svg>
                     </div>
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Cari nomor surat, judul, atau pengirim..." 
-                           class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                           placeholder="Cari nomor surat, judul..." 
+                           class="filter-input w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
                 </div>
             </div>
 
             {{-- Category --}}
-            <div class="md:col-span-3">
-                <select name="category" class="w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+            <div class="md:col-span-2">
+                <select name="category" class="filter-input w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
                     <option value="">Semua Kategori</option>
                     @foreach($categories ?? [] as $category)
                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
@@ -137,7 +146,7 @@
 
             {{-- Unit --}}
             <div class="md:col-span-2">
-                <select name="unit" class="w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                <select name="unit" class="filter-input w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
                     <option value="">Semua Unit</option>
                     @foreach($units ?? [] as $unit)
                         <option value="{{ $unit }}" {{ request('unit') == $unit ? 'selected' : '' }}>
@@ -147,12 +156,40 @@
                 </select>
             </div>
 
-            {{-- Actions --}}
-            <div class="md:col-span-2 flex gap-2">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
-                    Cari
-                </button>
-                <a href="{{ route('staff.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all">
+            {{-- ✅ NEW: Month Filter --}}
+            <div class="md:col-span-2">
+                <select name="month" class="filter-input w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                    <option value="">Semua Bulan</option>
+                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Januari</option>
+                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Februari</option>
+                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Maret</option>
+                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
+                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mei</option>
+                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Juni</option>
+                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Juli</option>
+                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agustus</option>
+                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
+                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Oktober</option>
+                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
+                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Desember</option>
+                </select>
+            </div>
+
+            {{-- ✅ NEW: Year Filter --}}
+            <div class="md:col-span-2">
+                <select name="year" class="filter-input w-full py-3 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                    <option value="">Semua Tahun</option>
+                    @foreach($years ?? [] as $year)
+                        <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
+                            {{ $year }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Reset Button --}}
+            <div class="md:col-span-1 flex gap-2">
+                <a href="{{ route('staff.arsip.index') }}" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center" title="Reset Filter">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -265,7 +302,7 @@
                 <span class="font-semibold text-gray-800">{{ $archives->total() }}</span> arsip
             </div>
             <div>
-                {{ $archives->links() }}
+                {{ $archives->appends(request()->except('page'))->links() }}
             </div>
         </div>
     </div>
@@ -286,6 +323,15 @@
             
             <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Arsip</h3>
             <p class="text-gray-500 text-lg mb-8">Tidak ada dokumen arsip yang tersedia saat ini</p>
+            
+            @if(Auth::user()->role === 'staff')
+            <a href="{{ route('staff.arsip.create') }}" class="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 space-x-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Upload Arsip Pertama</span>
+            </a>
+            @endif
         </div>
     </div>
     @endif
@@ -306,6 +352,33 @@
 
 @push('scripts')
 <script>
+// ✅ AUTO-LOAD FILTERS - Submit form saat ada perubahan pada filter
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const filterInputs = document.querySelectorAll('.filter-input');
+    
+    // Auto-submit ketika filter berubah (kecuali search)
+    filterInputs.forEach(input => {
+        if (input.name !== 'search') {
+            input.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        }
+    });
+    
+    // Untuk search, gunakan debounce agar tidak terlalu sering submit
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 500); // Submit setelah 500ms user berhenti mengetik
+        });
+    }
+});
+
 // Auto-hide messages
 setTimeout(() => {
     document.querySelectorAll('.animate-fade-in').forEach(el => {

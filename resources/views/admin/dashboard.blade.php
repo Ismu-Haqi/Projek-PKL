@@ -253,7 +253,7 @@
         {{-- RIGHT COLUMN --}}
         <div class="lg:col-span-4 space-y-6">
             
-            {{-- ✅ AKTIVITAS TERKINI - WITH AUTO SCROLL --}}
+            {{-- ✅ AKTIVITAS TERKINI - WITH AUTO SCROLL & ASSET ACTIVITIES --}}
             <div class="bg-white p-6 rounded-2xl shadow-md card-animate" style="animation-delay: 0.5s;">
                 <h3 class="text-xl font-bold text-gray-800 mb-6">Aktivitas Terkini</h3>
                 
@@ -262,19 +262,103 @@
                     <div id="activityScrollContainer" class="space-y-4">
                         @forelse($recentActivities as $activity)
                         <div class="activity-scroll-item activity-item border-l-4 border-{{ $activity['color'] }}-500 pl-4 py-3">
-                            <p class="text-sm font-medium text-gray-800">
-                                {{ $activity['user'] }} 
-                                @if($activity['type'] == 'upload')
-                                    mengunggah arsip baru
-                                @else
-                                    memberikan disposisi
-                                @endif
-                            </p>
-                            <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1">{{ Str::limit($activity['title'], 50) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
+                            <div class="flex items-start gap-3">
+                                {{-- Icon based on activity type --}}
+                                <div class="flex-shrink-0 mt-1">
+                                    @if($activity['type'] === 'upload')
+                                        {{-- Archive Upload Icon --}}
+                                        <div class="bg-blue-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif($activity['type'] === 'disposition')
+                                        {{-- Disposition Icon --}}
+                                        <div class="bg-green-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif(str_starts_with($activity['type'], 'asset_borrow'))
+                                        {{-- Asset Borrow Icons --}}
+                                        @if($activity['type'] === 'asset_borrow_pending')
+                                            <div class="bg-yellow-100 p-2 rounded-lg">
+                                                <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+                                                </svg>
+                                            </div>
+                                        @elseif($activity['type'] === 'asset_borrow_approved')
+                                            <div class="bg-green-100 p-2 rounded-lg">
+                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                                </svg>
+                                            </div>
+                                        @elseif($activity['type'] === 'asset_borrow_rejected')
+                                            <div class="bg-red-100 p-2 rounded-lg">
+                                                <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    @elseif($activity['type'] === 'asset_borrowed')
+                                        <div class="bg-blue-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif($activity['type'] === 'asset_returned')
+                                        <div class="bg-purple-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif($activity['type'] === 'asset_overdue')
+                                        <div class="bg-red-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif($activity['type'] === 'asset_created')
+                                        <div class="bg-indigo-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+                                            </svg>
+                                        </div>
+                                    @elseif($activity['type'] === 'asset_updated')
+                                        <div class="bg-gray-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                {{-- Activity Content --}}
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $activity['user'] }} 
+                                        @if(isset($activity['activity_text']))
+                                            {{ $activity['activity_text'] }}
+                                        @else
+                                            @if($activity['type'] === 'upload')
+                                                mengunggah arsip baru
+                                            @else
+                                                memberikan disposisi
+                                            @endif
+                                        @endif
+                                    </p>
+                                    <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1 truncate">
+                                        {{ Str::limit($activity['title'], 50) }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
+                                </div>
+                            </div>
                         </div>
                         @empty
                         <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
                             <p class="text-sm">Belum ada aktivitas</p>
                         </div>
                         @endforelse
@@ -984,16 +1068,15 @@
         }, 500);
 
         // ============================================
-        // ✅ AUTO-REFRESH DATA WITH PROPER REINIT
+        // ✅ AUTO-REFRESH DATA WITH ASSET ACTIVITIES
         // ============================================
         
-        // Uncomment untuk enable auto-refresh aktivitas & arsip setiap 30 detik
         setInterval(() => {
             fetch('{{ route("admin.dashboard.data") }}')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update Recent Activities
+                        // Update Recent Activities WITH ASSET ACTIVITIES
                         const activityContainer = document.getElementById('activityScrollContainer');
                         if (activityContainer && data.recentActivities && data.recentActivities.length > 0) {
                             // Stop existing animation
@@ -1002,13 +1085,118 @@
                             
                             let activitiesHTML = '';
                             data.recentActivities.forEach(activity => {
+                                // Determine icon and color based on activity type
+                                let iconHTML = '';
+                                let activityText = '';
+                                
+                                if (activity.type === 'upload') {
+                                    iconHTML = `
+                                        <div class="bg-blue-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = 'mengunggah arsip baru';
+                                } else if (activity.type === 'disposition') {
+                                    iconHTML = `
+                                        <div class="bg-green-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = 'memberikan disposisi';
+                                } else if (activity.type === 'asset_borrow_pending') {
+                                    iconHTML = `
+                                        <div class="bg-yellow-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'mengajukan peminjaman aset';
+                                } else if (activity.type === 'asset_borrow_approved') {
+                                    iconHTML = `
+                                        <div class="bg-green-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'peminjaman aset disetujui';
+                                } else if (activity.type === 'asset_borrowed') {
+                                    iconHTML = `
+                                        <div class="bg-blue-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'meminjam aset';
+                                } else if (activity.type === 'asset_returned') {
+                                    iconHTML = `
+                                        <div class="bg-purple-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'mengembalikan aset';
+                                } else if (activity.type === 'asset_overdue') {
+                                    iconHTML = `
+                                        <div class="bg-red-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'terlambat mengembalikan aset';
+                                } else if (activity.type === 'asset_created') {
+                                    iconHTML = `
+                                        <div class="bg-indigo-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'menambahkan aset baru';
+                                } else if (activity.type === 'asset_updated') {
+                                    iconHTML = `
+                                        <div class="bg-gray-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'memperbarui aset';
+                                } else if (activity.type === 'asset_borrow_rejected') {
+                                    iconHTML = `
+                                        <div class="bg-red-100 p-2 rounded-lg">
+                                            <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
+                                            </svg>
+                                        </div>
+                                    `;
+                                    activityText = activity.activity_text || 'peminjaman aset ditolak';
+                                }
+                                
                                 activitiesHTML += `
                                     <div class="activity-scroll-item activity-item border-l-4 border-${activity.color}-500 pl-4 py-3">
-                                        <p class="text-sm font-medium text-gray-800">
-                                            ${activity.user} ${activity.type === 'upload' ? 'mengunggah arsip baru' : 'memberikan disposisi'}
-                                        </p>
-                                        <p class="text-sm text-${activity.color}-600 font-medium mt-1">${activity.title.substring(0, 50)}${activity.title.length > 50 ? '...' : ''}</p>
-                                        <p class="text-xs text-gray-500 mt-1">${activity.time}</p>
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex-shrink-0 mt-1">
+                                                ${iconHTML}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-800">
+                                                    ${activity.user} ${activityText}
+                                                </p>
+                                                <p class="text-sm text-${activity.color}-600 font-medium mt-1 truncate">
+                                                    ${activity.title.substring(0, 50)}${activity.title.length > 50 ? '...' : ''}
+                                                </p>
+                                                <p class="text-xs text-gray-500 mt-1">${activity.time}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 `;
                             });
@@ -1071,7 +1259,7 @@
                             updateCategoryChart(data.categoryDistribution);
                         }
 
-                        console.log('✅ Dashboard data refreshed successfully');
+                        console.log('✅ Dashboard data refreshed successfully (with asset activities)');
                     }
                 })
                 .catch(error => {

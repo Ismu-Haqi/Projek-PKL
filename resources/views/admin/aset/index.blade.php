@@ -26,7 +26,7 @@
 
     {{-- Statistics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Total Aset</p>
@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Tersedia</p>
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-400">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-400 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Digunakan</p>
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Diperbaiki</p>
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500 hover:shadow-lg transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-medium">Rusak</p>
@@ -98,24 +98,39 @@
         </div>
     </div>
 
-    {{-- Filter Section --}}
-    <form action="{{ route('admin.aset.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow mb-6">
+    {{-- ============================================
+         FILTER SECTION - AUTO LOAD RESPONSIF
+         ============================================ --}}
+    <form action="{{ route('admin.aset.index') }}" method="GET" id="filterForm" class="bg-white p-4 rounded-lg shadow mb-6">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
             {{-- Search --}}
             <div class="md:col-span-2">
                 <div class="relative">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <input type="text" name="search" value="{{ request('search') }}" 
+                    <input type="text" 
+                           name="search" 
+                           id="searchInput"
+                           value="{{ request('search') }}" 
                            placeholder="Cari nama, kode, atau serial number..." 
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                           class="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                           autocomplete="off">
+                    {{-- Loading Indicator --}}
+                    <div id="searchLoading" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
             {{-- Kategori --}}
             <div>
-                <select name="kategori" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="kategori" 
+                        id="kategoriFilter"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                     <option value="">Semua Kategori</option>
                     @foreach($categories as $category)
                         <option value="{{ $category }}" {{ request('kategori') == $category ? 'selected' : '' }}>
@@ -127,7 +142,9 @@
 
             {{-- Status --}}
             <div>
-                <select name="status" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="status" 
+                        id="statusFilter"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                     <option value="">Semua Status</option>
                     <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                     <option value="digunakan" {{ request('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
@@ -138,7 +155,9 @@
 
             {{-- Unit --}}
             <div>
-                <select name="unit" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="unit" 
+                        id="unitFilter"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                     <option value="">Semua Unit</option>
                     @foreach($units as $unit)
                         <option value="{{ $unit }}" {{ request('unit') == $unit ? 'selected' : '' }}>
@@ -150,7 +169,9 @@
 
             {{-- Lokasi --}}
             <div>
-                <select name="lokasi" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="lokasi" 
+                        id="lokasiFilter"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                     <option value="">Semua Lokasi</option>
                     @foreach($lokasis as $lokasi)
                         <option value="{{ $lokasi }}" {{ request('lokasi') == $lokasi ? 'selected' : '' }}>
@@ -162,18 +183,99 @@
 
             {{-- Action Buttons --}}
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                {{-- Loading Indicator --}}
+                <div id="filterLoading" class="hidden flex-1 bg-blue-50 rounded-lg flex items-center justify-center px-3">
+                    <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                </button>
-                <a href="{{ route('admin.aset.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <span class="text-sm text-blue-600 font-medium hidden lg:inline">Memuat...</span>
+                </div>
+                
+                <a href="{{ route('admin.aset.index') }}" 
+                   class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center justify-center">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
                 </a>
             </div>
         </div>
+
+        {{-- Active Filters Display --}}
+        @if(request('search') || request('kategori') || request('status') || request('unit') || request('lokasi'))
+        <div class="mt-4 flex flex-wrap gap-2 items-center animate-fade-in">
+            <span class="text-sm text-gray-600 font-medium">Filter Aktif:</span>
+            <div class="flex flex-wrap gap-2">
+                @if(request('search'))
+                <span class="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="font-semibold mr-1">Pencarian:</span>
+                    <span>{{ request('search') }}</span>
+                    <a href="{{ route('admin.aset.index', request()->except('search')) }}" 
+                       class="ml-2 text-blue-600 hover:text-blue-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </span>
+                @endif
+                
+                @if(request('kategori'))
+                <span class="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                    <span class="font-semibold mr-1">Kategori:</span>
+                    <span>{{ request('kategori') }}</span>
+                    <a href="{{ route('admin.aset.index', request()->except('kategori')) }}" 
+                       class="ml-2 text-green-600 hover:text-green-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </span>
+                @endif
+                
+                @if(request('status'))
+                <span class="inline-flex items-center bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-medium">
+                    <span class="font-semibold mr-1">Status:</span>
+                    <span>{{ ucfirst(request('status')) }}</span>
+                    <a href="{{ route('admin.aset.index', request()->except('status')) }}" 
+                       class="ml-2 text-purple-600 hover:text-purple-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </span>
+                @endif
+                
+                @if(request('unit'))
+                <span class="inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
+                    <span class="font-semibold mr-1">Unit:</span>
+                    <span>{{ request('unit') }}</span>
+                    <a href="{{ route('admin.aset.index', request()->except('unit')) }}" 
+                       class="ml-2 text-yellow-600 hover:text-yellow-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </span>
+                @endif
+                
+                @if(request('lokasi'))
+                <span class="inline-flex items-center bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-xs font-medium">
+                    <span class="font-semibold mr-1">Lokasi:</span>
+                    <span>{{ request('lokasi') }}</span>
+                    <a href="{{ route('admin.aset.index', request()->except('lokasi')) }}" 
+                       class="ml-2 text-pink-600 hover:text-pink-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </span>
+                @endif
+            </div>
+        </div>
+        @endif
     </form>
 
     {{-- Assets Grid --}}
@@ -345,7 +447,7 @@
         <p class="text-gray-500 mb-6">Mulai tambahkan aset organisasi Anda dengan klik tombol di atas</p>
         @if(Auth::user()->role === 'admin')
         <a href="{{ route('admin.aset.create') }}" 
-           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700">
+           class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
@@ -356,6 +458,156 @@
     @endif
 
 </div>
+
+@push('styles')
+<style>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Smooth transitions */
+#filterForm input,
+#filterForm select,
+#filterForm button,
+#filterForm a {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Focus states */
+#filterForm input:focus,
+#filterForm select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #filterForm .grid {
+        gap: 0.75rem;
+    }
+    
+    #filterForm input,
+    #filterForm select {
+        font-size: 14px;
+    }
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchInput');
+    const kategoriFilter = document.getElementById('kategoriFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const unitFilter = document.getElementById('unitFilter');
+    const lokasiFilter = document.getElementById('lokasiFilter');
+    const filterLoading = document.getElementById('filterLoading');
+    const searchLoading = document.getElementById('searchLoading');
+    
+    let searchTimeout;
+    
+    // Function to submit form with loading indicator
+    function submitForm() {
+        if (filterLoading) {
+            filterLoading.classList.remove('hidden');
+        }
+        filterForm.submit();
+    }
+    
+    // Auto-submit on search (with debounce)
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            if (searchLoading) {
+                searchLoading.classList.remove('hidden');
+            }
+            
+            searchTimeout = setTimeout(function() {
+                if (searchLoading) {
+                    searchLoading.classList.add('hidden');
+                }
+                submitForm();
+            }, 800); // Wait 800ms after user stops typing
+        });
+        
+        // Submit immediately on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                if (searchLoading) {
+                    searchLoading.classList.add('hidden');
+                }
+                submitForm();
+            }
+        });
+    }
+    
+    // Auto-submit on kategori change
+    if (kategoriFilter) {
+        kategoriFilter.addEventListener('change', function() {
+            submitForm();
+        });
+    }
+    
+    // Auto-submit on status change
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            submitForm();
+        });
+    }
+    
+    // Auto-submit on unit change
+    if (unitFilter) {
+        unitFilter.addEventListener('change', function() {
+            submitForm();
+        });
+    }
+    
+    // Auto-submit on lokasi change
+    if (lokasiFilter) {
+        lokasiFilter.addEventListener('change', function() {
+            submitForm();
+        });
+    }
+    
+    // Prevent default form submission
+    filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm();
+    });
+});
+
+// Show loading on pagination click
+document.addEventListener('DOMContentLoaded', function() {
+    const paginationLinks = document.querySelectorAll('.pagination a');
+    const filterLoading = document.getElementById('filterLoading');
+    
+    if (paginationLinks.length > 0 && filterLoading) {
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!this.classList.contains('disabled')) {
+                    filterLoading.classList.remove('hidden');
+                }
+            });
+        });
+    }
+});
+</script>
+@endpush
 
 {{-- Include SweetAlert --}}
 @include('partials.sweetalert')

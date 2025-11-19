@@ -13,81 +13,121 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Laporan Arsip Digital</h1>
+                <h1 class="text-3xl font-bold text-gray-800">📁 Laporan Arsip Digital</h1>
                 <p class="text-gray-600 mt-1">Rekap arsip berdasarkan kategori, periode, dan unit kerja</p>
             </div>
         </div>
-        
-        
     </div>
 
-    <!-- Filters -->
+    <!-- ✅ FILTER PERIODE (Modern UI seperti Laporan Aset) -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <form method="GET" action="{{ route(Auth::user()->role . '.laporan.arsip') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
-                <input type="date" name="start_date" value="{{ request('start_date') }}" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+        <form method="GET" action="{{ route(Auth::user()->role . '.laporan.arsip') }}">
             
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
-                <input type="date" name="end_date" value="{{ request('end_date') }}" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
-                <select name="category_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Kategori</option>
-                    @foreach(\App\Models\Category::all() as $category)
-                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Unit Kerja</label>
-                <input type="text" name="unit" value="{{ request('unit') }}" placeholder="Nama unit..."
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            
-            <div class="md:col-span-4 flex justify-end">
-                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg font-medium">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Tampilkan Laporan
+            <!-- Period Toggle Buttons -->
+            <div class="flex flex-wrap gap-2 mb-4 pb-4 border-b">
+                <button type="submit" name="period" value="1month" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period', '1month') === '1month' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Bulan
                 </button>
+                <button type="submit" name="period" value="3months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '3months' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 3 Bulan
+                </button>
+                <button type="submit" name="period" value="6months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '6months' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 6 Bulan
+                </button>
+                <button type="submit" name="period" value="1year" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '1year' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Tahun
+                </button>
+                <button type="button" onclick="toggleCustomDate()" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === 'custom' ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    🗓️ Custom
+                </button>
+            </div>
+
+            <!-- Custom Date Range (Hidden by default) -->
+            <div id="customDateRange" class="mb-4 pb-4 border-b {{ request('period') === 'custom' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <input type="hidden" name="period" value="custom">
+                <button type="submit" class="mt-4 px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-lg font-medium">
+                    Terapkan Custom Range
+                </button>
+            </div>
+
+            <!-- Additional Filters -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
+                    <select name="category_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Semua Kategori</option>
+                        @foreach(\App\Models\Category::all() as $category)
+                        <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unit Kerja</label>
+                    <input type="text" name="unit" value="{{ request('unit') }}" placeholder="Nama unit..."
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg font-medium">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Filter
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-600">
+                <strong>Periode:</strong> {{ $dateRange['label'] ?? 'Semua Periode' }}
+                <span class="ml-3">
+                    ({{ $dateRange['start']->format('d M Y') }} - {{ $dateRange['end']->format('d M Y') }})
+                </span>
             </div>
         </form>
     </div>
 
-    <!-- Tombol Untuk Print dan Download -->
-<div class="flex gap-2 mb-4">
-    <!-- PRINT - Preview PDF -->
-    <a href="{{ route(auth()->user()->role . '.laporan.print-pdf', ['type' => 'arsip'] + request()->query()) }}" 
-       target="_blank"
-       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-        </svg>
-        Print PDF
-    </a>
-    
-    <!-- DOWNLOAD - Download PDF -->
-    <a href="{{ route(auth()->user()->role . '.laporan.export-pdf', ['type' => 'arsip'] + request()->query()) }}" 
-       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Download PDF
-    </a>
-</div>
+    <!-- Export Buttons -->
+    <div class="flex gap-2">
+        <a href="{{ route(auth()->user()->role . '.laporan.print-pdf', ['type' => 'arsip'] + request()->query()) }}" 
+           target="_blank"
+           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print PDF
+        </a>
+        
+        <a href="{{ route(auth()->user()->role . '.laporan.export-pdf', ['type' => 'arsip'] + request()->query()) }}" 
+           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Download PDF
+        </a>
+    </div>
+
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
@@ -197,125 +237,12 @@
         @endif
     </div>
 </div>
-{{-- Print Styles --}}
-<style media="print">
-    /* Hide elements when printing */
-    @media print {
-        /* Hide navigation, sidebar, buttons */
-        nav, .sidebar, aside, header, footer,
-        button, .no-print, .print-hide,
-        a[href^="http"]:not(.print-show),
-        .bg-gradient-to-r.from-purple-500,
-        .bg-gradient-to-r.from-orange-500,
-        svg.w-6.h-6.text-gray-600,
-        .flex.items-center > a[href*="laporan.index"] {
-            display: none !important;
-        }
 
-        /* Reset page margins */
-        @page {
-            margin: 1cm;
-            size: A4;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: white !important;
-        }
-
-        /* Make tables fit on page */
-        table {
-            page-break-inside: auto;
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-        }
-
-        thead {
-            display: table-header-group;
-        }
-
-        /* Add page header for print */
-        .print-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #333;
-        }
-
-        .print-header h1 {
-            font-size: 18px;
-            margin: 0;
-            color: #333;
-        }
-
-        .print-header p {
-            font-size: 12px;
-            margin: 5px 0;
-            color: #666;
-        }
-
-        /* Remove colors for black & white printing */
-        * {
-            color: #000 !important;
-            background: white !important;
-            box-shadow: none !important;
-        }
-
-        /* Keep badges visible */
-        .badge, span[class*="bg-"] {
-            border: 1px solid #333 !important;
-            padding: 2px 6px !important;
-            color: #000 !important;
-        }
-
-        /* Chart containers */
-        canvas {
-            max-height: 400px !important;
-        }
-
-        /* Remove shadows and gradients */
-        .shadow-sm, .shadow-lg, .shadow-xl {
-            box-shadow: none !important;
-        }
-
-        /* Adjust spacing */
-        .space-y-6 > * + * {
-            margin-top: 20px !important;
-        }
-
-        /* Footer for print */
-        .print-footer {
-            display: block !important;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-        }
-    }
-</style>
-
-{{-- Print Header (hidden on screen) --}}
-<div class="print-header" style="display: none;">
-    <h1>LAPORAN [NAMA LAPORAN]</h1>
-    <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
-    <p>Dinas Komunikasi dan Informatika</p>
-    <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
-</div>
-
-{{-- Print Footer (hidden on screen) --}}
-<div class="print-footer" style="display: none;">
-    <p>GANDARIA - Sistem Arsip Digital | Halaman [Page] dari [Total Pages]</p>
-</div>
+<script>
+// Toggle Custom Date Range
+function toggleCustomDate() {
+    const customDiv = document.getElementById('customDateRange');
+    customDiv.classList.toggle('hidden');
+}
+</script>
 @endsection

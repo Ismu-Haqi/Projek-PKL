@@ -60,7 +60,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::get('/create', [ArchiveController::class, 'create'])->name('create');
         Route::post('/store', [ArchiveController::class, 'store'])->name('store');
-        Route::get('/favorit/list', [ArchiveController::class, 'favorit'])->name('favorit');
+        Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
         Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ArchiveController::class, 'update'])->name('update');
@@ -142,6 +142,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/aset', [ReportController::class, 'aset'])->name('aset');
         Route::get('/user', [ReportController::class, 'user'])->name('user');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
@@ -190,7 +191,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     // Arsip Digital
     Route::prefix('arsip')->name('arsip.')->group(function () {
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
-        Route::post('/', [ArchiveController::class, 'store'])->name('store');
+        Route::get('/create', [ArchiveController::class, 'create'])->name('create'); 
+        Route::post('/store', [ArchiveController::class, 'store'])->name('store'); 
         Route::get('/favorit', [ArchiveController::class, 'favorit'])->name('favorit');
         Route::get('/{id}', [ArchiveController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ArchiveController::class, 'edit'])->name('edit');
@@ -239,6 +241,11 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     Route::prefix('aset')->name('aset.')->group(function () {
         Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/', [AssetController::class, 'index'])->name('index');
+        Route::get('/create', [AssetController::class, 'create'])->name('create');
+        Route::post('/', [AssetController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AssetController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
@@ -340,6 +347,7 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/aset', [ReportController::class, 'aset'])->name('aset');
         Route::get('/user', [ReportController::class, 'user'])->name('user');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');

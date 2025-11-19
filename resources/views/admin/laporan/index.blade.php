@@ -12,89 +12,95 @@
         </div>
     </div>
 
-    <!-- Quick Links - 5 Jenis Laporan -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            5 Jenis Laporan Tersedia
-        </h3>
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        5 Jenis Laporan Tersedia
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            <!-- 1. Laporan Arsip Digital -->
-            <a href="{{ route(Auth::user()->role . '.laporan.arsip') }}" class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <span class="text-blue-600 font-bold text-sm">01</span>
+        <!-- 1. Laporan Arsip Digital -->
+        <a href="{{ route(Auth::user()->role . '.laporan.arsip') }}" 
+           class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                    </svg>
                 </div>
-                <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Arsip Digital</h4>
-                <p class="text-sm text-gray-600">Rekap arsip berdasarkan kategori, periode & unit kerja</p>
-            </a>
+                <span class="text-blue-600 font-bold text-sm">01</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Arsip Digital</h4>
+            <p class="text-sm text-gray-600">Rekap arsip berdasarkan periode & kategori</p>
+        </a>
 
-            <!-- 2. Laporan Disposisi Surat -->
-            <a href="{{ route(Auth::user()->role . '.laporan.disposisi') }}" class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <span class="text-purple-600 font-bold text-sm">02</span>
+        <!-- 2. Laporan Disposisi -->
+        <a href="{{ route(Auth::user()->role . '.laporan.disposisi') }}" 
+           class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                 </div>
-                <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Disposisi Surat</h4>
-                <p class="text-sm text-gray-600">Tracking disposisi, status prioritas & overdue</p>
-            </a>
+                <span class="text-purple-600 font-bold text-sm">02</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Disposisi</h4>
+            <p class="text-sm text-gray-600">Tracking disposisi arsip & aset</p>
+        </a>
 
-            <!-- 3. Laporan Aktivitas User -->
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.laporan.user') }}" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
-                    </div>
-                    <span class="text-green-600 font-bold text-sm">03</span>
+        <!-- 3. Laporan Aktivitas User (Admin/Pimpinan Only) -->
+        @if(Auth::user()->role === 'admin' || Auth::user()->role === 'pimpinan')
+        <a href="{{ route(Auth::user()->role . '.laporan.user') }}" 
+           class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
                 </div>
-                <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Aktivitas User</h4>
-                <p class="text-sm text-gray-600">Monitoring aktivitas & kinerja pengguna sistem</p>
-            </a>
-            @endif
+                <span class="text-green-600 font-bold text-sm">03</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Aktivitas User</h4>
+            <p class="text-sm text-gray-600">Monitoring aktivitas pengguna</p>
+        </a>
+        @endif
 
-            <!-- 4. Laporan Statistik Periode -->
-            <a href="{{ route(Auth::user()->role . '.laporan.periode') }}" class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <span class="text-orange-600 font-bold text-sm">04</span>
+        <!-- 4. ✅ LAPORAN ASET (GANTI DARI STATISTIK PERIODE) -->
+        <a href="{{ route(Auth::user()->role . '.laporan.aset') }}" 
+           class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
                 </div>
-                <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Statistik Periode</h4>
-                <p class="text-sm text-gray-600">Summary bulanan & tahunan dengan grafik</p>
-            </a>
+                <span class="text-orange-600 font-bold text-sm">04</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Aset</h4>
+            <p class="text-sm text-gray-600">Inventaris aset per periode & kategori</p>
+        </a>
 
-            <!-- 5. Laporan Produktivitas Unit Kerja -->
-            <a href="{{ route(Auth::user()->role . '.laporan.unit-kerja') }}" class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                    </div>
-                    <span class="text-indigo-600 font-bold text-sm">05</span>
+        <!-- 5. Laporan Produktivitas Unit -->
+        <a href="{{ route(Auth::user()->role . '.laporan.unit-kerja') }}" 
+           class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
                 </div>
-                <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Produktivitas Unit</h4>
-                <p class="text-sm text-gray-600">Perbandingan kinerja antar unit kerja</p>
-            </a>
-        </div>
+                <span class="text-indigo-600 font-bold text-sm">05</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Produktivitas Unit</h4>
+            <p class="text-sm text-gray-600">Perbandingan kinerja antar unit</p>
+        </a>
+        
     </div>
+</div>
 
     <!-- Summary Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

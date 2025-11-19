@@ -137,8 +137,8 @@
         </a>
     </div>
 
-    {{-- Filter Section --}}
-    <form action="{{ route('admin.peminjaman.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow mb-6">
+    {{-- Filter Section dengan Auto-Submit --}}
+    <form id="filterForm" action="{{ route('admin.peminjaman.index') }}" method="GET" class="bg-white p-4 rounded-lg shadow mb-6">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
             {{-- Search --}}
             <div class="md:col-span-2">
@@ -146,15 +146,19 @@
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" name="search" value="{{ request('search') }}" 
+                    <input type="text" 
+                           name="search" 
+                           id="searchInput"
+                           value="{{ request('search') }}" 
                            placeholder="Cari kode peminjaman, aset, atau peminjam..." 
                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
 
-            {{-- Status --}}
+            {{-- Status dengan Auto-Submit --}}
             <div>
-                <select name="status" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="status" 
+                        class="auto-submit-filter w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Semua Status</option>
                     <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                     <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Sedang Dipinjam</option>
@@ -163,9 +167,10 @@
                 </select>
             </div>
 
-            {{-- Unit --}}
+            {{-- Unit dengan Auto-Submit --}}
             <div>
-                <select name="unit" class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="unit" 
+                        class="auto-submit-filter w-full py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Semua Unit</option>
                     @foreach($units as $unit)
                         <option value="{{ $unit }}" {{ request('unit') == $unit ? 'selected' : '' }}>
@@ -175,20 +180,57 @@
                 </select>
             </div>
 
-            {{-- Action Buttons --}}
+            {{-- Reset Button --}}
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                    </svg>
-                </button>
-                <a href="{{ route('admin.peminjaman.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                <a href="{{ route('admin.peminjaman.index') }}" 
+                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-center flex items-center justify-center"
+                   title="Reset Filter">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                 </a>
             </div>
         </div>
+
+        {{-- Active Filters Indicator --}}
+        @if(request()->hasAny(['search', 'status', 'unit']))
+        <div class="mt-3 flex flex-wrap gap-2 items-center">
+            <span class="text-sm text-gray-600 font-medium">Filter Aktif:</span>
+            
+            @if(request('search'))
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Search: "{{ request('search') }}"
+                <button type="button" onclick="removeFilter('search')" class="ml-2 hover:text-blue-900">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </span>
+            @endif
+
+            @if(request('status'))
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Status: {{ ucfirst(request('status')) }}
+                <button type="button" onclick="removeFilter('status')" class="ml-2 hover:text-green-900">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </span>
+            @endif
+
+            @if(request('unit'))
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Unit: {{ request('unit') }}
+                <button type="button" onclick="removeFilter('unit')" class="ml-2 hover:text-purple-900">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </span>
+            @endif
+        </div>
+        @endif
     </form>
 
     {{-- Peminjaman List --}}
@@ -275,5 +317,48 @@
 
 {{-- Include SweetAlert --}}
 @include('partials.sweetalert')
+
+{{-- JavaScript untuk Auto-Submit Filter --}}
+<script>
+// Auto-submit filter saat dropdown berubah
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filterForm');
+    const autoSubmitSelects = document.querySelectorAll('.auto-submit-filter');
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+
+    // Auto-submit untuk dropdown (status, unit)
+    autoSubmitSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            form.submit();
+        });
+    });
+
+    // Debounced search - submit setelah user berhenti mengetik 500ms
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                form.submit();
+            }, 500); // Tunggu 500ms setelah user berhenti mengetik
+        });
+    }
+});
+
+// Fungsi untuk menghapus filter tertentu
+function removeFilter(filterName) {
+    const form = document.getElementById('filterForm');
+    const input = form.querySelector(`[name="${filterName}"]`);
+    
+    if (input) {
+        if (input.tagName === 'SELECT') {
+            input.value = '';
+        } else if (input.tagName === 'INPUT') {
+            input.value = '';
+        }
+        form.submit();
+    }
+}
+</script>
 
 @endsection

@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Archive;
 use App\Models\Disposition;
+use App\Models\Asset;
+use App\Models\AssetBorrow;
 use App\Models\User;
 use App\Models\Category;
 use Carbon\Carbon;
@@ -88,14 +90,14 @@ class DashboardController extends Controller
             });
 
         // ============================================
-        // 4. AKTIVITAS TERKINI (10 Terakhir)
+        // 4. ✅ AKTIVITAS TERKINI - WITH ASSET ACTIVITIES
         // ============================================
         $recentActivities = collect();
 
-        // Arsip terbaru (ambil 8 untuk memastikan cukup data)
+        // Arsip terbaru (ambil 6)
         $recentArchives = Archive::with('uploader')
             ->latest()
-            ->limit(8)
+            ->limit(6)
             ->get()
             ->map(function ($archive) {
                 return [
@@ -108,24 +110,100 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Disposisi terbaru (ambil 8 untuk memastikan cukup data)
-        $recentDispositions = Disposition::with(['fromUser', 'archive'])
+        // Disposisi terbaru (ambil 6)
+        $recentDispositions = Disposition::with(['fromUser', 'disposable'])
             ->latest()
-            ->limit(8)
+            ->limit(6)
             ->get()
             ->map(function ($disposition) {
+                // Get title from disposable (arsip or aset)
+                $title = 'Disposisi';
+                if ($disposition->disposable_type === 'App\Models\Archive' && $disposition->disposable) {
+                    $title = $disposition->disposable->judul ?? $disposition->subject;
+                } elseif ($disposition->disposable_type === 'App\Models\Asset' && $disposition->disposable) {
+                    $title = $disposition->disposable->nama ?? $disposition->subject;
+                } else {
+                    $title = $disposition->subject;
+                }
+
                 return [
                     'type' => 'disposition',
                     'user' => $disposition->fromUser->name ?? 'Unknown',
-                    'title' => $disposition->archive->judul ?? $disposition->subject, // ❌ Ini error
+                    'title' => $title,
                     'time' => $disposition->created_at->diffForHumans(),
                     'timestamp' => $disposition->created_at,
                     'color' => 'green'
                 ];
             });
 
-        // Gabungkan dan urutkan - ambil 10 teratas
-        $recentActivities = $recentArchives->concat($recentDispositions)
+        // ✅ NEW: Aktivitas Peminjaman Aset (ambil 6)
+        $recentAssetBorrows = AssetBorrow::with(['borrower', 'asset'])
+            ->latest()
+            ->limit(6)
+            ->get()
+            ->map(function ($borrow) {
+                // Tentukan tipe aktivitas berdasarkan status
+                $activityType = 'asset_borrow_pending';
+                $activityText = 'mengajukan peminjaman aset';
+                $color = 'yellow';
+
+                if ($borrow->status === 'approved') {
+                    $activityType = 'asset_borrow_approved';
+                    $activityText = 'peminjaman aset disetujui';
+                    $color = 'green';
+                } elseif ($borrow->status === 'borrowed') {
+                    $activityType = 'asset_borrowed';
+                    $activityText = 'meminjam aset';
+                    $color = 'blue';
+                } elseif ($borrow->status === 'returned') {
+                    $activityType = 'asset_returned';
+                    $activityText = 'mengembalikan aset';
+                    $color = 'purple';
+                } elseif ($borrow->status === 'rejected') {
+                    $activityType = 'asset_borrow_rejected';
+                    $activityText = 'peminjaman aset ditolak';
+                    $color = 'red';
+                } elseif ($borrow->status === 'overdue') {
+                    $activityType = 'asset_overdue';
+                    $activityText = 'terlambat mengembalikan aset';
+                    $color = 'red';
+                }
+
+                return [
+                    'type' => $activityType,
+                    'user' => $borrow->borrower->name ?? 'Unknown',
+                    'title' => $borrow->asset->nama ?? 'Aset',
+                    'activity_text' => $activityText,
+                    'time' => $borrow->created_at->diffForHumans(),
+                    'timestamp' => $borrow->created_at,
+                    'color' => $color
+                ];
+            });
+
+        // ✅ NEW: Aktivitas Aset (create, update) (ambil 6)
+        $recentAssets = Asset::latest()
+            ->limit(6)
+            ->get()
+            ->map(function ($asset) {
+                // Cek apakah baru dibuat (kurang dari 1 jam)
+                $isNew = $asset->created_at->diffInHours(Carbon::now()) < 1;
+                
+                return [
+                    'type' => $isNew ? 'asset_created' : 'asset_updated',
+                    'user' => $asset->penanggung_jawab ?? 'Admin',
+                    'title' => $asset->nama,
+                    'activity_text' => $isNew ? 'menambahkan aset baru' : 'memperbarui aset',
+                    'time' => $asset->created_at->diffForHumans(),
+                    'timestamp' => $asset->created_at,
+                    'color' => $isNew ? 'indigo' : 'gray'
+                ];
+            });
+
+        // Gabungkan semua aktivitas dan urutkan - ambil 10 teratas
+        $recentActivities = $recentArchives
+            ->concat($recentDispositions)
+            ->concat($recentAssetBorrows)
+            ->concat($recentAssets)
             ->sortByDesc('timestamp')
             ->take(10)
             ->values();
@@ -141,7 +219,7 @@ class DashboardController extends Controller
         // ============================================
         // 6. DISPOSISI MENDESAK (Deadline < 7 hari)
         // ============================================
-        $urgentDispositions = Disposition::with(['archive', 'toUser'])
+        $urgentDispositions = Disposition::with(['disposable', 'toUser'])
             ->whereIn('status', ['pending', 'in_progress'])
             ->where('deadline', '<=', Carbon::now()->addDays(7))
             ->orderBy('deadline')
@@ -211,13 +289,13 @@ class DashboardController extends Controller
 
             // Jika request tanpa parameter type, return semua data untuk auto-refresh
             if ($type === 'all' || !$request->has('type')) {
-                // Get Recent Activities
+                // Get Recent Activities - WITH ASSET ACTIVITIES
                 $recentActivities = collect();
                 
-                // Arsip terbaru (ambil 8)
+                // Arsip terbaru (ambil 6)
                 $recentArchives = Archive::with('uploader')
                     ->latest()
-                    ->limit(8)
+                    ->limit(6)
                     ->get()
                     ->map(function ($archive) {
                         return [
@@ -230,24 +308,97 @@ class DashboardController extends Controller
                         ];
                     });
 
-                // Disposisi terbaru (ambil 8)
-                $recentDispositions = Disposition::with(['fromUser', 'archive'])
+                // Disposisi terbaru (ambil 6)
+                $recentDispositions = Disposition::with(['fromUser', 'disposable'])
                     ->latest()
-                    ->limit(8)
+                    ->limit(6)
                     ->get()
                     ->map(function ($disposition) {
+                        $title = 'Disposisi';
+                        if ($disposition->disposable_type === 'App\Models\Archive' && $disposition->disposable) {
+                            $title = $disposition->disposable->judul ?? $disposition->subject;
+                        } elseif ($disposition->disposable_type === 'App\Models\Asset' && $disposition->disposable) {
+                            $title = $disposition->disposable->nama ?? $disposition->subject;
+                        } else {
+                            $title = $disposition->subject;
+                        }
+
                         return [
                             'type' => 'disposition',
                             'user' => $disposition->fromUser->name ?? 'Unknown',
-                            'title' => $disposition->archive->judul ?? $disposition->subject,
+                            'title' => $title,
                             'time' => $disposition->created_at->diffForHumans(),
                             'timestamp' => $disposition->created_at,
                             'color' => 'green'
                         ];
                     });
 
+                // ✅ NEW: Aktivitas Peminjaman Aset
+                $recentAssetBorrows = AssetBorrow::with(['borrower', 'asset'])
+                    ->latest()
+                    ->limit(6)
+                    ->get()
+                    ->map(function ($borrow) {
+                        $activityType = 'asset_borrow_pending';
+                        $activityText = 'mengajukan peminjaman aset';
+                        $color = 'yellow';
+
+                        if ($borrow->status === 'approved') {
+                            $activityType = 'asset_borrow_approved';
+                            $activityText = 'peminjaman aset disetujui';
+                            $color = 'green';
+                        } elseif ($borrow->status === 'borrowed') {
+                            $activityType = 'asset_borrowed';
+                            $activityText = 'meminjam aset';
+                            $color = 'blue';
+                        } elseif ($borrow->status === 'returned') {
+                            $activityType = 'asset_returned';
+                            $activityText = 'mengembalikan aset';
+                            $color = 'purple';
+                        } elseif ($borrow->status === 'rejected') {
+                            $activityType = 'asset_borrow_rejected';
+                            $activityText = 'peminjaman aset ditolak';
+                            $color = 'red';
+                        } elseif ($borrow->status === 'overdue') {
+                            $activityType = 'asset_overdue';
+                            $activityText = 'terlambat mengembalikan aset';
+                            $color = 'red';
+                        }
+
+                        return [
+                            'type' => $activityType,
+                            'user' => $borrow->borrower->name ?? 'Unknown',
+                            'title' => $borrow->asset->nama ?? 'Aset',
+                            'activity_text' => $activityText,
+                            'time' => $borrow->created_at->diffForHumans(),
+                            'timestamp' => $borrow->created_at,
+                            'color' => $color
+                        ];
+                    });
+
+                // ✅ NEW: Aktivitas Aset
+                $recentAssets = Asset::latest()
+                    ->limit(6)
+                    ->get()
+                    ->map(function ($asset) {
+                        $isNew = $asset->created_at->diffInHours(Carbon::now()) < 1;
+                        
+                        return [
+                            'type' => $isNew ? 'asset_created' : 'asset_updated',
+                            'user' => $asset->penanggung_jawab ?? 'Admin',
+                            'title' => $asset->nama,
+                            'activity_text' => $isNew ? 'menambahkan aset baru' : 'memperbarui aset',
+                            'time' => $asset->created_at->diffForHumans(),
+                            'timestamp' => $asset->created_at,
+                            'color' => $isNew ? 'indigo' : 'gray'
+                        ];
+                    });
+
                 // Gabungkan dan urutkan - ambil 10 teratas
-                $recentActivities = $recentArchives->concat($recentDispositions)
+                $recentActivities = $recentArchives
+                    ->concat($recentDispositions)
+                    ->concat($recentAssetBorrows)
+                    ->concat($recentAssets)
                     ->sortByDesc('timestamp')
                     ->take(10)
                     ->values();
@@ -301,6 +452,7 @@ class DashboardController extends Controller
                     ]);
 
                 case 'activities':
+                    // Return activities with asset activities included
                     $recentArchives = Archive::with('uploader')
                         ->latest()
                         ->limit(10)

@@ -17,6 +17,17 @@
             </h1>
             <p class="text-gray-600 mt-1 ml-15">Monitor dan kelola aset organisasi</p>
         </div>
+        
+        {{-- ✅ NEW: Tombol Tambah Aset (Hanya untuk Staff & Admin) --}}
+        @if(Auth::user()->role === 'staff' || Auth::user()->role === 'admin')
+        <a href="{{ route('staff.aset.create') }}"       
+           class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg transition-all duration-200 text-base font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Tambah Aset</span>
+        </a>
+        @endif
     </div>
 
     {{-- Statistics Cards --}}
@@ -185,7 +196,8 @@
                         'tersedia' => ['bg' => 'bg-green-500', 'text' => 'Tersedia'],
                         'digunakan' => ['bg' => 'bg-blue-500', 'text' => 'Digunakan'],
                         'maintenance' => ['bg' => 'bg-yellow-500', 'text' => 'Diperbaiki'],
-                        'rusak' => ['bg' => 'bg-red-500', 'text' => 'Rusak']
+                        'rusak' => ['bg' => 'bg-red-500', 'text' => 'Rusak'],
+                        'dipinjam' => ['bg' => 'bg-orange-500', 'text' => 'Dipinjam']
                     ];
                     $status = $statusConfig[$asset->status] ?? ['bg' => 'bg-gray-500', 'text' => ucfirst($asset->status)];
                 @endphp

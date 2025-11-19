@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Archive;
+use App\Models\Asset;
 use App\Models\Disposition;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,14 +16,12 @@ class ReportController extends Controller
 {
     /**
      * Display main report dashboard
-     * ✅ UPDATED: Support pimpinan
      */
     public function index(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
 
-        // ✅ Allow admin, staff, and pimpinan
         if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
             abort(403, 'Unauthorized');
         }
@@ -31,7 +30,6 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
 
-        // Parse dates
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();
 
@@ -41,7 +39,6 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $archiveQuery->where('user_id', $user->id);
         }
-        // Admin dan Pimpinan lihat semua
 
         $archiveStats = [
             'total' => $archiveQuery->count(),
@@ -63,7 +60,6 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $dispositionQuery->where('to_user_id', $user->id);
         }
-        // Admin dan Pimpinan lihat semua
 
         $dispositionStats = [
             'total' => $dispositionQuery->count(),
@@ -75,7 +71,7 @@ class ReportController extends Controller
                 ->count(),
         ];
 
-        // ✅ UPDATED: User Statistics (Admin and Pimpinan only)
+        // User Statistics (Admin and Pimpinan only)
         $userStats = [];
         if (in_array($role, ['admin', 'pimpinan'])) {
             $userStats = [
@@ -101,28 +97,23 @@ class ReportController extends Controller
     }
 
     /**
-     * Archive report
-     * ✅ UPDATED: Support pimpinan
+     * ✅ UPDATED: Archive report with period filter
      */
     public function arsip(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
 
-        // ✅ Allow admin, staff, and pimpinan
         if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
             abort(403, 'Unauthorized');
         }
 
-        $query = Archive::with(['category', 'uploader']);
-
-        // Date filter
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('archives.created_at', [
-                Carbon::parse($request->start_date)->startOfDay(),
-                Carbon::parse($request->end_date)->endOfDay()
-            ]);
-        }
+        // ✅ Period Filter
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+        
+        $query = Archive::with(['category', 'uploader'])
+            ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']]);
 
         // Category filter
         if ($request->filled('category_id')) {
@@ -137,35 +128,48 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $query->where('user_id', $user->id);
         }
-        // Admin dan Pimpinan lihat semua
 
         $archives = $query->orderBy('archives.created_at', 'desc')->paginate(20);
+        
+        // Statistics
+        $stats = [
+            'total' => $query->count(),
+            'by_category' => Archive::whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']])
+                ->select('category_id', DB::raw('count(*) as total'))
+                ->groupBy('category_id')
+                ->with('category')
+                ->get(),
+        ];
 
-        return view("{$role}.laporan.arsip", compact('archives'));
+        return view("{$role}.laporan.arsip", compact('archives', 'stats', 'period', 'dateRange'));
     }
 
     /**
-     * Disposition report
-     * ✅ UPDATED: Support pimpinan
+     * ✅ UPDATED: Disposition report with period filter + item type
      */
     public function disposisi(Request $request)
     {
         $role = Auth::user()->role;
         $user = Auth::user();
 
-        // ✅ Allow admin, staff, and pimpinan
         if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
             abort(403, 'Unauthorized');
         }
 
-        $query = Disposition::with(['archive', 'fromUser', 'toUser']);
+        // ✅ Period Filter
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+        
+        $query = Disposition::with(['fromUser', 'toUser', 'disposable'])
+            ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']]);
 
-        // Date filter
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('dispositions.created_at', [
-                Carbon::parse($request->start_date)->startOfDay(),
-                Carbon::parse($request->end_date)->endOfDay()
-            ]);
+        // ✅ Item Type Filter (Arsip/Aset)
+        if ($request->filled('item_type')) {
+            if ($request->item_type === 'arsip') {
+                $query->where('disposable_type', 'App\\Models\\Archive');
+            } elseif ($request->item_type === 'aset') {
+                $query->where('disposable_type', 'App\\Models\\Asset');
+            }
         }
 
         // Status filter
@@ -181,16 +185,91 @@ class ReportController extends Controller
         if ($role === 'staff') {
             $query->where('to_user_id', $user->id);
         }
-        // Admin dan Pimpinan lihat semua
 
         $dispositions = $query->orderBy('dispositions.created_at', 'desc')->paginate(20);
+        
+        // Statistics
+        $stats = [
+            'total' => (clone $query)->count(),
+            'arsip' => (clone $query)->where('disposable_type', 'App\\Models\\Archive')->count(),
+            'aset' => (clone $query)->where('disposable_type', 'App\\Models\\Asset')->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'completed' => (clone $query)->where('status', 'completed')->count(),
+        ];
 
-        return view("{$role}.laporan.disposisi", compact('dispositions'));
+        return view("{$role}.laporan.disposisi", compact('dispositions', 'stats', 'period', 'dateRange'));
     }
 
     /**
-     * User activity report
-     * ✅ UPDATED: Admin and Pimpinan only
+     * ✅ NEW: Asset report with period filter
+     */
+    public function aset(Request $request)
+    {
+        $role = Auth::user()->role;
+
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        // ✅ Period Filter
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+        
+        $query = Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']]);
+
+        // Kategori filter
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // Unit filter
+        if ($request->filled('unit')) {
+            $query->where('unit', $request->unit);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Kondisi filter
+        if ($request->filled('kondisi')) {
+            $query->where('kondisi', $request->kondisi);
+        }
+
+        $assets = $query->orderBy('assets.created_at', 'desc')->paginate(20);
+        
+        // Statistics
+        $stats = [
+            'total' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])->count(),
+            'by_kategori' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])
+                ->select('kategori', DB::raw('count(*) as total'))
+                ->groupBy('kategori')
+                ->get(),
+            'by_kondisi' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])
+                ->select('kondisi', DB::raw('count(*) as total'))
+                ->groupBy('kondisi')
+                ->get(),
+            'by_status' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])
+                ->select('status', DB::raw('count(*) as total'))
+                ->groupBy('status')
+                ->get(),
+            'by_unit' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])
+                ->select('unit', DB::raw('count(*) as total'))
+                ->whereNotNull('unit')
+                ->groupBy('unit')
+                ->get(),
+        ];
+
+        // Get filter options
+        $categories = Asset::select('kategori')->distinct()->pluck('kategori');
+        $units = Asset::select('unit')->distinct()->whereNotNull('unit')->pluck('unit');
+
+        return view("{$role}.laporan.aset", compact('assets', 'stats', 'period', 'dateRange', 'categories', 'units'));
+    }
+
+    /**
+     * ✅ UPDATED: User activity report with period filter
      */
     public function user(Request $request)
     {
@@ -200,21 +279,29 @@ class ReportController extends Controller
             abort(403, 'Unauthorized - Admin and Pimpinan only');
         }
 
-        // Get users with manual count (avoid withCount issue)
-        $users = User::orderBy('name')->get()->map(function($user) {
+        // ✅ Period Filter
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+
+        $users = User::orderBy('name')->get()->map(function($user) use ($dateRange) {
             return (object)[
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
                 'unit' => $user->unit,
-                'archives_count' => Archive::where('user_id', $user->id)->count(),
-                'sent_dispositions_count' => Disposition::where('from_user_id', $user->id)->count(),
-                'received_dispositions_count' => Disposition::where('to_user_id', $user->id)->count(),
+                'archives_count' => Archive::where('user_id', $user->id)
+                    ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                    ->count(),
+                'sent_dispositions_count' => Disposition::where('from_user_id', $user->id)
+                    ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                    ->count(),
+                'received_dispositions_count' => Disposition::where('to_user_id', $user->id)
+                    ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                    ->count(),
             ];
         });
 
-        // Paginate manually
         $perPage = 20;
         $currentPage = request()->get('page', 1);
         $items = $users->forPage($currentPage, $perPage);
@@ -227,23 +314,25 @@ class ReportController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        return view("{$role}.laporan.user", ['users' => $paginator]);
+        return view("{$role}.laporan.user", [
+            'users' => $paginator,
+            'period' => $period,
+            'dateRange' => $dateRange
+        ]);
     }
 
     /**
      * Periode statistics report (Monthly & Annual)
-     * ✅ UPDATED: Support pimpinan
      */
     public function periode(Request $request)
     {
         $role = Auth::user()->role;
         
-        // ✅ Allow admin, staff, and pimpinan
         if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
             abort(403, 'Unauthorized');
         }
         
-        $type = $request->input('type', 'monthly'); // monthly or yearly
+        $type = $request->input('type', 'monthly');
         $month = $request->input('month', Carbon::now()->month);
         $year = $request->input('year', Carbon::now()->year);
         
@@ -255,7 +344,6 @@ class ReportController extends Controller
             $endDate = Carbon::create($year, 12, 31)->endOfYear();
         }
 
-        // Archive stats
         $archiveStats = [
             'total' => Archive::whereBetween('archives.created_at', [$startDate, $endDate])->count(),
             'by_category' => Archive::whereBetween('archives.created_at', [$startDate, $endDate])
@@ -265,7 +353,6 @@ class ReportController extends Controller
                 ->get(),
         ];
 
-        // Disposition stats
         $dispositionStats = [
             'total' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->count(),
             'pending' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->where('status', 'pending')->count(),
@@ -273,16 +360,13 @@ class ReportController extends Controller
             'completed' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->where('status', 'completed')->count(),
         ];
 
-        // Chart data based on type
         if ($type === 'monthly') {
-            // Per day in month
             $chartData = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
                 ->selectRaw('DAY(archives.created_at) as period, COUNT(*) as total')
                 ->groupBy('period')
                 ->orderBy('period')
                 ->pluck('total', 'period');
         } else {
-            // Per month in year
             $chartData = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
                 ->selectRaw('MONTH(archives.created_at) as period, COUNT(*) as total')
                 ->groupBy('period')
@@ -290,7 +374,6 @@ class ReportController extends Controller
                 ->pluck('total', 'period');
         }
 
-        // Compare with previous period
         if ($type === 'monthly') {
             $prevStartDate = Carbon::create($year, $month, 1)->subMonth()->startOfMonth();
             $prevEndDate = Carbon::create($year, $month, 1)->subMonth()->endOfMonth();
@@ -310,7 +393,6 @@ class ReportController extends Controller
             ],
         ];
 
-        // Calculate percentage
         foreach ($comparison as $key => $data) {
             if ($data['previous'] > 0) {
                 $comparison[$key]['percentage'] = round((($data['current'] - $data['previous']) / $data['previous']) * 100, 1);
@@ -333,26 +415,20 @@ class ReportController extends Controller
     }
 
     /**
-     * Unit productivity report
-     * ✅ UPDATED: Support pimpinan
+     * ✅ UPDATED: Unit productivity report with period filter
      */
     public function unitKerja(Request $request)
     {
         $role = Auth::user()->role;
         
-        // ✅ Allow admin, staff, and pimpinan
         if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
             abort(403, 'Unauthorized');
         }
         
-        // Date range
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
-        
-        $startDate = Carbon::parse($startDate)->startOfDay();
-        $endDate = Carbon::parse($endDate)->endOfDay();
+        // ✅ Period Filter
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
 
-        // Get all units from users (using 'unit' field)
         $unitsList = User::whereNotNull('unit')
             ->where('unit', '!=', '')
             ->distinct()
@@ -361,26 +437,21 @@ class ReportController extends Controller
         $unitData = [];
 
         foreach ($unitsList as $unitName) {
-            // Get users in this unit
             $userIds = User::where('unit', $unitName)->pluck('id');
 
-            // Archives created by unit (using 'user_id' field)
             $totalArchives = Archive::whereIn('user_id', $userIds)
-                ->whereBetween('archives.created_at', [$startDate, $endDate])
+                ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']])
                 ->count();
 
-            // Dispositions received by unit
             $totalDispositions = Disposition::whereIn('to_user_id', $userIds)
-                ->whereBetween('dispositions.created_at', [$startDate, $endDate])
+                ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']])
                 ->count();
 
-            // Dispositions completed by unit
             $completedDispositions = Disposition::whereIn('to_user_id', $userIds)
                 ->where('status', 'completed')
-                ->whereBetween('dispositions.created_at', [$startDate, $endDate])
+                ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']])
                 ->count();
 
-            // Calculate completion rate
             $completionRate = $totalDispositions > 0 
                 ? round(($completedDispositions / $totalDispositions) * 100, 1) 
                 : 0;
@@ -394,7 +465,6 @@ class ReportController extends Controller
             ];
         }
 
-        // Sort by completion rate or total archives
         $sortBy = $request->input('sort_by', 'archives');
         
         if ($sortBy === 'completion_rate') {
@@ -413,49 +483,112 @@ class ReportController extends Controller
 
         $units = collect($unitData);
 
-        return view("{$role}.laporan.unit-kerja", compact('units', 'startDate', 'endDate'));
+        return view("{$role}.laporan.unit-kerja", compact('units', 'period', 'dateRange'));
     }
 
     /**
-     * PRINT PDF - Preview di browser untuk dicetak
-     * ✅ UPDATED: Support pimpinan
+     * PRINT PDF
      */
     public function printPdf(Request $request)
     {
         $type = $request->input('type', 'summary');
+        
+        // Validate type to prevent security issues
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit'];
+        if (!in_array($type, $allowedTypes)) {
+            abort(404, 'Report type not found');
+        }
+        
         $data = $this->getExportData($type, $request);
 
         $pdf = Pdf::loadView("reports.pdf.{$type}", $data);
         
-        // stream() = Tampil di browser (untuk print preview)
         return $pdf->stream("laporan_{$type}_" . date('Y-m-d') . ".pdf");
     }
 
     /**
-     * DOWNLOAD PDF - Download langsung
-     * ✅ UPDATED: Support pimpinan
+     * DOWNLOAD PDF
      */
     public function exportPdf(Request $request)
     {
         $type = $request->input('type', 'summary');
+        
+        // Validate type to prevent security issues
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit'];
+        if (!in_array($type, $allowedTypes)) {
+            abort(404, 'Report type not found');
+        }
+        
         $data = $this->getExportData($type, $request);
 
         $pdf = Pdf::loadView("reports.pdf.{$type}", $data);
         
-        // download() = Download file langsung
         return $pdf->download("laporan_{$type}_" . date('Y-m-d') . ".pdf");
     }
 
     /**
-     * Export report to Excel
-     * ✅ UPDATED: Support pimpinan
+     * Export Excel
      */
     public function exportExcel(Request $request)
     {
         $type = $request->input('type', 'arsip');
         
-        // Will be implemented with Laravel Excel package
         return back()->with('info', 'Fitur export Excel akan segera tersedia');
+    }
+
+    /**
+     * ✅ Helper to get date range from period
+     */
+  private function getDateRangeFromPeriod($period, Request $request)
+    {
+        $now = Carbon::now();
+        
+        switch ($period) {
+            case '1month':
+                return [
+                    'start' => $now->copy()->subMonth()->startOfDay(),
+                    'end' => $now->copy()->endOfDay(),
+                    'label' => '1 Bulan Terakhir'
+                ];
+            
+            case '3months':
+                return [
+                    'start' => $now->copy()->subMonths(3)->startOfDay(),
+                    'end' => $now->copy()->endOfDay(),
+                    'label' => '3 Bulan Terakhir'
+                ];
+            
+            case '6months':
+                return [
+                    'start' => $now->copy()->subMonths(6)->startOfDay(),
+                    'end' => $now->copy()->endOfDay(),
+                    'label' => '6 Bulan Terakhir'
+                ];
+            
+            case '1year':
+                return [
+                    'start' => $now->copy()->subYear()->startOfDay(),
+                    'end' => $now->copy()->endOfDay(),
+                    'label' => '1 Tahun Terakhir'
+                ];
+            
+            case 'custom':
+                $start = $request->input('start_date', $now->copy()->startOfMonth());
+                $end = $request->input('end_date', $now->copy()->endOfMonth());
+                
+                return [
+                    'start' => Carbon::parse($start)->startOfDay(),
+                    'end' => Carbon::parse($end)->endOfDay(),
+                    'label' => 'Custom Range'
+                ];
+            
+            default:
+                return [
+                    'start' => $now->copy()->startOfMonth()->startOfDay(),
+                    'end' => $now->copy()->endOfMonth()->endOfDay(),
+                    'label' => 'Bulan Ini'
+                ];
+        }
     }
 
     /**
@@ -463,20 +596,17 @@ class ReportController extends Controller
      */
     private function getChartData($startDate, $endDate, $role)
     {
-        // Archives per month
         $archivesPerMonth = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
             ->selectRaw('MONTH(archives.created_at) as month, COUNT(*) as total')
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month');
 
-        // Dispositions by status
         $dispositionsByStatus = Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        // Archives by category
         $archivesByCategory = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
             ->join('categories', 'archives.category_id', '=', 'categories.id')
             ->selectRaw('categories.name as category, COUNT(*) as total')
@@ -493,145 +623,176 @@ class ReportController extends Controller
     /**
      * Get data for export
      */
-    private function getExportData($type, $request)
+     private function getExportData($type, $request)
     {
         $data = [];
 
         switch ($type) {
             case 'summary':
-                $data = [
-                    'archives' => Archive::count(),
-                    'dispositions' => Disposition::count(),
-                    'users' => User::count(),
-                ];
+                // Basic counts
+                $data['archives'] = Archive::count();
+                $data['dispositions'] = Disposition::count();
+                $data['users'] = User::count();
+                $data['assets'] = Asset::count();
+                
+                // Archive statistics by category
+                $data['archive_stats'] = Archive::join('categories', 'archives.category_id', '=', 'categories.id')
+                    ->selectRaw('categories.name as category, COUNT(*) as total')
+                    ->groupBy('categories.name')
+                    ->get()
+                    ->map(function($item) {
+                        return [
+                            'category' => $item->category,
+                            'total' => $item->total
+                        ];
+                    })
+                    ->toArray();
+                
+                // Disposition statistics by status
+                $data['disposition_stats'] = Disposition::selectRaw('status, COUNT(*) as total')
+                    ->groupBy('status')
+                    ->get()
+                    ->map(function($item) {
+                        return [
+                            'status' => $item->status,
+                            'total' => $item->total
+                        ];
+                    })
+                    ->toArray();
+                
+                // Asset statistics by category
+                $data['asset_stats'] = Asset::selectRaw('kategori, COUNT(*) as total')
+                    ->groupBy('kategori')
+                    ->get()
+                    ->map(function($item) {
+                        return [
+                            'kategori' => $item->kategori,
+                            'total' => $item->total
+                        ];
+                    })
+                    ->toArray();
+                
+                // User statistics by role
+                $data['user_stats'] = User::selectRaw('role, COUNT(*) as total')
+                    ->groupBy('role')
+                    ->get()
+                    ->map(function($item) {
+                        return [
+                            'role' => $item->role,
+                            'total' => $item->total
+                        ];
+                    })
+                    ->toArray();
                 break;
 
             case 'arsip':
-                $query = Archive::with(['category', 'uploader']);
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
                 
-                if ($request->filled('start_date') && $request->filled('end_date')) {
-                    $query->whereBetween('archives.created_at', [
-                        Carbon::parse($request->start_date)->startOfDay(),
-                        Carbon::parse($request->end_date)->endOfDay()
-                    ]);
-                }
+                $query = Archive::with(['category', 'uploader'])
+                    ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']]);
                 
                 if ($request->filled('category_id')) {
                     $query->where('category_id', $request->category_id);
                 }
                 
                 $data['archives'] = $query->orderBy('archives.created_at', 'desc')->get();
+                $data['period'] = $dateRange['label'];
                 break;
 
             case 'disposisi':
-                $query = Disposition::with(['archive', 'fromUser', 'toUser']);
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
                 
-                if ($request->filled('start_date') && $request->filled('end_date')) {
-                    $query->whereBetween('dispositions.created_at', [
-                        Carbon::parse($request->start_date)->startOfDay(),
-                        Carbon::parse($request->end_date)->endOfDay()
-                    ]);
-                }
+                $query = Disposition::with(['fromUser', 'toUser', 'disposable'])
+                    ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']]);
                 
                 if ($request->filled('status')) {
                     $query->where('status', $request->status);
                 }
                 
-                if ($request->filled('priority')) {
-                    $query->where('priority', $request->priority);
+                if ($request->filled('item_type')) {
+                    if ($request->item_type === 'arsip') {
+                        $query->where('disposable_type', 'App\\Models\\Archive');
+                    } elseif ($request->item_type === 'aset') {
+                        $query->where('disposable_type', 'App\\Models\\Asset');
+                    }
                 }
                 
                 $data['dispositions'] = $query->orderBy('dispositions.created_at', 'desc')->get();
+                $data['period'] = $dateRange['label'];
+                break;
+
+            case 'aset':
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
+                
+                $query = Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']]);
+                
+                if ($request->filled('kategori')) {
+                    $query->where('kategori', $request->kategori);
+                }
+                
+                $data['assets'] = $query->orderBy('assets.created_at', 'desc')->get();
+                $data['period'] = $dateRange['label'];
                 break;
 
             case 'user':
-                $users = User::orderBy('name')->get()->map(function($user) {
+                // ✅ FIX: Add users data and date range
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
+                
+                $users = User::orderBy('name')->get()->map(function($user) use ($dateRange) {
                     return (object)[
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
                         'role' => $user->role,
                         'unit' => $user->unit,
-                        'archives_count' => Archive::where('user_id', $user->id)->count(),
-                        'sent_dispositions_count' => Disposition::where('from_user_id', $user->id)->count(),
-                        'received_dispositions_count' => Disposition::where('to_user_id', $user->id)->count(),
+                        'archives_count' => Archive::where('user_id', $user->id)
+                            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                            ->count(),
+                        'sent_dispositions_count' => Disposition::where('from_user_id', $user->id)
+                            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                            ->count(),
+                        'received_dispositions_count' => Disposition::where('to_user_id', $user->id)
+                            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
+                            ->count(),
                     ];
                 });
                 
                 $data['users'] = $users;
-                break;
-
-            case 'periode':
-                $type = $request->input('period_type', 'monthly');
-                $month = $request->input('month', Carbon::now()->month);
-                $year = $request->input('year', Carbon::now()->year);
-                
-                if ($type === 'monthly') {
-                    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                    $endDate = Carbon::create($year, $month, 1)->endOfMonth();
-                } else {
-                    $startDate = Carbon::create($year, 1, 1)->startOfYear();
-                    $endDate = Carbon::create($year, 12, 31)->endOfYear();
-                }
-
-                $data['archives'] = Archive::with('category')
-                    ->whereBetween('archives.created_at', [$startDate, $endDate])
-                    ->get();
-                    
-                $data['dispositions'] = Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->get();
-                $data['period_type'] = $type;
-                $data['period_label'] = $type === 'monthly' ? $startDate->format('F Y') : 'Tahun ' . $year;
-                $data['start_date'] = $startDate;
-                $data['end_date'] = $endDate;
-                
-                // Add comparison
-                if ($type === 'monthly') {
-                    $prevStart = Carbon::create($year, $month, 1)->subMonth()->startOfMonth();
-                    $prevEnd = Carbon::create($year, $month, 1)->subMonth()->endOfMonth();
-                } else {
-                    $prevStart = Carbon::create($year - 1, 1, 1)->startOfYear();
-                    $prevEnd = Carbon::create($year - 1, 12, 31)->endOfYear();
-                }
-                
-                $currentCount = count($data['archives']);
-                $previousCount = Archive::whereBetween('archives.created_at', [$prevStart, $prevEnd])->count();
-                
-                $data['comparison'] = [
-                    'current' => $currentCount,
-                    'previous' => $previousCount,
-                    'percentage' => $previousCount > 0 
-                        ? round((($currentCount - $previousCount) / $previousCount) * 100, 1) 
-                        : 0
-                ];
+                $data['period'] = $dateRange['label'];
+                $data['start_date'] = $dateRange['start'];
+                $data['end_date'] = $dateRange['end'];
                 break;
 
             case 'unit':
-                $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
-                $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
+                // ✅ FIX: Add units data and date range
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
                 
-                $startDate = Carbon::parse($startDate)->startOfDay();
-                $endDate = Carbon::parse($endDate)->endOfDay();
-
                 $unitsList = User::whereNotNull('unit')
                     ->where('unit', '!=', '')
                     ->distinct()
                     ->pluck('unit');
 
                 $unitData = [];
+
                 foreach ($unitsList as $unitName) {
                     $userIds = User::where('unit', $unitName)->pluck('id');
 
                     $totalArchives = Archive::whereIn('user_id', $userIds)
-                        ->whereBetween('archives.created_at', [$startDate, $endDate])
+                        ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']])
                         ->count();
 
                     $totalDispositions = Disposition::whereIn('to_user_id', $userIds)
-                        ->whereBetween('dispositions.created_at', [$startDate, $endDate])
+                        ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']])
                         ->count();
 
                     $completedDispositions = Disposition::whereIn('to_user_id', $userIds)
                         ->where('status', 'completed')
-                        ->whereBetween('dispositions.created_at', [$startDate, $endDate])
+                        ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']])
                         ->count();
 
                     $completionRate = $totalDispositions > 0 
@@ -647,14 +808,27 @@ class ReportController extends Controller
                     ];
                 }
 
-                // Sort by completion rate
-                usort($unitData, function($a, $b) {
-                    return $b['completion_rate'] <=> $a['completion_rate'];
-                });
+                // Sort by archives (default)
+                $sortBy = $request->input('sort_by', 'archives');
+                
+                if ($sortBy === 'completion_rate') {
+                    usort($unitData, function($a, $b) {
+                        return $b['completion_rate'] <=> $a['completion_rate'];
+                    });
+                } else if ($sortBy === 'dispositions') {
+                    usort($unitData, function($a, $b) {
+                        return $b['total_dispositions'] <=> $a['total_dispositions'];
+                    });
+                } else {
+                    usort($unitData, function($a, $b) {
+                        return $b['total_archives'] <=> $a['total_archives'];
+                    });
+                }
 
                 $data['units'] = $unitData;
-                $data['start_date'] = $startDate;
-                $data['end_date'] = $endDate;
+                $data['period'] = $dateRange['label'];
+                $data['start_date'] = $dateRange['start'];
+                $data['end_date'] = $dateRange['end'];
                 break;
         }
 

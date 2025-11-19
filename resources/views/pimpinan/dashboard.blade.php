@@ -210,6 +210,47 @@
         animation: pulse-urgent 2s ease-in-out infinite;
     }
     
+    /* ============================================ */
+    /* ✅ AUTO-SCROLL ANIMATION STYLES */
+    /* ============================================ */
+    .auto-scroll-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auto-scroll-wrapper::before,
+    .auto-scroll-wrapper::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 30px;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .auto-scroll-wrapper::before {
+        top: 0;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    }
+
+    .auto-scroll-wrapper::after {
+        bottom: 0;
+        background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+    }
+
+    /* Pause on hover */
+    .auto-scroll-wrapper:hover .scrolling {
+        animation-play-state: paused;
+    }
+
+    /* Item fade effect */
+    .activity-scroll-item,
+    .archive-table-item {
+        opacity: 1;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
         .stat-card .stat-number {
@@ -222,7 +263,7 @@
         
         .page-header h1 {
             font-size: 1.5rem;
-        }
+        }        
     }
 </style>
 @endpush
@@ -357,7 +398,7 @@
                             </h5>
                             <small class="opacity-90">Grafik 6 bulan terakhir</small>
                         </div>
-                        <select class="form-select form-select-sm w-auto" id="periodFilter" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                        <select class="form-select form-select-sm w-auto" id="periodFilter" style="background: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.5); color: #1e293b; font-weight: 600;">
                             <option value="6month">6 Bulan</option>
                             <option value="3month">3 Bulan</option>
                             <option value="1month">1 Bulan</option>
@@ -509,7 +550,7 @@
     </div>
 
     <!-- Recent Activity - FULL WIDTH ROW -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <!-- Arsip Terbaru - FULL COL-12 -->
         <div class="col-12">
             <div class="chart-card h-100">
@@ -534,54 +575,55 @@
                             </thead>
                             <tbody>
                                 @forelse($latestArchives as $archive)
-                                    <tr>
-                                        <td class="py-3 px-4">
-                                            <div class="d-flex align-items-center">
-                                                <div class="icon-wrapper bg-primary bg-opacity-10 me-3" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                    <i class="fas fa-file-alt text-primary" style="font-size: 16px;"></i>
-                                                </div>
-                                                <div style="min-width: 0; flex: 1;">
-                                                    <div class="fw-semibold text-dark" style="font-size: 0.9rem;">
-                                                        {{ Str::limit($archive->judul, 60) }}
-                                                    </div>
-                                                    <small class="text-muted" style="font-size: 0.8rem;">{{ $archive->nomor_surat }}</small>
-                                                </div>
+                                <tr class="archive-table-item">
+                                    <td class="py-3 px-4" style="width: 45%;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="icon-wrapper bg-primary bg-opacity-10 me-3" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                <i class="fas fa-file-alt text-primary" style="font-size: 16px;"></i>
                                             </div>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
-                                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" style="font-size: 0.75rem;">
-                                                {{ Str::limit($archive->category->name ?? 'Tanpa Kategori', 15) }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
-                                            <span class="text-muted" style="font-size: 0.85rem;">
-                                                {{ Str::limit($archive->unit ?? 'N/A', 18) }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
-                                            <small class="text-muted d-block" style="font-size: 0.8rem;">
-                                                <i class="far fa-calendar me-1"></i>
-                                                {{ $archive->created_at->format('d M Y') }}
-                                            </small>
-                                            <small class="text-muted" style="font-size: 0.7rem;">
-                                                {{ $archive->created_at->format('H:i') }}
-                                            </small>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
-                                            <a href="{{ route('pimpinan.arsip.show', $archive->id) }}" 
-                                               class="btn btn-sm btn-modern-primary" 
-                                               style="font-size: 0.8rem; padding: 6px 16px;">
-                                                <i class="fas fa-eye me-1"></i> Detail
-                                            </a>
-                                        </td>
-                                    </tr>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div class="fw-semibold text-dark" style="font-size: 0.9rem;">
+                                                    {{ Str::limit($archive->judul, 60) }}
+                                                </div>
+                                                <small class="text-muted" style="font-size: 0.8rem;">{{ $archive->nomor_surat }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-3 text-center" style="width: 15%;">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" style="font-size: 0.75rem;">
+                                            {{ Str::limit($archive->category->name ?? 'Tanpa Kategori', 15) }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center" style="width: 15%;">
+                                        <span class="text-muted" style="font-size: 0.85rem;">
+                                            {{ Str::limit($archive->unit ?? 'N/A', 18) }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center" style="width: 15%;">
+                                        <small class="text-muted d-block" style="font-size: 0.8rem;">
+                                            <i class="far fa-calendar me-1"></i>
+                                            {{ $archive->created_at->format('d M Y') }}
+                                        </small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">
+                                            {{ $archive->created_at->format('H:i') }}
+                                        </small>
+                                    </td>
+                                    <td class="py-3 px-3 text-center" style="width: 10%;">
+                                        <a href="{{ route('pimpinan.arsip.show', $archive->id) }}" 
+                                            class="btn btn-sm btn-primary" 
+                                            style="font-size: 0.9rem; padding: 8px 12px; border-radius: 8px;"
+                                            title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center py-5">
-                                            <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
-                                            <p class="text-muted mb-0">Belum ada arsip terbaru</p>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                        <p class="text-muted mb-0">Belum ada arsip terbaru</p>
+                                    </td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -598,44 +640,57 @@
         </div>
     </div>
 
-    <!-- Disposisi Mendesak - Separate Row Below -->
+    <!-- ✅ Aktivitas Terkini - WITH AUTO-SCROLL -->
     <div class="row g-4 mt-1">
-        <div class="col-xl-6">
-            <div class="chart-card h-100" style="background: linear-gradient(135deg, #fff5f5 0%, #ffe4e6 100%); border: 2px solid #fecaca;">
-                <div class="card-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <div class="col-xl-12">
+            <div class="chart-card h-100">
+                <div class="card-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);">
                     <h5 class="mb-1 fw-bold">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Disposisi Mendesak
+                        <i class="fas fa-clock me-2"></i>
+                        Aktivitas Terkini
                     </h5>
-                    <small class="opacity-90">Perlu perhatian segera</small>
+                    <small class="opacity-90">Aktivitas terbaru dari semua modul</small>
                 </div>
                 <div class="card-body p-4">
-                    @forelse($urgentDispositions as $disposition)
-                        <div class="modern-list-item bg-white urgent-badge">
-                            <div class="mb-2">
-                                <div class="fw-semibold text-dark mb-1">
-                                    <i class="fas fa-file-alt text-danger me-2"></i>
-                                    {{ Str::limit($disposition->archive->judul ?? 'N/A', 50) }}
+                    {{-- Auto-scroll Container --}}
+                    <div class="auto-scroll-wrapper" style="height: 400px; overflow: hidden; position: relative;">
+                        <div id="activityScrollContainer" class="space-y-3" style="display: flex; flex-direction: column; gap: 12px;">
+                            @forelse($recentActivities as $activity)
+                            <div class="activity-scroll-item modern-list-item bg-{{ $activity['color'] }}-50" style="border-left: 4px solid;">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="icon-wrapper bg-{{ $activity['color'] }}-100" style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <i class="fas fa-file-alt text-{{ $activity['color'] }}-600"></i>
+                                    </div>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <p class="fw-semibold text-dark mb-1" style="font-size: 0.9rem;">
+                                            {{ $activity['user'] }} 
+                                            @if(isset($activity['activity_text']))
+                                                {{ $activity['activity_text'] }}
+                                            @else
+                                                @if($activity['type'] === 'archive_upload')
+                                                    mengunggah arsip baru
+                                                @else
+                                                    memberikan disposisi
+                                                @endif
+                                            @endif
+                                        </p>
+                                        <p class="text-{{ $activity['color'] }}-600 mb-1" style="font-size: 0.85rem;">
+                                            {{ Str::limit($activity['title'], 60) }}
+                                        </p>
+                                        <small class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="far fa-clock me-1"></i>{{ $activity['time'] }}
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-user me-1"></i>
-                                    {{ Str::limit($disposition->toUser->name ?? 'N/A', 20) }}
-                                </small>
-                                <small class="badge bg-danger px-2 py-1">
-                                    <i class="fas fa-clock me-1"></i>
-                                    {{ \Carbon\Carbon::parse($disposition->deadline)->diffForHumans() }}
-                                </small>
+                            @empty
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted mb-0">Belum ada aktivitas terkini</p>
                             </div>
+                            @endforelse
                         </div>
-                    @empty
-                        <div class="text-center py-5">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3 d-block"></i>
-                            <p class="fw-semibold text-success mb-1">Tidak Ada Disposisi Mendesak</p>
-                            <p class="text-muted small mb-0">Semua disposisi dalam kendali</p>
-                        </div>
-                    @endforelse
+                    </div>
                 </div>
             </div>
         </div>
@@ -841,6 +896,68 @@ new Chart(categoryCtx, {
         }
     }
 });
+
+// ============================================
+// ✅ AUTO-SCROLL ANIMATION
+// ============================================
+function initAutoScroll(containerId, itemClass) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const items = container.querySelectorAll(`.${itemClass}`);
+    const itemCount = items.length;
+
+    if (itemCount <= 5) return; // Only scroll if more than 5 items
+
+    container.style.animation = 'none';
+    container.classList.remove('scrolling');
+
+    const itemsHTML = container.innerHTML;
+    container.innerHTML = itemsHTML + itemsHTML;
+
+    setTimeout(() => {
+        const allItems = container.querySelectorAll(`.${itemClass}`);
+        if (allItems.length === 0) return;
+
+        const firstItem = allItems[0];
+        const itemHeight = firstItem.offsetHeight;
+        const gap = 12;
+        const totalHeight = (itemHeight + gap) * itemCount;
+
+        const speedPerItem = 4500;
+        const duration = speedPerItem * itemCount;
+
+        const keyframeName = `smoothScroll_${containerId}`;
+        const oldStyle = document.getElementById(`style_${containerId}`);
+        if (oldStyle) oldStyle.remove();
+
+        const styleSheet = document.createElement('style');
+        styleSheet.id = `style_${containerId}`;
+        styleSheet.textContent = `
+            @keyframes ${keyframeName} {
+                0% { transform: translateY(0); }
+                100% { transform: translateY(-${totalHeight}px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        container.style.animation = `${keyframeName} ${duration}ms linear infinite`;
+        container.classList.add('scrolling');
+    }, 100);
+
+    const wrapper = container.parentElement;
+    wrapper.addEventListener('mouseenter', () => {
+        container.style.animationPlayState = 'paused';
+    });
+    wrapper.addEventListener('mouseleave', () => {
+        container.style.animationPlayState = 'running';
+    });
+}
+
+// Initialize auto-scroll
+setTimeout(() => {
+    initAutoScroll('activityScrollContainer', 'activity-scroll-item');
+}, 500);
 
 // Refresh Dashboard Function
 function refreshDashboard() {

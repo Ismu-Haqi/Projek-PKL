@@ -1,4 +1,4 @@
-@extends('pimpinan.layouts.app')
+@extends(Auth::user()->role . '.layouts.app')
 
 @section('title', 'Laporan Aktivitas User')
 
@@ -7,18 +7,93 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-center">
-            <a href="{{ route('pimpinan.laporan.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <a href="{{ route(Auth::user()->role . '.laporan.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Laporan Aktivitas User</h1>
+                <h1 class="text-3xl font-bold text-gray-800">👥 Laporan Aktivitas User</h1>
                 <p class="text-gray-600 mt-1">Monitoring aktivitas & kinerja pengguna sistem</p>
             </div>
         </div>
+    </div>
+
+    <!-- ✅ FILTER PERIODE (Modern UI) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <form method="GET" action="{{ route(Auth::user()->role . '.laporan.user') }}">
+            
+            <!-- Period Toggle Buttons -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="submit" name="period" value="1month" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period', '1month') === '1month' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Bulan
+                </button>
+                <button type="submit" name="period" value="3months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '3months' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 3 Bulan
+                </button>
+                <button type="submit" name="period" value="6months" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '6months' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 6 Bulan
+                </button>
+                <button type="submit" name="period" value="1year" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === '1year' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    📅 1 Tahun
+                </button>
+                <button type="button" onclick="toggleCustomDate()" 
+                    class="px-4 py-2 rounded-lg font-medium transition-all {{ request('period') === 'custom' ? 'bg-green-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                    🗓️ Custom
+                </button>
+            </div>
+
+            <!-- Custom Date Range (Hidden by default) -->
+            <div id="customDateRange" class="mb-4 {{ request('period') === 'custom' ? '' : 'hidden' }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ request('end_date') }}" 
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                </div>
+                <input type="hidden" name="period" value="custom">
+                <button type="submit" class="mt-4 px-6 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all shadow-lg font-medium">
+                    Terapkan Custom Range
+                </button>
+            </div>
+
+            <div class="text-sm text-gray-600">
+                <strong>Periode:</strong> {{ $dateRange['label'] ?? 'Semua Periode' }}
+                <span class="ml-3">
+                    ({{ $dateRange['start']->format('d M Y') }} - {{ $dateRange['end']->format('d M Y') }})
+                </span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="flex gap-2">
+        <a href="{{ route(auth()->user()->role . '.laporan.print-pdf', ['type' => 'user'] + request()->query()) }}" 
+           target="_blank"
+           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print PDF
+        </a>
         
-        
+        <a href="{{ route(auth()->user()->role . '.laporan.export-pdf', ['type' => 'user'] + request()->query()) }}" 
+           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Download PDF
+        </a>
     </div>
 
     <!-- Statistics Cards -->
@@ -44,7 +119,7 @@
                 </div>
             </div>
             <p class="text-sm text-gray-600 mb-1">Admin</p>
-            <p class="text-3xl font-bold text-purple-600">{{ $users->where('role', 'pimpinan')->count() }}</p>
+            <p class="text-3xl font-bold text-purple-600">{{ $users->where('role', 'admin')->count() }}</p>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -67,46 +142,25 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-sm text-gray-600 mb-1">Total Arsip</p>
+            <p class="text-sm text-gray-600 mb-1">Total Arsip (Periode)</p>
             <p class="text-3xl font-bold text-orange-600">{{ $users->sum('archives_count') }}</p>
         </div>
     </div>
 
-    <!-- Tombol Untuk Print dan Download -->
-    @if(auth()->user()->role === 'pimpinan')
-<div class="flex gap-2 mb-4">
-    <a href="{{ route('pimpinan.laporan.print-pdf', ['type' => 'user']) }}" 
-       target="_blank"
-       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-        </svg>
-        Print PDF
-    </a>
-    
-    <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'user']) }}" 
-       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Download PDF
-    </a>
-</div>
-@endif
     <!-- Data Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Aktivitas Pengguna</h3>
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Aktivitas Pengguna (Periode: {{ $dateRange['label'] }})</h3>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 border-b">
+                <thead class="bg-gradient-to-r from-green-50 to-teal-50 border-b">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Nama</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Email</th>
                         <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Role</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Unit</th>
                         <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Arsip</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Disposisi Terkirim</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Disposisi Diterima</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Disp. Terkirim</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">Disp. Diterima</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
@@ -126,9 +180,13 @@
                             {{ $user->email }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            @if($user->role === 'pimpinan')
+                            @if($user->role === 'admin')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
                                     Admin
+                                </span>
+                            @elseif($user->role === 'pimpinan')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                    Pimpinan
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
@@ -177,4 +235,12 @@
         @endif
     </div>
 </div>
+
+<script>
+// Toggle Custom Date Range
+function toggleCustomDate() {
+    const customDiv = document.getElementById('customDateRange');
+    customDiv.classList.toggle('hidden');
+}
+</script>
 @endsection

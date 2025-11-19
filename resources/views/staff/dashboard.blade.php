@@ -51,7 +51,7 @@
                         <div class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
                         <p class="text-sm text-gray-500 font-semibold uppercase">Disposisi Aktif</p>
                     </div>
-                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $pendingDispositions ?? 5 }}</h3>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $pendingDispositions ?? 0 }}</h3>
                     <p class="text-xs text-orange-600 font-medium">Perlu ditindaklanjuti</p>
                 </div>
                 <div class="bg-gradient-to-br from-orange-100 to-orange-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -76,8 +76,8 @@
                         <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
                         <p class="text-sm text-gray-500 font-semibold uppercase">Arsip Saya</p>
                     </div>
-                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $myArchivesCount ?? 128 }}</h3>
-                    <p class="text-xs text-green-600 font-medium">+12 bulan ini</p>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $myArchivesCount ?? 0 }}</h3>
+                    <p class="text-xs text-green-600 font-medium">Total dokumen</p>
                 </div>
                 <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
                     <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@
                         <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
                         <p class="text-sm text-gray-500 font-semibold uppercase">Favorit</p>
                     </div>
-                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $favoritesCount ?? 24 }}</h3>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $favoritesCount ?? 0 }}</h3>
                     <p class="text-xs text-gray-600 font-medium">Dokumen tersimpan</p>
                 </div>
                 <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -126,7 +126,7 @@
                         <div class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
                         <p class="text-sm text-gray-500 font-semibold uppercase">Notifikasi</p>
                     </div>
-                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $unreadNotifications ?? 8 }}</h3>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-1">{{ $unreadNotifications ?? 0 }}</h3>
                     <p class="text-xs text-red-600 font-medium">Belum dibaca</p>
                 </div>
                 <div class="bg-gradient-to-br from-red-100 to-red-200 p-4 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -169,7 +169,7 @@
                     </a>
                 </div>
                 
-               <div class="space-y-3">
+                <div class="space-y-3">
                     @forelse($recentDispositions ?? [] as $disposition)
                     <div class="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-l-4 border-orange-500 hover:shadow-md transition-all">
                         <div class="flex items-start justify-between">
@@ -195,9 +195,8 @@
                                     Dari: {{ $disposition->fromUser->name ?? 'Unknown' }}
                                 </div>
                             </div>
-                            {{-- 🔥 TOMBOL PROSES YANG SUDAH DIPERBAIKI --}}
                             <a href="{{ route('staff.disposisi.show', $disposition->id) }}" 
-                            class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
+                               class="ml-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
@@ -218,7 +217,7 @@
             </div>
         </div>
 
-        {{-- Right Column (1/3) --}}
+        {{-- Right Column (1/3) - WIDER ACTIVITY TIMELINE --}}
         <div class="space-y-6">
             
             {{-- Quick Actions --}}
@@ -257,7 +256,7 @@
                 </div>
             </div>
 
-            {{-- Activity Timeline --}}
+            {{-- ✅ Activity Timeline WITH AUTO-SCROLL --}}
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,75 +264,56 @@
                     </svg>
                     Aktivitas Terkini
                 </h3>
-                <div class="space-y-4">
-                    @forelse($recentActivities ?? [] as $activity)
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                
+                {{-- Auto-scroll Container --}}
+                <div class="auto-scroll-wrapper" style="height: 400px; overflow: hidden; position: relative;">
+                    <div id="activityScrollContainer" class="space-y-3">
+                        @forelse($recentActivities ?? [] as $activity)
+                        <div class="activity-scroll-item flex items-start p-3 bg-{{ $activity['color'] }}-50 rounded-lg border-l-4 border-{{ $activity['color'] }}-500 hover:shadow-md transition-all">
+                            <div class="flex-shrink-0 w-10 h-10 bg-{{ $activity['color'] }}-100 rounded-full flex items-center justify-center mr-3">
+                                @if($activity['icon'] === 'upload')
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                @elseif($activity['icon'] === 'disposition')
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                @elseif($activity['icon'] === 'asset')
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                @elseif($activity['icon'] === 'asset_add')
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                @elseif($activity['icon'] === 'star')
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                @else
+                                    <svg class="w-5 h-5 text-{{ $activity['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-800">{{ $activity['title'] }}</p>
+                                <p class="text-sm text-{{ $activity['color'] }}-600 font-medium mt-1 truncate">{{ $activity['description'] }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
+                            <p class="text-gray-500 font-medium">Belum ada aktivitas</p>
+                            <p class="text-gray-400 text-sm mt-1">Aktivitas Anda akan muncul di sini</p>
                         </div>
-                        <div class="ml-3 flex-1">
-                            <p class="text-sm font-medium text-gray-800">{{ $activity->title ?? 'Anda mengunggah arsip baru' }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $activity->time ?? '5 menit lalu' }}</p>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r-lg">
-                        <p class="text-sm font-medium text-gray-800">Anda mengunggah arsip baru</p>
-                        <p class="text-xs text-blue-600 font-medium mt-1">Laporan Keuangan Q4 2023</p>
-                        <p class="text-xs text-gray-500 mt-1">5 menit lalu</p>
-                    </div>
-                    <div class="border-l-4 border-green-500 pl-4 py-3 bg-green-50 rounded-r-lg">
-                        <p class="text-sm font-medium text-gray-800">Disposisi selesai diproses</p>
-                        <p class="text-xs text-green-600 font-medium mt-1">SK Bupati No. 001/2024</p>
-                        <p class="text-xs text-gray-500 mt-1">2 jam lalu</p>
-                    </div>
-                    <div class="border-l-4 border-yellow-500 pl-4 py-3 bg-yellow-50 rounded-r-lg">
-                        <p class="text-sm font-medium text-gray-800">Arsip ditandai favorit</p>
-                        <p class="text-xs text-yellow-600 font-medium mt-1">Proposal Anggaran 2024</p>
-                        <p class="text-xs text-gray-500 mt-1">1 hari lalu</p>
-                    </div>
-                    @endforelse
-                </div>
-                <a href="#" class="block text-center text-sm text-blue-600 hover:text-blue-700 font-semibold mt-4">
-                    Lihat Semua Aktivitas →
-                </a>
-            </div>
-
-            {{-- Tips & Info --}}
-            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-lg border border-yellow-200 p-6">
-                <div class="flex items-start mb-4">
-                    <div class="flex-shrink-0 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h4 class="text-sm font-bold text-yellow-900 mb-2">💡 Tips Hari Ini</h4>
-                        <p class="text-sm text-yellow-800">Gunakan fitur <span class="font-semibold">Arsip Favorit</span> untuk menyimpan dokumen penting yang sering Anda akses!</p>
+                        @endforelse
                     </div>
                 </div>
-            </div>
-
-            {{-- Storage Info --}}
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
-                    </svg>
-                    Penyimpanan
-                </h3>
-                <div class="mb-3">
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Digunakan</span>
-                        <span class="font-semibold text-gray-800">2.8 GB / 10 GB</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: 28%"></div>
-                    </div>
-                </div>
-                <p class="text-xs text-gray-500">Anda masih memiliki <span class="font-semibold text-blue-600">7.2 GB</span> ruang tersedia</p>
             </div>
         </div>
     </div>
@@ -360,7 +340,162 @@
 .stat-card:nth-child(2) { animation-delay: 0.2s; }
 .stat-card:nth-child(3) { animation-delay: 0.3s; }
 .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ============================================ */
+/* ✅ AUTO-SCROLL ANIMATION STYLES */
+/* ============================================ */
+.auto-scroll-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.auto-scroll-wrapper::before,
+.auto-scroll-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.auto-scroll-wrapper::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.auto-scroll-wrapper::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+/* Pause on hover */
+.auto-scroll-wrapper:hover .scrolling {
+    animation-play-state: paused;
+}
+
+/* Item fade effect */
+.activity-scroll-item {
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.auto-scroll-wrapper:hover .activity-scroll-item {
+    opacity: 1;
+}
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ============================================
+        // ✅ AUTO-SCROLL ANIMATION FOR ACTIVITIES
+        // ============================================
+        function initAutoScroll(containerId, itemClass) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.warn(`Container ${containerId} not found`);
+                return;
+            }
+
+            const items = container.querySelectorAll(`.${itemClass}`);
+            const itemCount = items.length;
+
+            console.log(`Initializing auto-scroll for ${containerId}: ${itemCount} items`);
+
+            // Only enable auto-scroll if more than 5 items
+            if (itemCount <= 5) {
+                console.log(`Auto-scroll disabled for ${containerId}: not enough items (${itemCount} <= 5)`);
+                return;
+            }
+
+            // Remove existing animation first
+            container.style.animation = 'none';
+            container.classList.remove('scrolling');
+
+            // Duplicate items for seamless loop
+            const itemsHTML = container.innerHTML;
+            container.innerHTML = itemsHTML + itemsHTML;
+
+            // Wait for DOM update
+            setTimeout(() => {
+                // Calculate heights with more accurate method
+                const allItems = container.querySelectorAll(`.${itemClass}`);
+                if (allItems.length === 0) {
+                    console.error('No items found after duplication');
+                    return;
+                }
+
+                const firstItem = allItems[0];
+                const itemHeight = firstItem.offsetHeight;
+                
+                // Detect gap from container class
+                let gap = 12; // space-y-3 = 12px
+                if (container.classList.contains('space-y-4')) {
+                    gap = 16; // space-y-4 = 16px
+                }
+
+                const totalHeight = (itemHeight + gap) * itemCount;
+
+                console.log(`Container: ${containerId}, Item height: ${itemHeight}px, Gap: ${gap}px, Total height: ${totalHeight}px`);
+
+                // Set animation
+                const speedPerItem = 4500; // ms per item (smooth & readable)
+                const duration = speedPerItem * itemCount;
+
+                // Create unique keyframe name
+                const keyframeName = `smoothScroll_${containerId}`;
+
+                // Remove old keyframe if exists
+                const oldStyle = document.getElementById(`style_${containerId}`);
+                if (oldStyle) {
+                    oldStyle.remove();
+                }
+
+                // Create keyframes dynamically with unique ID
+                const styleSheet = document.createElement('style');
+                styleSheet.id = `style_${containerId}`;
+                styleSheet.textContent = `
+                    @keyframes ${keyframeName} {
+                        0% {
+                            transform: translateY(0);
+                        }
+                        100% {
+                            transform: translateY(-${totalHeight}px);
+                        }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+
+                // Apply animation
+                container.style.animation = `${keyframeName} ${duration}ms linear infinite`;
+                container.classList.add('scrolling');
+
+                console.log(`✅ Auto-scroll activated for ${containerId}`);
+            }, 100);
+
+            // Pause on hover
+            const wrapper = container.parentElement;
+            wrapper.addEventListener('mouseenter', () => {
+                container.style.animationPlayState = 'paused';
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                container.style.animationPlayState = 'running';
+            });
+        }
+
+        // Initialize auto-scroll for activities
+        console.log('🚀 Initializing staff dashboard auto-scroll...');
+        
+        // Add delay to ensure DOM is fully loaded
+        setTimeout(() => {
+            initAutoScroll('activityScrollContainer', 'activity-scroll-item');
+        }, 500);
+    });
+</script>
 @endpush
 
 @endsection

@@ -8,6 +8,7 @@ use App\Models\Archive;
 use App\Models\Disposition;
 use App\Models\User;
 use App\Models\Asset;
+use App\Models\AssetBorrow;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Category;
 use Carbon\Carbon;
@@ -120,7 +121,6 @@ class DashboardController extends Controller
 
             // ============================================
             // 5. TOP 5 UNIT KERJA (berdasarkan arsip)
-            // ✅ FIXED: Qualify column dengan table name
             // ============================================
             $topUnits = User::select('users.unit', DB::raw('COUNT(archives.id) as total_archives'))
                 ->leftJoin('archives', 'users.id', '=', 'archives.user_id')
@@ -133,26 +133,20 @@ class DashboardController extends Controller
                 ->get();
 
             // ============================================
-            // 6. ARSIP TERBARU (10 Terakhir)
+            // 6. ARSIP TERBARU (15 Terakhir untuk scroll)
             // ============================================
             $latestArchives = Archive::with(['category', 'uploader'])
                 ->latest()
-                ->limit(10)
+                ->limit(15)
                 ->get();
 
             // ============================================
-            // 7. DISPOSISI MENDESAK (Deadline < 7 hari)
+            // 7. ✅ AKTIVITAS TERKINI (menggantikan Disposisi Mendesak)
             // ============================================
-            $urgentDispositions = Disposition::with(['archive', 'toUser'])
-                ->whereIn('status', ['pending', 'in_progress'])
-                ->where('deadline', '<=', Carbon::now()->addDays(7))
-                ->orderBy('deadline')
-                ->limit(5)
-                ->get();
+            $recentActivities = $this->getRecentActivities();
 
             // ============================================
             // 8. PERFORMA STAFF (Top 5 Contributors)
-            // ✅ FIXED: Qualify all columns dengan table name
             // ============================================
             $topContributors = User::select(
                     'users.id',
@@ -162,8 +156,8 @@ class DashboardController extends Controller
                     DB::raw('COUNT(archives.id) as archives_count')
                 )
                 ->leftJoin('archives', 'users.id', '=', 'archives.user_id')
-                ->where('users.role', '!=', 'pimpinan') // Exclude pimpinan
-                ->where('users.is_active', true) // Only active users
+                ->where('users.role', '!=', 'pimpinan')
+                ->where('users.is_active', true)
                 ->groupBy('users.id', 'users.name', 'users.unit', 'users.role')
                 ->orderByDesc('archives_count')
                 ->having('archives_count', '>', 0)
@@ -200,7 +194,7 @@ class DashboardController extends Controller
                 
                 // Recent Data
                 'latestArchives',
-                'urgentDispositions',
+                'recentActivities', // ✅ Ganti urgentDispositions
                 'topContributors',
                 'userStats'
             ));
@@ -209,10 +203,126 @@ class DashboardController extends Controller
             Log::error('Error in Pimpinan Dashboard: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
             
-            // Return view with error message
             return view('pimpinan.dashboard')
                 ->with('error', 'Terjadi kesalahan saat memuat dashboard. Silakan refresh halaman.');
         }
+    }
+
+    /**
+     * ✅ NEW: Get recent activities untuk pimpinan
+     */
+    private function getRecentActivities()
+    {
+        $activities = collect();
+        
+        // Aktivitas dari arsip (5 terbaru)
+        $archives = Archive::with('uploader')
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function($archive) {
+                return [
+                    'type' => 'archive_upload',
+                    'user' => $archive->uploader->name ?? 'Unknown',
+                    'title' => $archive->judul,
+                    'time' => $archive->created_at->diffForHumans(),
+                    'created_at' => $archive->created_at,
+                    'color' => 'blue'
+                ];
+            });
+        
+        $activities = $activities->merge($archives);
+        
+        // Aktivitas dari disposisi (5 terbaru)
+        $dispositions = Disposition::with(['fromUser', 'disposable'])
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function($disposition) {
+                $title = 'Disposisi';
+                if ($disposition->disposable_type === 'App\Models\Archive' && $disposition->disposable) {
+                    $title = $disposition->disposable->judul ?? $disposition->subject;
+                } elseif ($disposition->disposable_type === 'App\Models\Asset' && $disposition->disposable) {
+                    $title = $disposition->disposable->nama ?? $disposition->subject;
+                } else {
+                    $title = $disposition->subject;
+                }
+
+                return [
+                    'type' => 'disposition',
+                    'user' => $disposition->fromUser->name ?? 'Unknown',
+                    'title' => $title,
+                    'time' => $disposition->created_at->diffForHumans(),
+                    'created_at' => $disposition->created_at,
+                    'color' => 'green'
+                ];
+            });
+        
+        $activities = $activities->merge($dispositions);
+        
+        // ✅ Aktivitas dari peminjaman aset (5 terbaru)
+        if (Schema::hasTable('asset_borrows')) {
+            $assetBorrows = AssetBorrow::with(['borrower', 'asset'])
+                ->latest()
+                ->limit(5)
+                ->get()
+                ->map(function($borrow) {
+                    $activityType = 'asset_borrow';
+                    $activityText = 'mengajukan peminjaman aset';
+                    $color = 'yellow';
+                    
+                    if ($borrow->status === 'approved') {
+                        $activityText = 'peminjaman aset disetujui';
+                        $color = 'green';
+                    } elseif ($borrow->status === 'borrowed') {
+                        $activityText = 'meminjam aset';
+                        $color = 'blue';
+                    } elseif ($borrow->status === 'returned') {
+                        $activityText = 'mengembalikan aset';
+                        $color = 'purple';
+                    } elseif ($borrow->status === 'overdue') {
+                        $activityText = 'terlambat mengembalikan aset';
+                        $color = 'red';
+                    }
+                    
+                    return [
+                        'type' => $activityType,
+                        'user' => $borrow->borrower->name ?? 'Unknown',
+                        'title' => $borrow->asset->nama ?? 'Aset',
+                        'activity_text' => $activityText,
+                        'time' => $borrow->created_at->diffForHumans(),
+                        'created_at' => $borrow->created_at,
+                        'color' => $color
+                    ];
+                });
+            
+            $activities = $activities->merge($assetBorrows);
+        }
+        
+        // ✅ Aktivitas dari aset (3 terbaru)
+        if (Schema::hasTable('assets')) {
+            $assets = Asset::latest()
+                ->limit(3)
+                ->get()
+                ->map(function($asset) {
+                    $isNew = $asset->created_at->diffInHours(Carbon::now()) < 24;
+                    
+                    return [
+                        'type' => $isNew ? 'asset_created' : 'asset_updated',
+                        'user' => $asset->penanggung_jawab ?? 'Admin',
+                        'title' => $asset->nama,
+                        'activity_text' => $isNew ? 'menambahkan aset baru' : 'memperbarui aset',
+                        'time' => $asset->created_at->diffForHumans(),
+                        'created_at' => $asset->created_at,
+                        'color' => $isNew ? 'indigo' : 'gray'
+                    ];
+                });
+            
+            $activities = $activities->merge($assets);
+        }
+        
+        // Sort by time and take 10 most recent
+        return $activities->sortByDesc('created_at')->take(10)->values();
     }
 
     /**
@@ -227,7 +337,7 @@ class DashboardController extends Controller
                 // Latest Archives
                 $latestArchives = Archive::with(['category', 'uploader'])
                     ->latest()
-                    ->limit(10)
+                    ->limit(15)
                     ->get()
                     ->map(function($archive) {
                         return [
@@ -255,11 +365,15 @@ class DashboardController extends Controller
                             'total' => $item->total
                         ];
                     });
+
+                // ✅ Recent Activities
+                $recentActivities = $this->getRecentActivities();
                 
                 return response()->json([
                     'success' => true,
                     'latestArchives' => $latestArchives,
-                    'categoryDistribution' => $categoryDistribution
+                    'categoryDistribution' => $categoryDistribution,
+                    'recentActivities' => $recentActivities
                 ]);
             }
 
@@ -272,29 +386,6 @@ class DashboardController extends Controller
                         'currentMonthArchives' => Archive::whereMonth('created_at', Carbon::now()->month)->count(),
                         'activeDispositions' => Disposition::whereIn('status', ['pending', 'in_progress'])->count(),
                         'totalAssets' => Schema::hasTable('assets') ? Asset::count() : 0,
-                    ]);
-
-                case 'dispositions':
-                    $urgentDispositions = Disposition::with(['archive', 'toUser'])
-                        ->whereIn('status', ['pending', 'in_progress'])
-                        ->where('deadline', '<=', Carbon::now()->addDays(7))
-                        ->orderBy('deadline')
-                        ->limit(5)
-                        ->get()
-                        ->map(function($disp) {
-                            return [
-                                'id' => $disp->id,
-                                'subject' => $disp->subject,
-                                'archive_title' => $disp->archive->judul ?? '-',
-                                'to_user' => $disp->toUser->name ?? '-',
-                                'deadline' => $disp->deadline ? Carbon::parse($disp->deadline)->format('d M Y') : '-',
-                                'status' => $disp->status
-                            ];
-                        });
-
-                    return response()->json([
-                        'success' => true,
-                        'urgentDispositions' => $urgentDispositions
                     ]);
 
                 default:
@@ -328,7 +419,6 @@ class DashboardController extends Controller
             
             switch ($period) {
                 case '1month':
-                    // Data harian untuk 1 bulan terakhir
                     for ($i = 29; $i >= 0; $i--) {
                         $date = Carbon::now()->subDays($i);
                         $count = Archive::whereDate('created_at', $date->format('Y-m-d'))->count();
@@ -339,7 +429,6 @@ class DashboardController extends Controller
                     break;
 
                 case '3month':
-                    // Data mingguan untuk 3 bulan terakhir
                     for ($i = 11; $i >= 0; $i--) {
                         $date = Carbon::now()->subWeeks($i);
                         $weekStart = $date->copy()->startOfWeek();
@@ -354,7 +443,6 @@ class DashboardController extends Controller
                     
                 case '6month':
                 default:
-                    // Data bulanan untuk 6 bulan terakhir
                     for ($i = 5; $i >= 0; $i--) {
                         $date = Carbon::now()->subMonths($i);
                         $count = Archive::whereYear('created_at', $date->year)
@@ -367,7 +455,6 @@ class DashboardController extends Controller
                     break;
             }
             
-            // Hitung statistik tambahan
             $total = array_sum($chartData);
             $average = $total > 0 && count($chartData) > 0 ? round($total / count($chartData), 1) : 0;
             $max = count($chartData) > 0 ? max($chartData) : 0;

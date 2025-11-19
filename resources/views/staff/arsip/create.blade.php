@@ -8,9 +8,9 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">📤 Unggah Arsip Digital Baru</h1>
-            <p class="text-sm text-gray-500 mt-1">Lengkapi informasi dan unggah file arsip digital</p>
+            <p class="text-sm text-gray-500 mt-1">Lengkapi informasi dan unggah file arsip digital dari unit Anda</p>
         </div>
-        <a href="{{ route('admin.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
+        <a href="{{ route('staff.arsip.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -38,7 +38,7 @@
     @endif
 
     {{-- Form --}}
-    <form action="{{ route('admin.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+    <form action="{{ route('staff.arsip.store') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
         @csrf
         
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -54,7 +54,7 @@
                             <li>Field bertanda (*) wajib diisi</li>
                             <li>Anda bisa upload <strong>BEBERAPA FILE SEKALIGUS</strong> (max 10MB per file)</li>
                             <li>Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG</li>
-                            <li>Data pengirim dan unit otomatis terisi dari akun Anda</li>
+                            <li>Pengirim dan Unit otomatis terisi dari akun Anda</li>
                         </ul>
                     </div>
                 </div>
@@ -100,27 +100,19 @@
                     <label class="block text-sm font-bold text-gray-700 mb-2">
                         Pengirim <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="pengirim" value="{{ Auth::user()->name }}" readonly
+                    <input type="text" value="{{ Auth::user()->name }}" readonly
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
-                    <p class="text-xs text-gray-500 mt-1">Otomatis terisi dari akun Anda</p>
+                    <p class="text-xs text-gray-500 mt-1">✓ Otomatis terisi dari akun Anda</p>
                 </div>
 
-                {{-- Unit (Auto-filled dari user, bisa edit jika perlu) --}}
+                {{-- Unit (Auto-filled, readonly) --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">
                         Unit/Bidang <span class="text-red-500">*</span>
                     </label>
-                    <select name="unit" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="{{ Auth::user()->unit ?? '' }}" selected>{{ Auth::user()->unit ?? 'Pilih Unit' }}</option>
-                        <option value="Sekretariat">Sekretariat</option>
-                        <option value="IKP">IKP (Informasi & Komunikasi Publik)</option>
-                        <option value="Aptika">Aptika (Aplikasi Informatika)</option>
-                        <option value="Komtel">Komtel (Komunikasi & Telematika)</option>
-                        <option value="Statistik">Statistik & Persandian</option>
-                        <option value="E-Gov">E-Government</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Unit Anda: <strong>{{ Auth::user()->unit ?? 'Belum diset' }}</strong></p>
+                    <input type="text" name="unit" value="{{ Auth::user()->unit ?? 'Umum' }}" readonly
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed">
+                    <p class="text-xs text-gray-500 mt-1">✓ Unit Anda: <strong>{{ Auth::user()->unit ?? 'Belum diset' }}</strong></p>
                 </div>
 
                 {{-- Kategori --}}
@@ -211,7 +203,7 @@
 
         {{-- Action Buttons --}}
         <div class="flex justify-end gap-3">
-            <a href="{{ route('admin.arsip.index') }}" 
+            <a href="{{ route('staff.arsip.index') }}" 
                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
                 Batal
             </a>
@@ -234,19 +226,16 @@ const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 const filesList = document.getElementById('filesList');
 let selectedFiles = [];
 
-// Click to upload
 uploadArea.addEventListener('click', function(e) {
     if (!e.target.closest('.remove-file-btn')) {
         fileInput.click();
     }
 });
 
-// File input change (FIX: Langsung trigger saat pilih file)
 fileInput.addEventListener('change', function(e) {
     handleFiles(this.files);
 });
 
-// Drag and drop
 uploadArea.addEventListener('dragover', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -265,24 +254,19 @@ uploadArea.addEventListener('drop', function(e) {
     uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
     
     if (e.dataTransfer.files.length) {
-        // Update file input dengan files yang di-drop
         const dataTransfer = new DataTransfer();
         Array.from(e.dataTransfer.files).forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
-        
         handleFiles(e.dataTransfer.files);
     }
 });
 
-// Handle files
 function handleFiles(files) {
     if (files.length === 0) return;
-    
     selectedFiles = Array.from(files);
     displayFiles();
 }
 
-// Display file list
 function displayFiles() {
     if (selectedFiles.length === 0) {
         filesList.classList.add('hidden');
@@ -298,8 +282,7 @@ function displayFiles() {
         const fileSize = (file.size / 1024 / 1024).toFixed(2);
         const fileExtension = file.name.split('.').pop().toLowerCase();
         
-        // Validate file
-        const maxSize = 10; // 10MB
+        const maxSize = 10;
         const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
         
         let statusClass = 'bg-green-50 border-green-200';
@@ -338,28 +321,21 @@ function displayFiles() {
     });
 }
 
-// Remove file
 function removeFile(index) {
     selectedFiles.splice(index, 1);
-    
-    // Update file input
     const dataTransfer = new DataTransfer();
     selectedFiles.forEach(file => dataTransfer.items.add(file));
     fileInput.files = dataTransfer.files;
-    
     displayFiles();
 }
 
-// Form submit validation
 document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const submitBtn = document.getElementById('submitBtn');
     
-    // Validate files
     const hasValidFiles = selectedFiles.length > 0 && selectedFiles.every(file => {
         const maxSize = 10 * 1024 * 1024;
         const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
         const fileExtension = file.name.split('.').pop().toLowerCase();
-        
         return file.size <= maxSize && allowedExtensions.includes(fileExtension);
     });
     
@@ -369,7 +345,6 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
         return false;
     }
     
-    // Disable button and show loading
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
         <svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

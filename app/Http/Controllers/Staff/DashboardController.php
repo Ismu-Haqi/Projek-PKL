@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Archive;
 use App\Models\Disposition;
+use App\Models\Asset;
+use App\Models\AssetBorrow;
 use App\Models\Notification;
 use Carbon\Carbon;
 
@@ -56,12 +58,11 @@ class DashboardController extends Controller
         // ================================
         
         // Disposisi terbaru yang perlu ditindaklanjuti (max 3)
-        // 🔥 PERBAIKAN: Pastikan relasi dan data lengkap terload
         $recentDispositions = [];
         if (Schema::hasTable('dispositions')) {
             $recentDispositions = Disposition::where('to_user_id', $user->id)
                 ->whereIn('status', ['pending', 'in_progress'])
-                ->with(['fromUser', 'archive']) // Eager loading
+                ->with(['fromUser', 'disposable']) // Eager loading
                 ->orderBy('created_at', 'desc')
                 ->limit(3)
                 ->get();
@@ -81,7 +82,7 @@ class DashboardController extends Controller
             $recentArchives = $query->get();
         }
         
-        // Aktivitas terkini (kombinasi dari berbagai sumber)
+        // ✅ Aktivitas terkini (kombinasi dari berbagai sumber + ASET)
         $recentActivities = $this->getRecentActivities($user->id);
         
         return view('staff.dashboard', compact(
@@ -96,17 +97,17 @@ class DashboardController extends Controller
     }
     
     /**
-     * Get recent activities for staff
+     * ✅ UPDATED: Get recent activities for staff - WITH ASSET ACTIVITIES
      */
     private function getRecentActivities($userId)
     {
         $activities = collect();
         
-        // Aktivitas dari arsip
+        // Aktivitas dari arsip (ambil 4)
         if (Schema::hasTable('archives')) {
             $archives = Archive::where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
-                ->limit(3)
+                ->limit(4)
                 ->get()
                 ->map(function($archive) {
                     return [
@@ -123,29 +124,113 @@ class DashboardController extends Controller
             $activities = $activities->merge($archives);
         }
         
-        // Aktivitas dari disposisi
+        // Aktivitas dari disposisi (ambil 4)
         if (Schema::hasTable('dispositions')) {
             $dispositions = Disposition::where('to_user_id', $userId)
-                ->where('status', 'completed')
                 ->orderBy('updated_at', 'desc')
-                ->limit(2)
+                ->limit(4)
                 ->get()
                 ->map(function($disposition) {
+                    $activityType = 'disposition_received';
+                    $activityTitle = 'Anda menerima disposisi baru';
+                    $color = 'orange';
+                    
+                    if ($disposition->status === 'completed') {
+                        $activityType = 'disposition_completed';
+                        $activityTitle = 'Disposisi selesai diproses';
+                        $color = 'green';
+                    } elseif ($disposition->status === 'in_progress') {
+                        $activityType = 'disposition_progress';
+                        $activityTitle = 'Disposisi sedang dikerjakan';
+                        $color = 'blue';
+                    }
+                    
                     return [
-                        'type' => 'disposition_completed',
-                        'title' => 'Disposisi selesai diproses',
+                        'type' => $activityType,
+                        'title' => $activityTitle,
                         'description' => $disposition->subject ?? 'Disposisi',
                         'time' => $disposition->updated_at->diffForHumans(),
                         'created_at' => $disposition->updated_at,
-                        'icon' => 'check',
-                        'color' => 'green'
+                        'icon' => 'disposition',
+                        'color' => $color
                     ];
                 });
             
             $activities = $activities->merge($dispositions);
         }
         
-        // Aktivitas dari favorit
+        // ✅ NEW: Aktivitas dari peminjaman aset (ambil 4)
+        if (Schema::hasTable('asset_borrows')) {
+            $assetBorrows = AssetBorrow::where('borrower_id', $userId)
+                ->with('asset')
+                ->orderBy('created_at', 'desc')
+                ->limit(4)
+                ->get()
+                ->map(function($borrow) {
+                    $activityType = 'asset_borrow_pending';
+                    $activityTitle = 'Anda mengajukan peminjaman aset';
+                    $color = 'yellow';
+                    
+                    if ($borrow->status === 'approved') {
+                        $activityType = 'asset_borrow_approved';
+                        $activityTitle = 'Peminjaman aset disetujui';
+                        $color = 'green';
+                    } elseif ($borrow->status === 'borrowed') {
+                        $activityType = 'asset_borrowed';
+                        $activityTitle = 'Anda meminjam aset';
+                        $color = 'blue';
+                    } elseif ($borrow->status === 'returned') {
+                        $activityType = 'asset_returned';
+                        $activityTitle = 'Anda mengembalikan aset';
+                        $color = 'purple';
+                    } elseif ($borrow->status === 'rejected') {
+                        $activityType = 'asset_borrow_rejected';
+                        $activityTitle = 'Peminjaman aset ditolak';
+                        $color = 'red';
+                    } elseif ($borrow->status === 'overdue') {
+                        $activityType = 'asset_overdue';
+                        $activityTitle = 'Peminjaman aset terlambat';
+                        $color = 'red';
+                    }
+                    
+                    return [
+                        'type' => $activityType,
+                        'title' => $activityTitle,
+                        'description' => $borrow->asset->nama ?? 'Aset',
+                        'time' => $borrow->created_at->diffForHumans(),
+                        'created_at' => $borrow->created_at,
+                        'icon' => 'asset',
+                        'color' => $color
+                    ];
+                });
+            
+            $activities = $activities->merge($assetBorrows);
+        }
+        
+        // ✅ NEW: Aktivitas dari aset yang ditambahkan staff (ambil 3)
+        if (Schema::hasTable('assets')) {
+            $userAssets = Asset::where('penanggung_jawab', Auth::user()->name)
+                ->orderBy('created_at', 'desc')
+                ->limit(3)
+                ->get()
+                ->map(function($asset) {
+                    $isNew = $asset->created_at->diffInHours(Carbon::now()) < 24;
+                    
+                    return [
+                        'type' => $isNew ? 'asset_created' : 'asset_managed',
+                        'title' => $isNew ? 'Anda menambahkan aset baru' : 'Aset dikelola',
+                        'description' => $asset->nama,
+                        'time' => $asset->created_at->diffForHumans(),
+                        'created_at' => $asset->created_at,
+                        'icon' => 'asset_add',
+                        'color' => $isNew ? 'indigo' : 'gray'
+                    ];
+                });
+            
+            $activities = $activities->merge($userAssets);
+        }
+        
+        // Aktivitas dari favorit (ambil 2)
         if (Schema::hasTable('archives') && Schema::hasColumn('archives', 'is_favorite')) {
             $favorites = Archive::where('user_id', $userId)
                 ->where('is_favorite', true)
@@ -167,7 +252,7 @@ class DashboardController extends Controller
             $activities = $activities->merge($favorites);
         }
         
-        // Sort by time and take 5 most recent
-        return $activities->sortByDesc('created_at')->take(5)->values();
+        // Sort by time and take 10 most recent
+        return $activities->sortByDesc('created_at')->take(10)->values();
     }
 }
