@@ -28,26 +28,20 @@
     </div>
     @endif
 
-    {{-- Header Section --}}
+    {{-- Header Section - TANPA TOMBOL UPLOAD --}}
     <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-8 p-8">
         <div class="absolute inset-0 bg-black opacity-10"></div>
         <div class="relative z-10">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-4xl font-bold text-white mb-2">📂 Arsip Digital</h1>
-                    <p class="text-blue-100 text-lg">Akses dan kelola dokumen arsip digital</p>
+                    <p class="text-blue-100 text-lg">Akses dokumen arsip digital Diskominfo</p>
                 </div>
                 <div class="hidden md:flex gap-4">
                     <div class="bg-white/20 backdrop-blur-lg rounded-xl p-4 text-white text-center border border-white/30">
                         <p class="text-3xl font-bold">{{ $totalArchives ?? 0 }}</p>
                         <p class="text-sm text-white/80">Total Arsip</p>
                     </div>
-                    <a href="{{ route('admin.arsip.create') }}" class="bg-white/20 backdrop-blur-lg hover:bg-white/30 text-white px-6 py-4 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        <span class="font-semibold">Upload Arsip</span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -112,8 +106,8 @@
         </div>
     </div>
 
-    {{-- Filter Section with Auto-Load --}}
-    <form action="{{ route('admin.arsip.index') }}" method="GET" id="filterForm" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+    {{-- ✅ FIXED: Filter Section - Route Pimpinan --}}
+    <form action="{{ route('pimpinan.arsip.index') }}" method="GET" id="filterForm" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
             {{-- Search --}}
             <div class="md:col-span-3">
@@ -186,7 +180,7 @@
 
             {{-- Reset Button --}}
             <div class="md:col-span-1 flex gap-2">
-                <a href="{{ route('admin.arsip.index') }}" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center" title="Reset Filter">
+                <a href="{{ route('pimpinan.arsip.index') }}" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center" title="Reset Filter">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -195,7 +189,7 @@
         </div>
     </form>
 
-    {{-- Archives Grid (sama seperti pimpinan) --}}
+    {{-- Archives Grid --}}
     @if($archives->count() > 0)
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         @foreach($archives as $archive)
@@ -214,7 +208,7 @@
                         </div>
                         @endif
                     </div>
-                    <form action="{{ route('admin.arsip.favorite', $archive->id) }}" method="POST" class="inline">
+                    <form action="{{ route('pimpinan.arsip.favorite', $archive->id) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="bg-white/25 backdrop-blur-sm hover:bg-white/40 p-2.5 rounded-xl transition-all transform hover:scale-110">
                             <svg class="w-6 h-6 text-white {{ $archive->is_favorite ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,7 +221,7 @@
 
             <div class="p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer" 
-                    onclick="window.location='{{ route('admin.arsip.show', $archive->id) }}'">
+                    onclick="window.location='{{ route('pimpinan.arsip.show', $archive->id) }}'">
                     {{ $archive->judul }}
                 </h3>
 
@@ -261,7 +255,7 @@
                 </div>
 
                 <div class="flex gap-2 pt-4 border-t border-gray-100">
-                    <a href="{{ route('admin.arsip.show', $archive->id) }}" 
+                    <a href="{{ route('pimpinan.arsip.show', $archive->id) }}" 
                        class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -269,7 +263,7 @@
                         </svg>
                         Detail
                     </a>
-                    <a href="{{ route('admin.arsip.download', $archive->id) }}" 
+                    <a href="{{ route('pimpinan.arsip.download', $archive->id) }}" 
                        class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -311,13 +305,6 @@
             
             <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Arsip</h3>
             <p class="text-gray-500 text-lg mb-8">Tidak ada dokumen arsip yang tersedia saat ini</p>
-            
-            <a href="{{ route('admin.arsip.create') }}" class="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 space-x-3">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                <span>Upload Arsip Pertama</span>
-            </a>
         </div>
     </div>
     @endif
@@ -338,10 +325,12 @@
 
 @push('scripts')
 <script>
+// ✅ AUTO-LOAD FILTERS - Submit form saat ada perubahan pada filter
 document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
     const filterInputs = document.querySelectorAll('.filter-input');
     
+    // Auto-submit ketika filter berubah (kecuali search)
     filterInputs.forEach(input => {
         if (input.name !== 'search') {
             input.addEventListener('change', function() {
@@ -350,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Untuk search, gunakan debounce agar tidak terlalu sering submit
     const searchInput = document.querySelector('input[name="search"]');
     if (searchInput) {
         let searchTimeout;
@@ -357,11 +347,12 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 filterForm.submit();
-            }, 500);
+            }, 500); // Submit setelah 500ms user berhenti mengetik
         });
     }
 });
 
+// Auto-hide success/error message
 setTimeout(() => {
     document.querySelectorAll('.animate-fade-in').forEach(el => {
         el.style.transition = 'opacity 0.5s';
