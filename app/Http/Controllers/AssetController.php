@@ -7,39 +7,57 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AssetController extends Controller
 {
     /**
-     * ✅ Predefined Lokasi, Unit & Kategori
+     * ✅ FIXED: Display the specified asset
+     * Perbaikan authorization untuk staff
      */
-    private function getLokasis()
+    public function show($id)
     {
-        return ['Ruang SP', 'Ruang E-Gov', 'Ruang Sekretariat', 'Ruang IKP'];
-    }
-
-    private function getUnits()
-    {
-        return ['SP', 'E-Government', 'Sekretariat', 'IKP'];
-    }
-    
-    private function getKategoris()
-    {
-        return [
-            'Peralatan Elektronik',
-            'Perabot Kantor',
-            'Kendaraan',
-            'Infrastruktur Jaringan',
-            'Dokumentasi & Multimedia',
-            'Gedung & Bangunan',
-            'Tanah / Lahan'
-        ];
+        $role = Auth::user()->role;
+        
+        // ✅ Allow admin, staff, and pimpinan
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+        
+        $asset = Asset::findOrFail($id);
+        
+        // ✅ FIXED: Staff authorization - Cek apakah user punya unit
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            
+            // Jika user tidak punya unit, izinkan akses (untuk backward compatibility)
+            // Jika user punya unit, cek apakah sesuai dengan unit aset
+            if ($userUnit && $asset->unit && $asset->unit !== $userUnit) {
+                // Log untuk debugging
+                Log::warning("Staff unauthorized access attempt", [
+                    'user_id' => Auth::id(),
+                    'user_unit' => $userUnit,
+                    'asset_id' => $asset->id,
+                    'asset_unit' => $asset->unit
+                ]);
+                
+                abort(403, 'Unauthorized - Anda hanya bisa melihat aset dari unit Anda');
+            }
+        }
+        
+        $viewPrefix = match($role) {
+            'admin' => 'admin',
+            'pimpinan' => 'pimpinan',
+            default => 'staff'
+        };
+        
+        return view("{$viewPrefix}.aset.show", compact('asset'));
     }
 
     /**
-     * Display a listing of assets
-     * ✅ UPDATED: Support pimpinan + Filter Lokasi
+     * ✅ FIXED: Display a listing of assets
+     * Perbaikan filter untuk staff
      */
     public function index(Request $request)
     {
@@ -52,9 +70,19 @@ class AssetController extends Controller
         
         $query = Asset::query();
         
-        // ✅ Staff hanya bisa lihat aset dari unitnya
-        if ($role === 'staff' && Auth::user()->unit) {
-            $query->where('unit', Auth::user()->unit);
+        // ✅ FIXED: Staff filter - Hanya apply jika user punya unit DAN unit tidak kosong
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            
+            if ($userUnit) {
+                // Filter aset: tampilkan yang unit-nya sesuai ATAU yang unit-nya kosong/null
+                $query->where(function($q) use ($userUnit) {
+                    $q->where('unit', $userUnit)
+                      ->orWhereNull('unit')
+                      ->orWhere('unit', '');
+                });
+            }
+            // Jika user tidak punya unit, tampilkan semua
         }
         
         // Search
@@ -82,36 +110,42 @@ class AssetController extends Controller
             $query->kondisi($request->kondisi);
         }
         
-        // ✅ Filter Lokasi
+        // Filter Lokasi
         if ($request->filled('lokasi')) {
             $query->where('lokasi', $request->lokasi);
         }
         
         $assets = $query->orderBy('created_at', 'desc')->paginate(12);
         
-        // Statistics - ✅ FIXED: Sesuai dengan ENUM baru
+        // ✅ FIXED: Statistics - Sesuai dengan filter yang sama
         $statsQuery = Asset::query();
-        if ($role === 'staff' && Auth::user()->unit) {
-            $statsQuery->where('unit', Auth::user()->unit);
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            if ($userUnit) {
+                $statsQuery->where(function($q) use ($userUnit) {
+                    $q->where('unit', $userUnit)
+                      ->orWhereNull('unit')
+                      ->orWhere('unit', '');
+                });
+            }
         }
         
         $stats = [
             'total' => $statsQuery->count(),
-            'tersedia' => (clone $statsQuery)->status('tersedia')->count(),
-            'digunakan' => (clone $statsQuery)->status('digunakan')->count(),
-            'dipinjam' => (clone $statsQuery)->status('dipinjam')->count(),
-            'maintenance' => (clone $statsQuery)->status('maintenance')->count(),
-            'rusak' => (clone $statsQuery)->status('rusak')->count(),
+            'tersedia' => (clone $statsQuery)->where('status', 'tersedia')->count(),
+            'digunakan' => (clone $statsQuery)->where('status', 'digunakan')->count(),
+            'dipinjam' => (clone $statsQuery)->where('status', 'dipinjam')->count(),
+            'maintenance' => (clone $statsQuery)->where('status', 'maintenance')->count(),
+            'rusak' => (clone $statsQuery)->where('status', 'rusak')->count(),
         ];
         
         // Get unique categories for filter
         $categories = Asset::select('kategori')->distinct()->pluck('kategori');
         
-        // ✅ FIXED: Predefined options
+        // Predefined options
         $lokasis = $this->getLokasis();
         $units = $this->getUnits();
         
-        // ✅ UPDATED: Support pimpinan
         $viewPrefix = match($role) {
             'admin' => 'admin',
             'pimpinan' => 'pimpinan',
@@ -122,138 +156,7 @@ class AssetController extends Controller
     }
 
     /**
-     * Show the form for creating a new asset
-     * ✅ UPDATED: Admin & Staff can create
-     */
-    public function create()
-    {
-        $role = Auth::user()->role;
-        
-        // ✅ Allow admin and staff
-        if (!in_array($role, ['admin', 'staff'])) {
-            abort(403, 'Unauthorized - Admin and Staff only');
-        }
-        
-        // ✅ PENTING: Gunakan method getKategoris()
-        $categories = $this->getKategoris();
-        
-        // ✅ Predefined options
-        $lokasis = $this->getLokasis();
-        $units = $this->getUnits();
-        
-        // ✅ Auto-fill Penanggung Jawab dan Unit untuk Staff
-        $penanggungJawab = Auth::user()->name;
-        
-        // ✅ FIXED: Untuk staff, unit harus dari user yang login
-        $userUnit = Auth::user()->unit;
-        
-        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
-        
-        return view("{$viewPrefix}.aset.create", compact('categories', 'units', 'lokasis', 'penanggungJawab', 'userUnit'));
-    }
-
-    /**
-     * Store a newly created asset
-     * ✅ UPDATED: Admin & Staff can store
-     */
-    public function store(Request $request)
-    {
-        $role = Auth::user()->role;
-        
-        // ✅ Allow admin and staff
-        if (!in_array($role, ['admin', 'staff'])) {
-            abort(403, 'Unauthorized - Admin and Staff only');
-        }
-        
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'kategori' => 'required|string|max:100',
-            'merk' => 'nullable|string|max:100',
-            'tipe' => 'nullable|string|max:100',
-            'serial_number' => 'nullable|string|max:100',
-            'spesifikasi' => 'nullable|string',
-            'kondisi' => 'required|in:baik,cukup,kurang,rusak',
-            'status' => 'required|in:tersedia,digunakan,dipinjam,maintenance,rusak',
-            'lokasi' => 'nullable|string|max:255',
-            'unit' => 'nullable|string|max:100',
-            'tanggal_pembelian' => 'nullable|date',
-            'harga_pembelian' => 'nullable|numeric|min:0',
-            'masa_garansi' => 'nullable|integer|min:0',
-            'penanggung_jawab' => 'nullable|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'keterangan' => 'nullable|string',
-        ]);
-        
-        // ✅ STAFF: Force unit to user's unit
-        if ($role === 'staff') {
-            $validated['unit'] = Auth::user()->unit;
-        }
-        
-        // ✅ AUTO-FILL: Penanggung jawab
-        if (empty($validated['penanggung_jawab'])) {
-            $validated['penanggung_jawab'] = Auth::user()->name;
-        }
-        
-        // Generate kode asset
-        $validated['kode_asset'] = Asset::generateKodeAsset($validated['kategori']);
-        
-        // Calculate tanggal garansi berakhir
-        if ($request->filled('tanggal_pembelian') && $request->filled('masa_garansi')) {
-            $validated['tanggal_garansi_berakhir'] = \Carbon\Carbon::parse($request->tanggal_pembelian)
-                ->addMonths($request->masa_garansi);
-        }
-        
-        // Upload foto
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $filename = 'asset_' . time() . '.' . $foto->getClientOriginalExtension();
-            $path = $foto->storeAs('assets', $filename, 'public');
-            $validated['foto'] = $path;
-        }
-        
-        $asset = Asset::create($validated);
-        
-        // Generate QR Code
-        $this->generateQrCode($asset);
-        
-        $routeName = $role === 'admin' ? 'admin.aset.index' : 'staff.aset.index';
-        
-        return redirect()->route($routeName)
-            ->with('success', 'Aset berhasil ditambahkan!');
-    }
-
-    /**
-     * Display the specified asset
-     * ✅ UPDATED: Support pimpinan
-     */
-    public function show($id)
-    {
-        $role = Auth::user()->role;
-        
-        // ✅ Allow admin, staff, and pimpinan
-        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
-            abort(403, 'Unauthorized');
-        }
-        
-        $asset = Asset::findOrFail($id);
-        
-        // ✅ Staff hanya bisa lihat aset dari unitnya
-        if ($role === 'staff' && Auth::user()->unit && $asset->unit !== Auth::user()->unit) {
-            abort(403, 'Unauthorized - Anda hanya bisa melihat aset dari unit Anda');
-        }
-        
-        $viewPrefix = match($role) {
-            'admin' => 'admin',
-            'pimpinan' => 'pimpinan',
-            default => 'staff'
-        };
-        
-        return view("{$viewPrefix}.aset.show", compact('asset'));
-    }
-
-    /**
-     * Show the form for editing the specified asset
-     * ✅ UPDATED: Admin & Staff can edit (staff only their unit)
+     * ✅ FIXED: Show the form for editing the specified asset
      */
     public function edit($id)
     {
@@ -266,15 +169,19 @@ class AssetController extends Controller
         
         $asset = Asset::findOrFail($id);
         
-        // ✅ Staff hanya bisa edit aset dari unitnya
-        if ($role === 'staff' && Auth::user()->unit && $asset->unit !== Auth::user()->unit) {
-            abort(403, 'Unauthorized - Anda hanya bisa mengedit aset dari unit Anda');
+        // ✅ FIXED: Staff authorization dengan null check
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            
+            if ($userUnit && $asset->unit && $asset->unit !== $userUnit) {
+                abort(403, 'Unauthorized - Anda hanya bisa mengedit aset dari unit Anda');
+            }
         }
         
         // Get existing categories for dropdown
         $categories = Asset::select('kategori')->distinct()->pluck('kategori');
         
-        // ✅ Predefined options
+        // Predefined options
         $lokasis = $this->getLokasis();
         $units = $this->getUnits();
         
@@ -284,8 +191,7 @@ class AssetController extends Controller
     }
 
     /**
-     * Update the specified asset
-     * ✅ UPDATED: Admin & Staff can update
+     * ✅ FIXED: Update the specified asset
      */
     public function update(Request $request, $id)
     {
@@ -298,9 +204,13 @@ class AssetController extends Controller
         
         $asset = Asset::findOrFail($id);
         
-        // ✅ Staff hanya bisa update aset dari unitnya
-        if ($role === 'staff' && Auth::user()->unit && $asset->unit !== Auth::user()->unit) {
-            abort(403, 'Unauthorized - Anda hanya bisa mengupdate aset dari unit Anda');
+        // ✅ FIXED: Staff authorization dengan null check
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            
+            if ($userUnit && $asset->unit && $asset->unit !== $userUnit) {
+                abort(403, 'Unauthorized - Anda hanya bisa mengupdate aset dari unit Anda');
+            }
         }
         
         $validated = $request->validate([
@@ -355,8 +265,7 @@ class AssetController extends Controller
     }
 
     /**
-     * Remove the specified asset
-     * ✅ UPDATED: Admin & Staff can delete
+     * ✅ FIXED: Remove the specified asset
      */
     public function destroy($id)
     {
@@ -369,9 +278,13 @@ class AssetController extends Controller
         
         $asset = Asset::findOrFail($id);
         
-        // ✅ Staff hanya bisa hapus aset dari unitnya
-        if ($role === 'staff' && Auth::user()->unit && $asset->unit !== Auth::user()->unit) {
-            abort(403, 'Unauthorized - Anda hanya bisa menghapus aset dari unit Anda');
+        // ✅ FIXED: Staff authorization dengan null check
+        if ($role === 'staff') {
+            $userUnit = Auth::user()->unit;
+            
+            if ($userUnit && $asset->unit && $asset->unit !== $userUnit) {
+                abort(403, 'Unauthorized - Anda hanya bisa menghapus aset dari unit Anda');
+            }
         }
         
         // Hapus foto
@@ -392,10 +305,108 @@ class AssetController extends Controller
             ->with('success', 'Aset berhasil dihapus!');
     }
 
-    /**
-     * Update status asset (quick update)
-     * ✅ ADMIN ONLY - FIXED: Status ENUM updated
-     */
+    // ===== METHODS LAINNYA TETAP SAMA =====
+    
+    private function getLokasis()
+    {
+        return ['Ruang SP', 'Ruang E-Gov', 'Ruang Sekretariat', 'Ruang IKP'];
+    }
+
+    private function getUnits()
+    {
+        return ['SP', 'E-Government', 'Sekretariat', 'IKP'];
+    }
+    
+    private function getKategoris()
+    {
+        return [
+            'Peralatan Elektronik',
+            'Perabot Kantor',
+            'Kendaraan',
+            'Infrastruktur Jaringan',
+            'Dokumentasi & Multimedia',
+            'Gedung & Bangunan',
+            'Tanah / Lahan'
+        ];
+    }
+
+    public function create()
+    {
+        $role = Auth::user()->role;
+        
+        if (!in_array($role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized - Admin and Staff only');
+        }
+        
+        $categories = $this->getKategoris();
+        $lokasis = $this->getLokasis();
+        $units = $this->getUnits();
+        $penanggungJawab = Auth::user()->name;
+        $userUnit = Auth::user()->unit;
+        
+        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+        
+        return view("{$viewPrefix}.aset.create", compact('categories', 'units', 'lokasis', 'penanggungJawab', 'userUnit'));
+    }
+
+    public function store(Request $request)
+    {
+        $role = Auth::user()->role;
+        
+        if (!in_array($role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized - Admin and Staff only');
+        }
+        
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|string|max:100',
+            'merk' => 'nullable|string|max:100',
+            'tipe' => 'nullable|string|max:100',
+            'serial_number' => 'nullable|string|max:100',
+            'spesifikasi' => 'nullable|string',
+            'kondisi' => 'required|in:baik,cukup,kurang,rusak',
+            'status' => 'required|in:tersedia,digunakan,dipinjam,maintenance,rusak',
+            'lokasi' => 'nullable|string|max:255',
+            'unit' => 'nullable|string|max:100',
+            'tanggal_pembelian' => 'nullable|date',
+            'harga_pembelian' => 'nullable|numeric|min:0',
+            'masa_garansi' => 'nullable|integer|min:0',
+            'penanggung_jawab' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'keterangan' => 'nullable|string',
+        ]);
+        
+        if ($role === 'staff') {
+            $validated['unit'] = Auth::user()->unit;
+        }
+        
+        if (empty($validated['penanggung_jawab'])) {
+            $validated['penanggung_jawab'] = Auth::user()->name;
+        }
+        
+        $validated['kode_asset'] = Asset::generateKodeAsset($validated['kategori']);
+        
+        if ($request->filled('tanggal_pembelian') && $request->filled('masa_garansi')) {
+            $validated['tanggal_garansi_berakhir'] = \Carbon\Carbon::parse($request->tanggal_pembelian)
+                ->addMonths($request->masa_garansi);
+        }
+        
+        if ($request->hasFile('foto')) {
+            $foto = $request->file('foto');
+            $filename = 'asset_' . time() . '.' . $foto->getClientOriginalExtension();
+            $path = $foto->storeAs('assets', $filename, 'public');
+            $validated['foto'] = $path;
+        }
+        
+        $asset = Asset::create($validated);
+        $this->generateQrCode($asset);
+        
+        $routeName = $role === 'admin' ? 'admin.aset.index' : 'staff.aset.index';
+        
+        return redirect()->route($routeName)
+            ->with('success', 'Aset berhasil ditambahkan!');
+    }
+
     public function updateStatus(Request $request, $id)
     {
         if (Auth::user()->role !== 'admin') {
@@ -413,12 +424,8 @@ class AssetController extends Controller
         return back()->with('success', 'Status aset berhasil diperbarui!');
     }
 
-    /**
-     * Generate QR Code for asset
-     */
     private function generateQrCode($asset)
     {
-        // Ganti ke route public
         $qrContent = route('aset.public.show', $asset->id);
         
         $qrCode = QrCode::format('svg')
@@ -426,7 +433,6 @@ class AssetController extends Controller
             ->errorCorrection('H')
             ->generate($qrContent);
         
-        // ✅ FIXED: Sanitize filename untuk QR code
         $safeKodeAsset = preg_replace('/[\/\\\:*?"<>|]/', '_', $asset->kode_asset);
         $filename = 'qr_' . $safeKodeAsset . '.svg';
         $path = 'qrcodes/' . $filename;
@@ -436,19 +442,12 @@ class AssetController extends Controller
         $asset->update(['qr_code' => $path]);
     }
 
-    /**
-     * Public asset detail view (for QR code scanning)
-     */
     public function publicShow($id)
     {
         $asset = Asset::findOrFail($id);
         return view('public.aset-detail', compact('asset'));
     }
     
-    /**
-     * Download QR Code
-     * ✅ UPDATED: All roles can download QR + Fixed filename sanitization
-     */
     public function downloadQr($id)
     {
         $asset = Asset::findOrFail($id);
@@ -458,19 +457,13 @@ class AssetController extends Controller
             $asset->refresh();
         }
         
-        // ✅ FIXED: Sanitize filename - hapus karakter tidak valid (/, \, :, *, ?, ", <, >, |)
         $safeFilename = 'QR_' . preg_replace('/[\/\\\:*?"<>|]/', '_', $asset->kode_asset) . '.svg';
         
         return Storage::disk('public')->download($asset->qr_code, $safeFilename);
     }
     
-    /**
-     * ✅ NEW: Return borrowed asset
-     * Update status aset saat dikembalikan
-     */
     public function returnAsset(Request $request, $borrowId)
     {
-        // Validasi role (admin/staff)
         if (!in_array(Auth::user()->role, ['admin', 'staff'])) {
             abort(403, 'Unauthorized');
         }
@@ -480,23 +473,20 @@ class AssetController extends Controller
             'keterangan_kembali' => 'nullable|string',
         ]);
         
-        // Ambil data peminjaman
         $borrow = DB::table('borrows')->where('id', $borrowId)->first();
         
         if (!$borrow) {
             return back()->with('error', 'Data peminjaman tidak ditemukan!');
         }
         
-        // ✅ FIXED: Update status aset sesuai ENUM yang ada
-        $newAssetStatus = 'tersedia'; // Default kembali ke tersedia
+        $newAssetStatus = 'tersedia';
 
         if ($validated['kondisi_kembali'] === 'rusak') {
             $newAssetStatus = 'rusak';
         } elseif ($validated['kondisi_kembali'] === 'kurang') {
-            $newAssetStatus = 'maintenance'; // ✅ Sesuai ENUM
+            $newAssetStatus = 'maintenance';
         }
 
-        // ✅ Gunakan DB::table untuk update yang aman
         DB::table('assets')
             ->where('id', $borrow->asset_id)
             ->update([
@@ -505,7 +495,6 @@ class AssetController extends Controller
                 'updated_at' => now()
             ]);
         
-        // Update data peminjaman
         DB::table('borrows')
             ->where('id', $borrowId)
             ->update([

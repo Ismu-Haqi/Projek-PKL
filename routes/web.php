@@ -239,15 +239,20 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     
     // Manajemen Aset (Read-Only + Upload unit sendiri)
     Route::prefix('aset')->name('aset.')->group(function () {
-        Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/', [AssetController::class, 'index'])->name('index');
+        Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/create', [AssetController::class, 'create'])->name('create');
         Route::post('/', [AssetController::class, 'store'])->name('store');
+        
+        // ✅ PENTING: Routes dengan path spesifik HARUS di atas {id}
         Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
+        Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
+        
+        // ✅ Route show di bawah semua route spesifik
+        Route::get('/{id}', [AssetController::class, 'show'])->name('show');
+        
         Route::put('/{id}', [AssetController::class, 'update'])->name('update');
         Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}', [AssetController::class, 'show'])->name('show');
-        Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
     // Laporan
