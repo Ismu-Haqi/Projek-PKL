@@ -125,32 +125,32 @@ class AssetController extends Controller
      * Show the form for creating a new asset
      * ✅ UPDATED: Admin & Staff can create
      */
-public function create()
-{
-    $role = Auth::user()->role;
-    
-    // ✅ Allow admin and staff
-    if (!in_array($role, ['admin', 'staff'])) {
-        abort(403, 'Unauthorized - Admin and Staff only');
+    public function create()
+    {
+        $role = Auth::user()->role;
+        
+        // ✅ Allow admin and staff
+        if (!in_array($role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized - Admin and Staff only');
+        }
+        
+        // ✅ PENTING: Gunakan method getKategoris()
+        $categories = $this->getKategoris();
+        
+        // ✅ Predefined options
+        $lokasis = $this->getLokasis();
+        $units = $this->getUnits();
+        
+        // ✅ Auto-fill Penanggung Jawab dan Unit untuk Staff
+        $penanggungJawab = Auth::user()->name;
+        
+        // ✅ FIXED: Untuk staff, unit harus dari user yang login
+        $userUnit = Auth::user()->unit;
+        
+        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+        
+        return view("{$viewPrefix}.aset.create", compact('categories', 'units', 'lokasis', 'penanggungJawab', 'userUnit'));
     }
-    
-    // ✅ PENTING: Gunakan method getKategoris()
-    $categories = $this->getKategoris();
-    
-    // ✅ Predefined options
-    $lokasis = $this->getLokasis();
-    $units = $this->getUnits();
-    
-    // ✅ Auto-fill Penanggung Jawab dan Unit untuk Staff
-    $penanggungJawab = Auth::user()->name;
-    
-    // ✅ FIXED: Untuk staff, unit harus dari user yang login
-    $userUnit = Auth::user()->unit;
-    
-    $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
-    
-    return view("{$viewPrefix}.aset.create", compact('categories', 'units', 'lokasis', 'penanggungJawab', 'userUnit'));
-}
 
     /**
      * Store a newly created asset
@@ -426,7 +426,9 @@ public function create()
             ->errorCorrection('H')
             ->generate($qrContent);
         
-        $filename = 'qr_' . $asset->kode_asset . '.svg';
+        // ✅ FIXED: Sanitize filename untuk QR code
+        $safeKodeAsset = preg_replace('/[\/\\\:*?"<>|]/', '_', $asset->kode_asset);
+        $filename = 'qr_' . $safeKodeAsset . '.svg';
         $path = 'qrcodes/' . $filename;
         
         Storage::disk('public')->put($path, $qrCode);
@@ -445,7 +447,7 @@ public function create()
     
     /**
      * Download QR Code
-     * ✅ UPDATED: All roles can download QR
+     * ✅ UPDATED: All roles can download QR + Fixed filename sanitization
      */
     public function downloadQr($id)
     {
@@ -456,7 +458,10 @@ public function create()
             $asset->refresh();
         }
         
-        return Storage::disk('public')->download($asset->qr_code, 'QR_' . $asset->kode_asset . '.svg');
+        // ✅ FIXED: Sanitize filename - hapus karakter tidak valid (/, \, :, *, ?, ", <, >, |)
+        $safeFilename = 'QR_' . preg_replace('/[\/\\\:*?"<>|]/', '_', $asset->kode_asset) . '.svg';
+        
+        return Storage::disk('public')->download($asset->qr_code, $safeFilename);
     }
     
     /**
