@@ -450,7 +450,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" 
-                                        onclick="confirmDelete(this, 'Arsip &quot;{{ addslashes(Str::limit($archive->judul, 40)) }}&quot; akan dihapus permanen!')" 
+                                        onclick="confirmDelete(this, 'Arsip {{ addslashes(Str::limit($archive->judul, 40)) }} akan dihapus permanen!')" 
                                         class="p-2 text-red-600 hover:bg-red-50 rounded transition" 
                                         title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
