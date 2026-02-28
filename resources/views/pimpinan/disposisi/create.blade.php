@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto" x-data="{ itemType: 'arsip', needsForwarding: false, showFinalRecipient: false }">
-    <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center mb-4">
             <a href="{{ route('pimpinan.disposisi.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -19,7 +18,6 @@
         </div>
     </div>
 
-    <!-- Forwarding Info -->
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4 mb-6">
         <div class="flex items-start">
             <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Form Card -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-4">
             <h2 class="text-xl font-bold text-white flex items-center">
@@ -50,7 +47,6 @@
         <form action="{{ route('pimpinan.disposisi.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
 
-            <!-- Select Item Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Tipe Item <span class="text-red-500">*</span>
@@ -97,7 +93,6 @@
                 @enderror
             </div>
 
-            <!-- Select Item -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <span x-text="itemType === 'aset' ? 'Pilih Aset' : 'Pilih Arsip/Surat'"></span>
@@ -105,7 +100,9 @@
                 </label>
                 
                 <div x-show="itemType === 'arsip'" x-cloak>
-                    <select name="item_id" required
+                    <select name="item_id" 
+                            :required="itemType === 'arsip'"
+                            :disabled="itemType !== 'arsip'"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">-- Pilih Arsip/Surat --</option>
                         @foreach($archives as $archive)
@@ -115,7 +112,9 @@
                 </div>
 
                 <div x-show="itemType === 'aset'" x-cloak>
-                    <select name="item_id" required
+                    <select name="item_id" 
+                            :required="itemType === 'aset'"
+                            :disabled="itemType !== 'aset'"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                         <option value="">-- Pilih Aset --</option>
                         @foreach($assets as $asset)
@@ -125,13 +124,11 @@
                 </div>
             </div>
 
-            <!-- Recipient Section with Forwarding -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Penerima Disposisi <span class="text-red-500">*</span>
                 </label>
                 
-                <!-- Toggle Option -->
                 <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <label class="flex items-center cursor-pointer">
                         <input type="checkbox" 
@@ -147,16 +144,15 @@
                     </p>
                 </div>
 
-                <!-- Direct to Admin (always shown, hidden field) -->
                 <input type="hidden" name="to_user_id" value="{{ $users->first()->id }}">
 
-                <!-- Final Recipient (shown when forwarding) -->
                 <div x-show="showFinalRecipient" x-cloak>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                         Penerima Akhir (Staff) <span class="text-red-500">*</span>
                     </label>
                     <select name="final_recipient_id"
                             :required="needsForwarding"
+                            :disabled="!needsForwarding"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">-- Pilih Staff --</option>
                         @php
@@ -180,19 +176,18 @@
                 </div>
             </div>
 
-            <!-- Forwarding Note (shown when forwarding) -->
             <div x-show="showFinalRecipient" x-cloak>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Catatan untuk Admin (Penerusan)
                 </label>
                 <textarea name="forwarding_note" 
+                          :disabled="!needsForwarding"
                           rows="3" 
                           placeholder="Contoh: Mohon diteruskan dengan segera, terkait proyek X..."
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
                 <p class="text-xs text-gray-500 mt-1">Catatan khusus untuk Admin mengenai penerusan disposisi ini</p>
             </div>
 
-            <!-- Subject -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Subjek Disposisi <span class="text-red-500">*</span>
@@ -202,7 +197,6 @@
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             </div>
 
-            <!-- Priority & Deadline -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -228,7 +222,6 @@
                 </div>
             </div>
 
-            <!-- Instruction -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Instruksi/Perintah <span class="text-red-500">*</span>
@@ -238,7 +231,6 @@
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
             </div>
 
-            <!-- Info Box -->
             <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-4">
                 <div class="flex items-start">
                     <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +249,6 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
                 <a href="{{ route('pimpinan.disposisi.index') }}" 
                    class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">

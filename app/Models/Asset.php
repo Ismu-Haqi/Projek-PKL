@@ -122,7 +122,7 @@ public function getStatusBadgeAttribute()
         'tersedia' => ['text' => 'Tersedia', 'color' => 'green'],
         'digunakan' => ['text' => 'Digunakan', 'color' => 'blue'],
         'dipinjam' => ['text' => 'Dipinjam', 'color' => 'orange'],
-        'maintenance' => ['text' => 'Maintenance', 'color' => 'yellow'],
+        'maintenance' => ['text' => 'Pemeliharaan', 'color' => 'yellow'],
         'rusak' => ['text' => 'Rusak', 'color' => 'red'],
     ];
 
@@ -253,5 +253,55 @@ public function getStatusBadgeAttribute()
     public function maintenanceHistory()
     {
         return $this->hasMany(AssetMaintenance::class);
+    }
+    
+    public function getPenyusutanPerTahunAttribute()
+    {
+        if (!$this->umur_ekonomis || $this->umur_ekonomis == 0 || !$this->harga_pembelian) return 0;
+        
+        return ($this->harga_pembelian - $this->nilai_residu) / $this->umur_ekonomis;
+    }
+
+    /**
+     * 2. Menghitung Berapa Tahun Aset Telah Digunakan
+     */
+    public function getUmurTerpakaiAttribute()
+    {
+        if (!$this->tanggal_pembelian) return 0;
+        
+        $tahunBeli = \Carbon\Carbon::parse($this->tanggal_pembelian)->year;
+        $tahunSekarang = now()->year;
+        $umur = $tahunSekarang - $tahunBeli;
+        
+        // Mentok di umur ekonomis jika sudah melebihi batas
+        return $umur > $this->umur_ekonomis ? $this->umur_ekonomis : $umur;
+    }
+
+    /**
+     * 3. Menghitung Nilai Valuasi Aset Saat Ini (Nilai Buku)
+     */
+    public function getNilaiBukuAttribute()
+    {
+        if (!$this->harga_pembelian) return 0;
+
+        $akumulasiPenyusutan = $this->penyusutan_per_tahun * $this->umur_terpakai;
+        $nilaiSekarang = $this->harga_pembelian - $akumulasiPenyusutan;
+        
+        return $nilaiSekarang < $this->nilai_residu ? $this->nilai_residu : $nilaiSekarang;
+    }
+
+    /**
+     * 4. Sistem Pendukung Keputusan (SPK) Kelayakan Sederhana
+     */
+    public function getStatusKelayakanAttribute()
+    {
+        if (!$this->tanggal_pembelian || !$this->umur_ekonomis) return 'Data Belum Lengkap';
+        
+        if ($this->umur_terpakai >= $this->umur_ekonomis) {
+            return 'Waktu Penghapusan / Lelang';
+        } elseif ($this->umur_terpakai >= ($this->umur_ekonomis * 0.8)) {
+            return 'Kritis (Perlu Perhatian)';
+        }
+        return 'Layak Pakai';
     }
 }

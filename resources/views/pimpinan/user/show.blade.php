@@ -17,26 +17,6 @@
                 <p class="text-gray-600 mt-1">Informasi lengkap pengguna</p>
             </div>
         </div>
-
-        <div class="flex space-x-2">
-            <a href="{{ route('pimpinan.user.edit', $user->id) }}" 
-               class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                Edit
-            </a>
-            
-            @if($user->id !== Auth::id())
-            <button onclick="showResetPasswordModal()" 
-                class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                Reset Password
-            </button>
-            @endif
-        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -60,12 +40,19 @@
                         <p class="text-sm text-gray-600">{{ $user->email }}</p>
                         
                         <!-- Role Badge -->
-                        @if($user->role === 'pimpinan')
+                        @if($user->role === 'admin')
                             <span class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
                                 </svg>
-                                Administrator
+                                Admin
+                            </span>
+                        @elseif($user->role === 'pimpinan')
+                            <span class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                Pimpinan
                             </span>
                         @else
                             <span class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
@@ -173,8 +160,8 @@
                     </div>
                     @endif
 
-                    <!-- Dispositions Sent (Admin only) -->
-                    @if($user->role === 'pimpinan')
+                    <!-- Dispositions Sent (Admin/Pimpinan only) -->
+                    @if(in_array($user->role, ['admin', 'pimpinan']))
                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
                         <div class="flex items-center justify-between">
                             <div>
@@ -259,243 +246,22 @@
                 </div>
             </div>
 
-            <!-- Danger Zone (only for other users) -->
-            @if($user->id !== Auth::id())
-            <div class="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
-                <div class="bg-red-50 px-6 py-4 border-b border-red-200">
-                    <h3 class="text-lg font-bold text-red-800 flex items-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        Zona Berbahaya
-                    </h3>
-                </div>
-                
-                <div class="p-6 space-y-4">
-                    <!-- Toggle Status -->
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div>
-                            <p class="font-semibold text-gray-800">{{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}</p>
-                            <p class="text-sm text-gray-600 mt-1">
-                                {{ $user->is_active ? 'User tidak akan bisa login ke sistem' : 'User dapat kembali login ke sistem' }}
-                            </p>
-                        </div>
-                        <form action="{{ route('pimpinan.user.toggleStatus', $user->id) }}" method="POST" id="toggleStatusForm">
-                            @csrf
-                            @method('PUT')
-                            <button type="button" 
-                                    onclick="confirmToggleStatus({{ $user->is_active ? 'true' : 'false' }}, '{{ $user->name }}')"
-                                    class="px-4 py-2 {{ $user->is_active ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600' }} text-white rounded-lg transition-colors">
-                                {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Delete User -->
-                    <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
-                        <div>
-                            <p class="font-semibold text-red-800">Hapus User</p>
-                            <p class="text-sm text-red-600 mt-1">Tindakan ini tidak dapat dibatalkan. Semua data user akan dihapus permanen.</p>
-                        </div>
-                        <form action="{{ route('pimpinan.user.destroy', $user->id) }}" method="POST" id="deleteUserForm">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" 
-                                    onclick="confirmDeleteUserShow('{{ $user->name }}', '{{ $user->email }}')"
-                                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                Hapus User
-                            </button>
-                        </form>
+            <!-- Info Box untuk Pimpinan -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <h4 class="text-sm font-bold text-blue-800 mb-1">Informasi</h4>
+                        <p class="text-sm text-blue-700">Anda memiliki akses read-only untuk melihat detail pengguna. Untuk mengedit atau mengelola user, silakan hubungi Administrator.</p>
                     </div>
                 </div>
             </div>
-            @endif
         </div>
     </div>
 </div>
 
 {{-- Include SweetAlert --}}
 @include('partials.sweetalert')
-
-<script>
-// Show Reset Password Modal with SweetAlert2
-function showResetPasswordModal() {
-    if (typeof Swal === 'undefined') {
-        alert('SweetAlert2 tidak tersedia');
-        return;
-    }
-
-    Swal.fire({
-        title: '🔑 Reset Password User',
-        html: `
-            <form id="resetPasswordForm" action="{{ route('pimpinan.user.reset-password', $user->id) }}" method="POST">
-                @csrf
-                <div class="text-left space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password Baru</label>
-                        <input type="password" name="password" id="newPassword" required
-                            placeholder="Minimal 8 karakter"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
-                        <input type="password" name="password_confirmation" id="confirmPassword" required
-                            placeholder="Ulangi password"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                        <p class="text-sm text-yellow-800">⚠️ User harus menggunakan password baru ini untuk login</p>
-                    </div>
-                </div>
-            </form>
-        `,
-        showCancelButton: true,
-        confirmButtonColor: '#ea580c',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-key mr-2"></i> Reset Password',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        },
-        preConfirm: () => {
-            const password = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (!password || !confirmPassword) {
-                Swal.showValidationMessage('Semua field harus diisi');
-                return false;
-            }
-            
-            if (password.length < 8) {
-                Swal.showValidationMessage('Password minimal 8 karakter');
-                return false;
-            }
-            
-            if (password !== confirmPassword) {
-                Swal.showValidationMessage('Password tidak cocok');
-                return false;
-            }
-            
-            return true;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Mereset Password...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-orange-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            document.getElementById('resetPasswordForm').submit();
-        }
-    });
-}
-
-// Confirm Toggle Status
-function confirmToggleStatus(isActive, userName) {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Yakin ingin mengubah status user?')) {
-            document.getElementById('toggleStatusForm').submit();
-        }
-        return;
-    }
-
-    const action = isActive ? 'menonaktifkan' : 'mengaktifkan';
-    const status = isActive ? 'nonaktif' : 'aktif';
-    
-    Swal.fire({
-        title: `${action.charAt(0).toUpperCase() + action.slice(1)} User?`,
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">User <strong>${userName}</strong> akan ${action}</p>
-                <p class="text-sm text-gray-600">User yang ${status} ${isActive ? 'tidak dapat' : 'dapat'} login ke sistem</p>
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: isActive ? '#eab308' : '#22c55e',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: `<i class="fas fa-check mr-2"></i> Ya, ${action.charAt(0).toUpperCase() + action.slice(1)}`,
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Memproses...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            document.getElementById('toggleStatusForm').submit();
-        }
-    });
-}
-
-// Confirm Delete User
-function confirmDeleteUserShow(userName, userEmail) {
-    if (typeof Swal === 'undefined') {
-        if (confirm('Yakin ingin menghapus user ini?')) {
-            document.getElementById('deleteUserForm').submit();
-        }
-        return;
-    }
-
-    Swal.fire({
-        title: '⚠️ Hapus User?',
-        html: `
-            <div class="text-left">
-                <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>
-                <div class="bg-gray-50 p-3 rounded mb-3">
-                    <p class="text-sm text-gray-600">Email: <strong>${userEmail}</strong></p>
-                </div>
-                <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
-                    <p class="text-sm text-red-600 font-semibold">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Semua data user akan dihapus permanen dan TIDAK DAPAT dikembalikan!
-                    </p>
-                </div>
-            </div>
-        `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus User!',
-        cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-        reverseButtons: true,
-        focusCancel: true,
-        customClass: {
-            popup: 'animated-popup'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Menghapus User...',
-                html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-red-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            document.getElementById('deleteUserForm').submit();
-        }
-    });
-}
-</script>
 @endsection

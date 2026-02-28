@@ -822,23 +822,52 @@
         });
 
         // Auto-refresh notification count every 30 seconds
-        setInterval(function() {
-            fetch('{{ route("pimpinan.notifikasi.unread-count") }}')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.querySelector('.top-header .relative span.bg-red-500');
-                    if (data.count > 0) {
-                        if (badge) {
-                            badge.textContent = data.count > 99 ? '99+' : data.count;
-                        }
-                    } else {
-                        if (badge) {
-                            badge.remove();
-                        }
+// Auto-refresh notification count every 30 seconds
+setInterval(function() {
+    fetch('{{ route("pimpinan.notifikasi.unread-count") }}', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const badge = document.querySelector('.top-header .relative span.bg-red-500');
+            if (data.count > 0) {
+                if (badge) {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'flex';
+                } else {
+                    // Buat badge baru jika belum ada
+                    const notifButton = document.querySelector('button[onclick="toggleNotification()"]');
+                    if (notifButton && notifButton.querySelector('.relative')) {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'absolute top-0 right-0 w-4 h-4 md:w-5 md:h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center';
+                        newBadge.textContent = data.count > 99 ? '99+' : data.count;
+                        notifButton.querySelector('.relative').appendChild(newBadge);
                     }
-                })
-                .catch(error => console.error('Error fetching notification count:', error));
-        }, 30000);
+                }
+            } else {
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching notification count:', error);
+        // Jangan tampilkan error ke user, hanya log saja
+    });
+}, 30000); // Update setiap 30 detik
     </script>
     
     @stack('scripts')

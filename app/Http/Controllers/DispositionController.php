@@ -341,6 +341,9 @@ class DispositionController extends Controller
     /**
      * Update status disposisi dengan upload bukti penyelesaian
      */
+ /**
+     * Update status disposisi dengan upload bukti penyelesaian
+     */
     public function updateStatus(Request $request, $id)
     {
         $role = Auth::user()->role;
@@ -414,7 +417,25 @@ class DispositionController extends Controller
             }
         }
         
+        // 1. Update Disposisi Saat Ini (Milik Staff)
         $disposition->update($data);
+
+        // ====================================================================
+        // 2. PERBAIKAN: SINKRONISASI KE DISPOSISI INDUK (MILIK PIMPINAN/ADMIN)
+        // ====================================================================
+        $currentDispo = $disposition;
+        // Gunakan loop untuk melacak ke atas (Staff -> Admin -> Pimpinan)
+        while ($currentDispo->forwarded_from_id) {
+            $parentDispo = Disposition::find($currentDispo->forwarded_from_id);
+            if ($parentDispo) {
+                // Update parent dengan data yang sama (termasuk file bukti dan status)
+                $parentDispo->update($data);
+                $currentDispo = $parentDispo; // Lanjut ke atas jika masih ada parent
+            } else {
+                break;
+            }
+        }
+        // ====================================================================
         
         $statusText = [
             'in_progress' => 'sedang dikerjakan',

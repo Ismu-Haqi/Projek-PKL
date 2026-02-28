@@ -229,12 +229,32 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Harga Pembelian (Rp)</label>
                     <input type="number" name="harga_pembelian" value="{{ old('harga_pembelian') }}" min="0"
+                    
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            placeholder="Contoh: 15000000">
                     @error('harga_pembelian')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                <div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">
+        Nilai Residu (Rp)
+    </label>
+    <input type="number" name="nilai_residu" value="{{ old('nilai_residu', $asset->nilai_residu ?? '') }}"
+        placeholder="Contoh: 1000000" min="0"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+    <p class="text-xs text-gray-500 mt-1">Perkiraan harga jual/sisa aset saat sudah rusak (Kosongkan jika tidak ada).</p>
+</div>
+
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">
+        Umur Ekonomis (Tahun)
+    </label>
+    <input type="number" name="umur_ekonomis" value="{{ old('umur_ekonomis', $asset->umur_ekonomis ?? '') }}"
+        placeholder="Contoh: 5" min="0"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+    <p class="text-xs text-gray-500 mt-1">Lama pemakaian aset secara optimal dalam hitungan tahun.</p>
+</div>
 
                 <!-- Masa Garansi -->
                 <div>

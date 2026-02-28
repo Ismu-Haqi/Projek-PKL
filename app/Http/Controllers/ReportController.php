@@ -6,6 +6,7 @@ use App\Models\Archive;
 use App\Models\Asset;
 use App\Models\Disposition;
 use App\Models\User;
+use App\Models\AssetBorrow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -96,9 +97,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * ✅ UPDATED: Archive report with period filter
-     */
     public function arsip(Request $request)
     {
         $role = Auth::user()->role;
@@ -108,19 +106,16 @@ class ReportController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // ✅ Period Filter
         $period = $request->input('period', '1month');
         $dateRange = $this->getDateRangeFromPeriod($period, $request);
         
         $query = Archive::with(['category', 'uploader'])
             ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']]);
 
-        // Category filter
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Unit filter
         if ($request->filled('unit')) {
             $query->where('unit', $request->unit);
         }
@@ -131,7 +126,6 @@ class ReportController extends Controller
 
         $archives = $query->orderBy('archives.created_at', 'desc')->paginate(20);
         
-        // Statistics
         $stats = [
             'total' => $query->count(),
             'by_category' => Archive::whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']])
@@ -144,9 +138,6 @@ class ReportController extends Controller
         return view("{$role}.laporan.arsip", compact('archives', 'stats', 'period', 'dateRange'));
     }
 
-    /**
-     * ✅ UPDATED: Disposition report with period filter + item type
-     */
     public function disposisi(Request $request)
     {
         $role = Auth::user()->role;
@@ -156,14 +147,12 @@ class ReportController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // ✅ Period Filter
         $period = $request->input('period', '1month');
         $dateRange = $this->getDateRangeFromPeriod($period, $request);
         
         $query = Disposition::with(['fromUser', 'toUser', 'disposable'])
             ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']]);
 
-        // ✅ Item Type Filter (Arsip/Aset)
         if ($request->filled('item_type')) {
             if ($request->item_type === 'arsip') {
                 $query->where('disposable_type', 'App\\Models\\Archive');
@@ -172,12 +161,10 @@ class ReportController extends Controller
             }
         }
 
-        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Priority filter
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
@@ -188,7 +175,6 @@ class ReportController extends Controller
 
         $dispositions = $query->orderBy('dispositions.created_at', 'desc')->paginate(20);
         
-        // Statistics
         $stats = [
             'total' => (clone $query)->count(),
             'arsip' => (clone $query)->where('disposable_type', 'App\\Models\\Archive')->count(),
@@ -200,9 +186,6 @@ class ReportController extends Controller
         return view("{$role}.laporan.disposisi", compact('dispositions', 'stats', 'period', 'dateRange'));
     }
 
-    /**
-     * ✅ NEW: Asset report with period filter
-     */
     public function aset(Request $request)
     {
         $role = Auth::user()->role;
@@ -211,35 +194,29 @@ class ReportController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // ✅ Period Filter
         $period = $request->input('period', '1month');
         $dateRange = $this->getDateRangeFromPeriod($period, $request);
         
         $query = Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']]);
 
-        // Kategori filter
         if ($request->filled('kategori')) {
             $query->where('kategori', $request->kategori);
         }
 
-        // Unit filter
         if ($request->filled('unit')) {
             $query->where('unit', $request->unit);
         }
 
-        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Kondisi filter
         if ($request->filled('kondisi')) {
             $query->where('kondisi', $request->kondisi);
         }
 
         $assets = $query->orderBy('assets.created_at', 'desc')->paginate(20);
         
-        // Statistics
         $stats = [
             'total' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])->count(),
             'by_kategori' => Asset::whereBetween('assets.created_at', [$dateRange['start'], $dateRange['end']])
@@ -261,16 +238,12 @@ class ReportController extends Controller
                 ->get(),
         ];
 
-        // Get filter options
         $categories = Asset::select('kategori')->distinct()->pluck('kategori');
         $units = Asset::select('unit')->distinct()->whereNotNull('unit')->pluck('unit');
 
         return view("{$role}.laporan.aset", compact('assets', 'stats', 'period', 'dateRange', 'categories', 'units'));
     }
 
-    /**
-     * ✅ UPDATED: User activity report with period filter
-     */
     public function user(Request $request)
     {
         $role = Auth::user()->role;
@@ -279,7 +252,6 @@ class ReportController extends Controller
             abort(403, 'Unauthorized - Admin and Pimpinan only');
         }
 
-        // ✅ Period Filter
         $period = $request->input('period', '1month');
         $dateRange = $this->getDateRangeFromPeriod($period, $request);
 
@@ -321,9 +293,6 @@ class ReportController extends Controller
         ]);
     }
 
-    /**
-     * Periode statistics report (Monthly & Annual)
-     */
     public function periode(Request $request)
     {
         $role = Auth::user()->role;
@@ -414,9 +383,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * ✅ UPDATED: Unit productivity report with period filter
-     */
     public function unitKerja(Request $request)
     {
         $role = Auth::user()->role;
@@ -425,7 +391,6 @@ class ReportController extends Controller
             abort(403, 'Unauthorized');
         }
         
-        // ✅ Period Filter
         $period = $request->input('period', '1month');
         $dateRange = $this->getDateRangeFromPeriod($period, $request);
 
@@ -493,8 +458,8 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        // Validate type to prevent security issues
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit'];
+        // ✅ TERMASUK LAPORAN KE-6 (Penyusutan) & KE-7 (Peminjaman)
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -513,8 +478,8 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        // Validate type to prevent security issues
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit'];
+        // ✅ TERMASUK LAPORAN KE-6 (Penyusutan) & KE-7 (Peminjaman)
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -526,9 +491,6 @@ class ReportController extends Controller
         return $pdf->download("laporan_{$type}_" . date('Y-m-d') . ".pdf");
     }
 
-    /**
-     * Export Excel
-     */
     public function exportExcel(Request $request)
     {
         $type = $request->input('type', 'arsip');
@@ -536,10 +498,7 @@ class ReportController extends Controller
         return back()->with('info', 'Fitur export Excel akan segera tersedia');
     }
 
-    /**
-     * ✅ Helper to get date range from period
-     */
-  private function getDateRangeFromPeriod($period, Request $request)
+    private function getDateRangeFromPeriod($period, Request $request)
     {
         $now = Carbon::now();
         
@@ -591,9 +550,6 @@ class ReportController extends Controller
         }
     }
 
-    /**
-     * Get chart data
-     */
     private function getChartData($startDate, $endDate, $role)
     {
         $archivesPerMonth = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
@@ -620,22 +576,17 @@ class ReportController extends Controller
         ];
     }
 
-    /**
-     * Get data for export
-     */
-     private function getExportData($type, $request)
+    private function getExportData($type, $request)
     {
         $data = [];
 
         switch ($type) {
             case 'summary':
-                // Basic counts
                 $data['archives'] = Archive::count();
                 $data['dispositions'] = Disposition::count();
                 $data['users'] = User::count();
                 $data['assets'] = Asset::count();
                 
-                // Archive statistics by category
                 $data['archive_stats'] = Archive::join('categories', 'archives.category_id', '=', 'categories.id')
                     ->selectRaw('categories.name as category, COUNT(*) as total')
                     ->groupBy('categories.name')
@@ -648,7 +599,6 @@ class ReportController extends Controller
                     })
                     ->toArray();
                 
-                // Disposition statistics by status
                 $data['disposition_stats'] = Disposition::selectRaw('status, COUNT(*) as total')
                     ->groupBy('status')
                     ->get()
@@ -660,7 +610,6 @@ class ReportController extends Controller
                     })
                     ->toArray();
                 
-                // Asset statistics by category
                 $data['asset_stats'] = Asset::selectRaw('kategori, COUNT(*) as total')
                     ->groupBy('kategori')
                     ->get()
@@ -672,7 +621,6 @@ class ReportController extends Controller
                     })
                     ->toArray();
                 
-                // User statistics by role
                 $data['user_stats'] = User::selectRaw('role, COUNT(*) as total')
                     ->groupBy('role')
                     ->get()
@@ -737,8 +685,41 @@ class ReportController extends Controller
                 $data['period'] = $dateRange['label'];
                 break;
 
+            
+            case 'penyusutan':
+                $data['assets'] = Asset::whereNotNull('harga_pembelian')
+                    ->where('harga_pembelian', '>', 0)
+                    ->orderBy('tanggal_pembelian', 'desc')
+                    ->get();
+                
+                $data['totalAsetAwal'] = $data['assets']->sum('harga_pembelian');
+                $data['totalNilaiBuku'] = $data['assets']->sum('nilai_buku');
+                break;
+
+           
+            case 'peminjaman':
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
+                
+                $query = AssetBorrow::with(['asset', 'borrower'])
+                    ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
+                
+                if (Auth::user()->role === 'staff') {
+                    $query->where('user_id', Auth::id());
+                }
+                
+                $data['borrows'] = $query->orderBy('created_at', 'desc')->get();
+                $data['period'] = $dateRange['label'];
+                break;
+
+            case 'maintenance':
+                $data['assets'] = Asset::whereIn('status', ['maintenance', 'rusak'])
+                                       ->orWhereIn('kondisi', ['kurang', 'rusak'])
+                                       ->orderBy('updated_at', 'desc')->get();
+                $data['period'] = 'Hingga ' . now()->format('d M Y');
+                break;
+
             case 'user':
-                // ✅ FIX: Add users data and date range
                 $period = $request->input('period', '1month');
                 $dateRange = $this->getDateRangeFromPeriod($period, $request);
                 
@@ -768,7 +749,6 @@ class ReportController extends Controller
                 break;
 
             case 'unit':
-                // ✅ FIX: Add units data and date range
                 $period = $request->input('period', '1month');
                 $dateRange = $this->getDateRangeFromPeriod($period, $request);
                 
@@ -808,7 +788,6 @@ class ReportController extends Controller
                     ];
                 }
 
-                // Sort by archives (default)
                 $sortBy = $request->input('sort_by', 'archives');
                 
                 if ($sortBy === 'completion_rate') {
@@ -833,5 +812,81 @@ class ReportController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * ✅ LAPORAN KE-6: Laporan Penyusutan Aset
+     */
+    public function penyusutan(Request $request)
+    {
+        $role = Auth::user()->role;
+        
+        if (!in_array($role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $assets = Asset::whereNotNull('harga_pembelian')
+                       ->where('harga_pembelian', '>', 0)
+                       ->orderBy('tanggal_pembelian', 'desc')
+                       ->get();
+
+        $totalNilaiBuku = $assets->sum('nilai_buku');
+        $totalAsetAwal = $assets->sum('harga_pembelian');
+
+        return view("{$role}.laporan.penyusutan", compact('assets', 'totalNilaiBuku', 'totalAsetAwal'));
+    }
+
+    /**
+     * ✅ LAPORAN KE-7: Laporan Peminjaman Aset
+     */
+    public function peminjaman(Request $request)
+    {
+        $role = Auth::user()->role;
+        $user = Auth::user();
+
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+
+        $query = AssetBorrow::with(['asset', 'borrower'])
+            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
+
+        if ($role === 'staff') {
+            $query->where('user_id', $user->id); 
+        }
+
+        $borrows = $query->orderBy('created_at', 'desc')->get();
+
+        $stats = [
+            'total' => (clone $query)->count(),
+            'dipinjam' => (clone $query)->whereIn('status', ['approved', 'borrowed'])->count(),
+            'dikembalikan' => (clone $query)->where('status', 'returned')->count(),
+            'ditolak' => (clone $query)->where('status', 'rejected')->count(),
+            'terlambat' => (clone $query)->where('status', 'overdue')->count(),
+        ];
+
+        return view("{$role}.laporan.peminjaman", compact('borrows', 'stats', 'period', 'dateRange'));
+    }
+    public function maintenance(Request $request)
+    {
+        $role = Auth::user()->role;
+        if (!in_array($role, ['admin', 'pimpinan'])) abort(403, 'Unauthorized');
+
+        $assets = Asset::whereIn('status', ['maintenance', 'rusak'])
+                       ->orWhereIn('kondisi', ['kurang', 'rusak'])
+                       ->orderBy('updated_at', 'desc')
+                       ->get();
+
+        $stats = [
+            'total' => $assets->count(),
+            'rusak_berat' => $assets->where('kondisi', 'rusak')->count(),
+            'perlu_perbaikan' => $assets->where('kondisi', 'kurang')->count(),
+            'sedang_maintenance' => $assets->where('status', 'maintenance')->count(),
+        ];
+
+        return view("{$role}.laporan.maintenance", compact('assets', 'stats'));
     }
 }

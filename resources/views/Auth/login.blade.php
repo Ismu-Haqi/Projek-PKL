@@ -138,7 +138,7 @@
                 
                 <!-- System Name -->
                 <h1 class="system-title text-3xl md:text-5xl font-bold text-white mb-2 md:mb-3 tracking-wide">GANDARIA</h1>
-                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Aplikasi arsip dan Aset Dinamis Terintegrasi</p>
+                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Sistem penGelolaan Arsip dan Data aset terpAdu, teRstruktur, Informatif, dan Akuntabel</p>
                 
                 <!-- Description -->
                 <div class="description-box bg-white/10 backdrop-blur-sm rounded-2xl p-4 md:p-6 mt-3 md:mt-4 text-white mx-4 md:mx-0">

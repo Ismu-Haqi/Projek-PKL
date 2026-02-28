@@ -86,7 +86,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
     });
     
-    // ✅ NEW: Peminjaman Aset (Admin)
+    // Peminjaman Aset (Admin)
     Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
         Route::get('/', [AdminAssetBorrowController::class, 'index'])->name('index');
         Route::get('/menunggu', [AdminAssetBorrowController::class, 'pending'])->name('pending');
@@ -149,6 +149,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
+        Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
+        Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
     });
     
     // Pengaturan
@@ -243,14 +246,9 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/create', [AssetController::class, 'create'])->name('create');
         Route::post('/', [AssetController::class, 'store'])->name('store');
-        
-        // ✅ PENTING: Routes dengan path spesifik HARUS di atas {id}
         Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
-        
-        // ✅ Route show di bawah semua route spesifik
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
-        
         Route::put('/{id}', [AssetController::class, 'update'])->name('update');
         Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
     });
@@ -359,10 +357,12 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
+        Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
+        Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
     });
     
-    // Pengaturan (Limited)
-   // Pengaturan (Profile & Password Only - Sama seperti Staff)
+    // Pengaturan (Profile & Password Only - Sama seperti Staff)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::put('/update-profil', [SettingController::class, 'updateProfil'])->name('update-profil');

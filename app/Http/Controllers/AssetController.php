@@ -16,44 +16,49 @@ class AssetController extends Controller
      * ✅ FIXED: Display the specified asset
      * Perbaikan authorization untuk staff
      */
-    public function show($id)
-    {
-        $role = Auth::user()->role;
-        
-        // ✅ Allow admin, staff, and pimpinan
-        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
-            abort(403, 'Unauthorized');
-        }
-        
-        $asset = Asset::findOrFail($id);
-        
-        // ✅ FIXED: Staff authorization - Cek apakah user punya unit
-        if ($role === 'staff') {
-            $userUnit = Auth::user()->unit;
-            
-            // Jika user tidak punya unit, izinkan akses (untuk backward compatibility)
-            // Jika user punya unit, cek apakah sesuai dengan unit aset
-            if ($userUnit && $asset->unit && $asset->unit !== $userUnit) {
-                // Log untuk debugging
-                Log::warning("Staff unauthorized access attempt", [
-                    'user_id' => Auth::id(),
-                    'user_unit' => $userUnit,
-                    'asset_id' => $asset->id,
-                    'asset_unit' => $asset->unit
-                ]);
-                
-                abort(403, 'Unauthorized - Anda hanya bisa melihat aset dari unit Anda');
-            }
-        }
-        
-        $viewPrefix = match($role) {
-            'admin' => 'admin',
-            'pimpinan' => 'pimpinan',
-            default => 'staff'
-        };
-        
-        return view("{$viewPrefix}.aset.show", compact('asset'));
+public function show($id)
+{
+    $role = Auth::user()->role;
+    
+    if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+        abort(403, 'Unauthorized');
     }
+    
+    $asset = Asset::findOrFail($id);
+    
+    // ✅ Regenerate QR Code jika belum ada atau file hilang
+    if (!$asset->qr_code || !Storage::disk('public')->exists($asset->qr_code)) {
+        $this->generateQrCode($asset);
+        $asset->refresh(); // Reload asset data setelah generate QR
+    }
+    
+    // Authorization logic
+    $canEdit = false;
+    $canDelete = false;
+    
+    if ($role === 'admin') {
+        $canEdit = true;
+        $canDelete = true;
+    } elseif ($role === 'pimpinan') {
+        $canEdit = true;
+        $canDelete = false;
+    } elseif ($role === 'staff') {
+        $userUnit = Auth::user()->unit;
+        
+        if ($userUnit && $asset->unit && $asset->unit === $userUnit) {
+            $canEdit = true;
+            $canDelete = true;
+        }
+    }
+    
+    $viewPrefix = match($role) {
+        'admin' => 'admin',
+        'pimpinan' => 'pimpinan',
+        default => 'staff'
+    };
+    
+    return view("{$viewPrefix}.aset.show", compact('asset', 'canEdit', 'canDelete'));
+}
 
     /**
      * ✅ FIXED: Display a listing of assets
@@ -226,6 +231,9 @@ class AssetController extends Controller
             'unit' => 'nullable|string|max:100',
             'tanggal_pembelian' => 'nullable|date',
             'harga_pembelian' => 'nullable|numeric|min:0',
+            'harga_pembelian' => 'nullable|numeric|min:0',
+            'nilai_residu' => 'nullable|numeric|min:0',      // <--- TAMBAHKAN INI
+            'umur_ekonomis' => 'nullable|integer|min:0',     // <--- TAMBAHKAN INI
             'masa_garansi' => 'nullable|integer|min:0',
             'penanggung_jawab' => 'nullable|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -370,6 +378,9 @@ class AssetController extends Controller
             'unit' => 'nullable|string|max:100',
             'tanggal_pembelian' => 'nullable|date',
             'harga_pembelian' => 'nullable|numeric|min:0',
+            'harga_pembelian' => 'nullable|numeric|min:0',
+            'nilai_residu' => 'nullable|numeric|min:0',      // <--- TAMBAHKAN INI
+            'umur_ekonomis' => 'nullable|integer|min:0',     // <--- TAMBAHKAN INI
             'masa_garansi' => 'nullable|integer|min:0',
             'penanggung_jawab' => 'nullable|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
