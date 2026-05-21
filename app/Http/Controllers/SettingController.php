@@ -274,7 +274,7 @@ class SettingController extends Controller
 
     /**
      * Create database backup
-     * ✅ ADMIN ONLY
+     * ✅ ADMIN ONLY — Mendukung mysqldump (jika tersedia) + fallback PHP-native
      */
     public function backup()
     {
@@ -285,62 +285,40 @@ class SettingController extends Controller
         try {
             $filename = 'backup_' . date('Y-m-d_His') . '.sql';
             $path = storage_path('app/backups');
-            
-            // Create backups directory if not exists
+
             if (!file_exists($path)) {
                 mkdir($path, 0755, true);
             }
 
             $fullPath = $path . '/' . $filename;
 
-            // Database credentials
-            $dbHost = env('DB_HOST', '127.0.0.1');
-            $dbPort = env('DB_PORT', '3306');
-            $dbName = env('DB_DATABASE');
-            $dbUser = env('DB_USERNAME');
-            $dbPass = env('DB_PASSWORD');
-
-            // Check if mysqldump is available
+            // Coba mysqldump dulu
             $mysqldumpPath = $this->findMysqldump();
-            
-            if (!$mysqldumpPath) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'mysqldump tidak ditemukan. Install MySQL client terlebih dahulu.'
-                ], 500);
+
+            if ($mysqldumpPath) {
+                $success = $this->backupViaMysqldump($mysqldumpPath, $fullPath);
+            } else {
+                $success = false;
             }
 
-            // Build mysqldump command
-            $command = sprintf(
-                '%s --user=%s --password=%s --host=%s --port=%s %s > %s 2>&1',
-                $mysqldumpPath,
-                escapeshellarg($dbUser),
-                escapeshellarg($dbPass),
-                escapeshellarg($dbHost),
-                escapeshellarg($dbPort),
-                escapeshellarg($dbName),
-                escapeshellarg($fullPath)
-            );
+            // Fallback: PHP-native backup (tanpa mysqldump)
+            if (!$success) {
+                $this->backupViaPHP($fullPath);
+            }
 
-            // Execute backup
-            exec($command, $output, $returnVar);
-
-            // Check if backup was successful
-            if ($returnVar !== 0 || !file_exists($fullPath) || filesize($fullPath) === 0) {
-                if (file_exists($fullPath)) {
-                    unlink($fullPath);
-                }
+            if (!file_exists($fullPath) || filesize($fullPath) === 0) {
+                if (file_exists($fullPath)) unlink($fullPath);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal membuat backup. Error: ' . implode("\n", $output)
+                    'message' => 'Gagal membuat backup. Pastikan izin folder storage/app/backups dapat ditulis.'
                 ], 500);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Backup berhasil dibuat',
+                'message' => 'Backup berhasil dibuat' . ($mysqldumpPath ? '' : ' (mode PHP-native)'),
                 'filename' => $filename,
-                'size' => $this->formatFileSize(filesize($fullPath))
+                'size'     => $this->formatFileSize(filesize($fullPath)),
             ]);
 
         } catch (\Exception $e) {
@@ -349,6 +327,95 @@ class SettingController extends Controller
                 'message' => 'Gagal membuat backup: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Backup via mysqldump — return true jika berhasil
+     */
+    private function backupViaMysqldump(string $mysqldumpPath, string $fullPath): bool
+    {
+        $dbHost = env('DB_HOST', '127.0.0.1');
+        $dbPort = env('DB_PORT', '3306');
+        $dbName = env('DB_DATABASE');
+        $dbUser = env('DB_USERNAME');
+        $dbPass = env('DB_PASSWORD');
+
+        // Tulis password ke file sementara supaya tidak tampil di process list
+        $cnfFile = tempnam(sys_get_temp_dir(), 'mysql_');
+        file_put_contents($cnfFile, "[client]\npassword=" . addslashes($dbPass) . "\n");
+        chmod($cnfFile, 0600);
+
+        $command = sprintf(
+            '%s --defaults-extra-file=%s --user=%s --host=%s --port=%s --single-transaction --routines --triggers --add-drop-table %s > %s 2>&1',
+            escapeshellcmd($mysqldumpPath),
+            escapeshellarg($cnfFile),
+            escapeshellarg($dbUser),
+            escapeshellarg($dbHost),
+            escapeshellarg($dbPort),
+            escapeshellarg($dbName),
+            escapeshellarg($fullPath)
+        );
+
+        exec($command, $output, $returnVar);
+        @unlink($cnfFile);
+
+        return $returnVar === 0 && file_exists($fullPath) && filesize($fullPath) > 0;
+    }
+
+    /**
+     * Backup PHP-native — menggunakan PDO langsung, tanpa mysqldump
+     */
+    private function backupViaPHP(string $fullPath): void
+    {
+        $dbHost = env('DB_HOST', '127.0.0.1');
+        $dbPort = env('DB_PORT', '3306');
+        $dbName = env('DB_DATABASE');
+        $dbUser = env('DB_USERNAME');
+        $dbPass = env('DB_PASSWORD');
+
+        $pdo = new \PDO(
+            "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4",
+            $dbUser,
+            $dbPass,
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
+
+        $output  = "-- GANDARIA Database Backup\n";
+        $output .= "-- Dibuat: " . date('Y-m-d H:i:s') . "\n";
+        $output .= "-- Host: {$dbHost} | Database: {$dbName}\n";
+        $output .= "-- -----------------------------------------------\n\n";
+        $output .= "SET FOREIGN_KEY_CHECKS=0;\n";
+        $output .= "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n";
+        $output .= "SET NAMES utf8mb4;\n\n";
+
+        // Ambil semua tabel
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+
+        foreach ($tables as $table) {
+            // CREATE TABLE statement
+            $createRow = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(\PDO::FETCH_NUM);
+            $output .= "\n-- Tabel: `{$table}`\n";
+            $output .= "DROP TABLE IF EXISTS `{$table}`;\n";
+            $output .= $createRow[1] . ";\n\n";
+
+            // INSERT data
+            $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
+            if (!empty($rows)) {
+                $cols = '`' . implode('`, `', array_keys($rows[0])) . '`';
+                foreach ($rows as $row) {
+                    $vals = array_map(function ($v) use ($pdo) {
+                        return $v === null ? 'NULL' : $pdo->quote($v);
+                    }, array_values($row));
+                    $output .= "INSERT INTO `{$table}` ({$cols}) VALUES (" . implode(', ', $vals) . ");\n";
+                }
+                $output .= "\n";
+            }
+        }
+
+        $output .= "\nSET FOREIGN_KEY_CHECKS=1;\n";
+        $output .= "-- Backup selesai: " . date('Y-m-d H:i:s') . "\n";
+
+        file_put_contents($fullPath, $output);
     }
 
     /**
@@ -394,6 +461,33 @@ class SettingController extends Controller
                 'message' => 'Gagal memuat daftar backup: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Delete a backup file
+     * ✅ ADMIN ONLY
+     */
+    public function deleteBackup($filename)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized - Admin only'], 403);
+        }
+
+        // Sanitasi: hanya izinkan nama file .sql tanpa path traversal
+        $filename = basename($filename);
+        if (!preg_match('/^backup_[\d_]+\.sql$/', $filename)) {
+            return response()->json(['success' => false, 'message' => 'Nama file tidak valid.'], 400);
+        }
+
+        $path = storage_path('app/backups/' . $filename);
+
+        if (!file_exists($path)) {
+            return response()->json(['success' => false, 'message' => 'File tidak ditemukan.'], 404);
+        }
+
+        unlink($path);
+
+        return response()->json(['success' => true, 'message' => 'File backup berhasil dihapus.']);
     }
 
     /**

@@ -16,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AssetBorrowController as AdminAssetBorrowController;
 use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowController;
+use App\Http\Controllers\IncomingLetterController;
 
 // Halaman Login
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
@@ -166,6 +167,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/backup/download/{filename}', [SettingController::class, 'downloadBackup'])->name('backup-download');
     });
     
+    // Surat Masuk (Admin)
+    Route::prefix('surat-masuk')->name('surat-masuk.')->group(function () {
+        Route::get('/',                    [IncomingLetterController::class, 'index'])->name('index');
+        Route::get('/create',              [IncomingLetterController::class, 'create'])->name('create');
+        Route::post('/',                   [IncomingLetterController::class, 'store'])->name('store');
+        Route::get('/{id}',                [IncomingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/edit',           [IncomingLetterController::class, 'edit'])->name('edit');
+        Route::put('/{id}',                [IncomingLetterController::class, 'update'])->name('update');
+        Route::delete('/{id}',             [IncomingLetterController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/preview',        [IncomingLetterController::class, 'preview'])->name('preview');
+        Route::get('/{id}/download',       [IncomingLetterController::class, 'download'])->name('download');
+        Route::get('/{id}/buat-disposisi', [IncomingLetterController::class, 'buatDisposisi'])->name('buat-disposisi');
+        Route::post('/{id}/tandai-selesai',[IncomingLetterController::class, 'tandaiSelesai'])->name('tandai-selesai');
+    });
+
     // Kategori
     Route::prefix('kategori')->name('kategori.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
@@ -265,6 +281,21 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
     });
     
+    // Surat Masuk (Staff)
+    Route::prefix('surat-masuk')->name('surat-masuk.')->group(function () {
+        Route::get('/',                    [IncomingLetterController::class, 'index'])->name('index');
+        Route::get('/create',              [IncomingLetterController::class, 'create'])->name('create');
+        Route::post('/',                   [IncomingLetterController::class, 'store'])->name('store');
+        Route::get('/{id}',                [IncomingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/edit',           [IncomingLetterController::class, 'edit'])->name('edit');
+        Route::put('/{id}',                [IncomingLetterController::class, 'update'])->name('update');
+        Route::delete('/{id}',             [IncomingLetterController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/preview',        [IncomingLetterController::class, 'preview'])->name('preview');
+        Route::get('/{id}/download',       [IncomingLetterController::class, 'download'])->name('download');
+        Route::get('/{id}/buat-disposisi', [IncomingLetterController::class, 'buatDisposisi'])->name('buat-disposisi');
+        Route::post('/{id}/tandai-selesai',[IncomingLetterController::class, 'tandaiSelesai'])->name('tandai-selesai');
+    });
+
     // Pengaturan
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');
@@ -362,6 +393,14 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
     });
     
+    // Surat Masuk (Pimpinan - read only)
+    Route::prefix('surat-masuk')->name('surat-masuk.')->group(function () {
+        Route::get('/',              [IncomingLetterController::class, 'index'])->name('index');
+        Route::get('/{id}',          [IncomingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/preview',  [IncomingLetterController::class, 'preview'])->name('preview');
+        Route::get('/{id}/download', [IncomingLetterController::class, 'download'])->name('download');
+    });
+
     // Pengaturan (Profile & Password Only - Sama seperti Staff)
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [SettingController::class, 'index'])->name('index');

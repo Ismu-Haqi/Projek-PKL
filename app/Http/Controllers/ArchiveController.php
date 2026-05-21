@@ -625,4 +625,15 @@ class ArchiveController extends Controller
             return redirect()->back()->with('error', 'Gagal mengunduh file. Error: ' . $e->getMessage());
         }
     }
+    public function arsipkan($id)
+    {
+        // Cari data surat berdasarkan ID (Karena sudah di ArchiveController, panggil model Archive langsung)
+        $surat = Archive::findOrFail($id); 
+        
+        // Ubah status surat menjadi diarsipkan
+        $surat->status = 'diarsipkan'; 
+        $surat->save();
+
+        return back()->with('success', 'Dokumen berhasil dikunci dan resmi disimpan ke dalam Laci Arsip Negara!');
+    }
 }

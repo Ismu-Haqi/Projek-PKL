@@ -33,6 +33,29 @@
         <form action="{{ route('admin.disposisi.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
 
+            {{-- ✅ Hidden input: surat masuk asal --}}
+            @if(isset($fromLetter) && $fromLetter)
+            <input type="hidden" name="from_letter" value="{{ $fromLetter->id }}">
+
+            {{-- Banner info surat masuk --}}
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-semibold text-blue-800 text-sm">Disposisi dari Surat Masuk</p>
+                    <p class="text-blue-700 text-xs mt-0.5">
+                        <strong>No. Agenda:</strong> {{ $fromLetter->nomor_agenda }} &nbsp;|&nbsp;
+                        <strong>Dari:</strong> {{ $fromLetter->pengirim }} &nbsp;|&nbsp;
+                        <strong>Perihal:</strong> {{ $fromLetter->perihal }}
+                    </p>
+                    <p class="text-blue-500 text-xs mt-1">Data subject & perihal sudah terisi otomatis dari surat masuk ini.</p>
+                </div>
+            </div>
+            @endif
+
             <!-- Select Item Type -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -92,11 +115,34 @@
                     <select name="item_id" id="item_select_arsip" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 @error('item_id') border-red-500 @enderror">
                         <option value="">-- Pilih Arsip/Surat --</option>
-                        @foreach($archives as $archive)
-                        <option value="{{ $archive->id }}" {{ old('item_id') == $archive->id ? 'selected' : '' }}>
-                            {{ $archive->nomor_surat }} - {{ $archive->judul }}
-                        </option>
-                        @endforeach
+
+                        {{-- ✅ GRUP 1: Surat Masuk (dari tabel incoming_letters) --}}
+                        @if(isset($incomingLetters) && $incomingLetters->count())
+                        <optgroup label="📨 Surat Masuk">
+                            @foreach($incomingLetters as $letter)
+                            <option value="incoming_{{ $letter->id }}"
+                                data-subject="{{ $letter->perihal }}"
+                                {{ isset($fromLetter) && $fromLetter?->id == $letter->id ? 'selected' : '' }}
+                                {{ old('item_id') == 'incoming_'.$letter->id ? 'selected' : '' }}>
+                                [SM] {{ $letter->nomor_agenda }} — {{ Str::limit($letter->perihal, 50) }}
+                                @if($letter->status === 'sudah_disposisi') (sudah disposisi) @endif
+                            </option>
+                            @endforeach
+                        </optgroup>
+                        @endif
+
+                        {{-- GRUP 2: Arsip Digital (dari tabel archives) --}}
+                        @if($archives->count())
+                        <optgroup label="🗂️ Arsip Digital">
+                            @foreach($archives as $archive)
+                            <option value="{{ $archive->id }}"
+                                data-subject="{{ $archive->judul }}"
+                                {{ old('item_id') == $archive->id ? 'selected' : '' }}>
+                                {{ $archive->nomor_surat }} - {{ Str::limit($archive->judul, 50) }}
+                            </option>
+                            @endforeach
+                        </optgroup>
+                        @endif
                     </select>
                 </div>
 
@@ -148,7 +194,7 @@
                     Subjek Disposisi <span class="text-red-500">*</span>
                 </label>
                 <input type="text" name="subject" id="subject" required
-                    value="{{ old('subject') }}"
+                    value="{{ old('subject', isset($fromLetter) && $fromLetter ? $fromLetter->perihal : '') }}"
                     placeholder="Contoh: Tindak Lanjut Surat Edaran"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 @error('subject') border-red-500 @enderror">
                 @error('subject')
@@ -252,14 +298,27 @@
 </style>
 
 <script>
-// Auto-fill subject from selected item
 document.addEventListener('DOMContentLoaded', function() {
-    const arsipSelect = document.getElementById('item_select_arsip');
-    const asetSelect = document.getElementById('item_select_aset');
+    const arsipSelect  = document.getElementById('item_select_arsip');
+    const asetSelect   = document.getElementById('item_select_aset');
     const subjectInput = document.getElementById('subject');
-    
+
     if (arsipSelect) {
         arsipSelect.addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            // Gunakan data-subject jika ada, fallback ke teks option
+            const dataSubject = selected.getAttribute('data-subject');
+            if (dataSubject && !subjectInput.value) {
+                subjectInput.value = 'Disposisi: ' + dataSubject;
+            } else if (this.value && !subjectInput.value) {
+                const itemName = selected.text.split(' — ')[1] || selected.text.split(' - ')[1] || selected.text;
+                subjectInput.value = 'Disposisi: ' + itemName.replace(/\(sudah disposisi\)/g, '').trim();
+            }
+        });
+    }
+
+    if (asetSelect) {
+        asetSelect.addEventListener('change', function() {
             if (this.value && !subjectInput.value) {
                 const selectedText = this.options[this.selectedIndex].text;
                 const itemName = selectedText.split(' - ')[1] || selectedText;
@@ -267,13 +326,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    if (asetSelect) {
-        asetSelect.addEventListener('change', function() {
-            if (this.value && !subjectInput.value) {
-                const selectedText = this.options[this.selectedIndex].text;
-                const itemName = selectedText.split(' - ')[1] || selectedText;
-                subjectInput.value = 'Disposisi: ' + itemName;
+
+    // Handle form submit: konversi "incoming_X" → set from_letter hidden input
+    const form = arsipSelect ? arsipSelect.closest('form') : null;
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const val = arsipSelect.value;
+            if (val && val.startsWith('incoming_')) {
+                e.preventDefault();
+                const letterId = val.replace('incoming_', '');
+
+                // Set item_type ke arsip, item_id ke letterId, tandai sebagai surat masuk
+                let hiddenLetter = form.querySelector('input[name="from_letter"]');
+                if (!hiddenLetter) {
+                    hiddenLetter = document.createElement('input');
+                    hiddenLetter.type = 'hidden';
+                    hiddenLetter.name = 'from_letter';
+                    form.appendChild(hiddenLetter);
+                }
+                hiddenLetter.value = letterId;
+
+                // Ganti nilai item_id ke letterId (angka murni) untuk validasi backend
+                let hiddenItem = document.createElement('input');
+                hiddenItem.type = 'hidden';
+                hiddenItem.name = 'item_id';
+                hiddenItem.value = letterId;
+
+                // Nonaktifkan select agar tidak kirim dua item_id
+                arsipSelect.removeAttribute('name');
+                form.appendChild(hiddenItem);
+
+                // Set item_type ke surat_masuk agar controller tahu
+                let itemTypeInput = form.querySelector('input[name="item_type"]:checked') ||
+                                    form.querySelector('input[name="item_type"]');
+                let hiddenType = document.createElement('input');
+                hiddenType.type = 'hidden';
+                hiddenType.name = 'incoming_letter_mode';
+                hiddenType.value = '1';
+                form.appendChild(hiddenType);
+
+                form.submit();
             }
         });
     }

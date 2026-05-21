@@ -550,45 +550,39 @@
 
         {{-- Tab Backup --}}
         <div id="content-backup" class="tab-content hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Backup Database</h2>
-            
-            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-                <div class="flex items-start">
-                    <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
-                    <div>
-                        <h3 class="font-medium text-blue-800 mb-1">Informasi Backup</h3>
-                        <p class="text-sm text-blue-700">
-                            Backup database akan disimpan di folder <code class="bg-blue-100 px-2 py-1 rounded">storage/app/backups</code>.
-                            Pastikan folder memiliki permission yang sesuai.
-                        </p>
-                    </div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Backup Database</h2>
+            <p class="text-gray-500 text-sm mb-5">Buat salinan database MySQL ke file <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">.sql</code> yang tersimpan di server.</p>
+
+            {{-- Info Box --}}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-semibold mb-1">Informasi Backup</p>
+                    <p>File backup disimpan di <code class="bg-blue-100 px-1.5 py-0.5 rounded">storage/app/backups/</code>. Sistem otomatis memilih metode terbaik: <strong>mysqldump</strong> (jika tersedia) atau <strong>PHP-native</strong> sebagai fallback. Backup berisi seluruh struktur tabel dan data.</p>
                 </div>
             </div>
-            
-            <div class="space-y-4">
-                <div class="flex gap-3">
-                    <button type="button" 
-                            onclick="confirmCreateBackup()"
-                            class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-download mr-2"></i>
-                        Buat Backup Sekarang
-                    </button>
-                    
-                    <button type="button" 
-                            onclick="loadBackupList()"
-                            class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-md transition duration-200">
-                        <i class="fas fa-list mr-2"></i>
-                        Lihat Daftar Backup
-                    </button>
-                </div>
-                
-                <div id="backup-list" class="mt-6 hidden">
-                    <h3 class="text-lg font-medium text-gray-800 mb-3">Daftar Backup</h3>
-                    <div id="backup-list-content" class="bg-gray-50 rounded-md p-4">
-                        <div class="text-center text-gray-500">
-                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-                            <p>Memuat daftar backup...</p>
-                        </div>
+
+            {{-- Tombol Aksi --}}
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button type="button" id="btnCreateBackup" onclick="confirmCreateBackup()"
+                        class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg transition shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Buat Backup Sekarang
+                </button>
+                <button type="button" onclick="loadBackupList()"
+                        class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-5 rounded-lg border border-gray-300 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Refresh Daftar Backup
+                </button>
+            </div>
+
+            {{-- Daftar Backup --}}
+            <div>
+                <h3 class="text-base font-semibold text-gray-700 mb-3">📂 Daftar File Backup</h3>
+                <div id="backup-list-content" class="bg-gray-50 border border-gray-200 rounded-lg p-4 min-h-24">
+                    <div class="text-center text-gray-400 py-6">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        <p class="text-sm">Klik "Refresh Daftar Backup" untuk memuat daftar file</p>
                     </div>
                 </div>
             </div>
@@ -920,18 +914,15 @@ function createBackupProcess() {
                     <div class="text-left">
                         <p class="text-gray-700 mb-2">${data.message}</p>
                         <div class="bg-gray-50 p-3 rounded">
-                            <p class="text-sm text-gray-600">File:</p>
-                            <p class="text-sm font-mono font-semibold text-blue-600">${data.filename}</p>
+                            <p class="text-sm text-gray-600">File: <span class="font-mono font-semibold text-blue-600">${data.filename}</span></p>
+                            <p class="text-sm text-gray-600">Ukuran: <span class="font-semibold">${data.size || '-'}</span></p>
                         </div>
                     </div>
                 `,
                 confirmButtonColor: '#22c55e',
                 confirmButtonText: 'OK'
             }).then(() => {
-                const backupList = document.getElementById('backup-list');
-                if (backupList && !backupList.classList.contains('hidden')) {
-                    loadBackupList();
-                }
+                loadBackupList();
             });
         } else {
             Swal.fire({
@@ -1018,14 +1009,15 @@ function resetAppearanceToDefault() {
 
 // Load Backup List Function
 function loadBackupList() {
-    const backupListDiv = document.getElementById('backup-list');
     const backupListContent = document.getElementById('backup-list-content');
     
-    backupListDiv.classList.remove('hidden');
     backupListContent.innerHTML = `
-        <div class="text-center text-gray-500">
-            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-            <p>Memuat daftar backup...</p>
+        <div class="text-center text-gray-400 py-6">
+            <svg class="w-8 h-8 animate-spin mx-auto mb-2 text-blue-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <p class="text-sm">Memuat daftar backup...</p>
         </div>
     `;
     
@@ -1038,21 +1030,31 @@ function loadBackupList() {
     .then(response => response.json())
     .then(data => {
         if (data.success && data.backups.length > 0) {
-            let html = '<div class="space-y-2">';
+            let html = '<div class="divide-y divide-gray-200">';
             data.backups.forEach(backup => {
                 html += `
-                    <div class="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:border-blue-300 transition">
-                        <div class="flex items-center">
-                            <i class="fas fa-file-archive text-blue-500 mr-3"></i>
+                    <div class="flex items-center justify-between py-3 px-2 hover:bg-gray-100 rounded-lg transition">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-8 h-8 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                            </svg>
                             <div>
-                                <p class="font-medium text-gray-800">${backup.name}</p>
-                                <p class="text-sm text-gray-500">${backup.size} - ${backup.date}</p>
+                                <p class="font-medium text-gray-800 text-sm">${backup.name}</p>
+                                <p class="text-xs text-gray-400">${backup.size} &bull; ${backup.date}</p>
                             </div>
                         </div>
-                        <a href="/admin/pengaturan/backup/download/${backup.name}" 
-                           class="text-blue-500 hover:text-blue-700">
-                            <i class="fas fa-download"></i>
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="/admin/pengaturan/backup/download/${encodeURIComponent(backup.name)}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Unduh
+                            </a>
+                            <button onclick="confirmDeleteBackup('${backup.name}')"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Hapus
+                            </button>
+                        </div>
                     </div>
                 `;
             });
@@ -1060,10 +1062,10 @@ function loadBackupList() {
             backupListContent.innerHTML = html;
         } else {
             backupListContent.innerHTML = `
-                <div class="text-center text-gray-500 py-8">
-                    <i class="fas fa-folder-open text-4xl mb-3"></i>
-                    <p class="text-lg font-medium">Belum ada backup</p>
-                    <p class="text-sm">Buat backup pertama Anda sekarang</p>
+                <div class="text-center text-gray-400 py-8">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg>
+                    <p class="font-medium">Belum ada file backup</p>
+                    <p class="text-sm mt-1">Klik "Buat Backup Sekarang" untuk membuat backup pertama</p>
                 </div>
             `;
         }
@@ -1071,17 +1073,66 @@ function loadBackupList() {
     .catch(error => {
         console.error('Error:', error);
         backupListContent.innerHTML = `
-            <div class="text-center text-red-500 py-8">
-                <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
-                <p>Gagal memuat daftar backup</p>
+            <div class="text-center text-red-400 py-6">
+                <p class="text-sm">Gagal memuat daftar backup. Silakan coba lagi.</p>
             </div>
         `;
     });
 }
 
-// Initialize on page load
+// Hapus Backup
+function confirmDeleteBackup(filename) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Hapus file backup ini?')) deleteBackupProcess(filename);
+        return;
+    }
+    Swal.fire({
+        title: '🗑️ Hapus File Backup?',
+        html: `<p class="text-gray-700">File <code class="bg-gray-100 px-1 rounded">${filename}</code> akan dihapus permanen dari server.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) deleteBackupProcess(filename);
+    });
+}
+
+function deleteBackupProcess(filename) {
+    fetch(`/admin/pengaturan/backup/${encodeURIComponent(filename)}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: data.message, timer: 2000, showConfirmButton: false, toast: true, position: 'top-end' });
+            }
+            loadBackupList();
+        } else {
+            alert(data.message || 'Gagal menghapus backup.');
+        }
+    })
+    .catch(() => alert('Terjadi kesalahan jaringan.'));
+}
+
+// Initialize on page load — auto-load backup list jika tab backup aktif
 document.addEventListener('DOMContentLoaded', function() {
     switchTab('profil');
+    // Auto load backup list setiap kali tab backup diklik
+    const tabBackup = document.getElementById('tab-backup');
+    if (tabBackup) {
+        tabBackup.addEventListener('click', function() {
+            setTimeout(loadBackupList, 100);
+        });
+    }
 });
 </script>
 @endpush

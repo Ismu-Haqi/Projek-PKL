@@ -36,8 +36,27 @@
                 <span>Dashboard</span>
             </a>
 
-            <p class="text-xs text-gray-400 font-semibold uppercase pt-4 pb-2 sidebar-title">MANAJEMEN</p>
-            
+            <p class="text-xs text-gray-400 font-semibold uppercase pt-4 pb-2 sidebar-title">SURAT & ARSIP</p>
+
+            {{-- ✅ SURAT MASUK (BARU) --}}
+            @if(Auth::user()->role !== 'pimpinan')
+            <a href="{{ route(Auth::user()->role . '.surat-masuk.index') }}" 
+               class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.surat-masuk.*') ? 'active' : '' }}">
+                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span>Surat Masuk</span>
+            </a>
+            @else
+            <a href="{{ route('pimpinan.surat-masuk.index') }}" 
+               class="sidebar-link {{ Request::routeIs('pimpinan.surat-masuk.*') ? 'active' : '' }}">
+                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span>Surat Masuk</span>
+            </a>
+            @endif
+
             {{-- Arsip Digital --}}
             <a href="{{ route(Auth::user()->role . '.arsip.index') }}" 
                class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.arsip.index') ? 'active' : '' }}">
@@ -60,6 +79,8 @@
                 <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <span>Disposisi</span>
             </a>
+
+            <p class="text-xs text-gray-400 font-semibold uppercase pt-4 pb-2 sidebar-title">MANAJEMEN</p>
             
             {{-- NOTIFIKASI --}}
             <a href="{{ route(Auth::user()->role . '.notifikasi.index') }}" 
@@ -73,6 +94,13 @@
                class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.aset.*') ? 'active' : '' }}">
                 <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m8-12h2M12 7h1m-1 4h1m-1 4h1m8-4h2"></path></svg>
                 <span>Manajemen Aset</span>
+            </a>
+
+            {{-- Peminjaman Aset --}}
+            <a href="{{ route(Auth::user()->role . '.peminjaman.index') }}" 
+               class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.peminjaman.*') ? 'active' : '' }}">
+                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                <span>Peminjaman Aset</span>
             </a>
 
             {{-- Manajemen User --}}
@@ -93,7 +121,7 @@
                 <span>Laporan Umum</span>
             </a>
 
-            {{-- Laporan Penyusutan (FITUR BARU UNTUK SKRIPSI) --}}
+            {{-- Laporan Penyusutan --}}
             <a href="{{ route(Auth::user()->role . '.laporan.penyusutan') }}" 
                class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.laporan.penyusutan') ? 'active' : '' }}">
                 <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>

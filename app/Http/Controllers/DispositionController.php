@@ -7,6 +7,7 @@ use App\Models\Archive;
 use App\Models\Asset;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\IncomingLetter;
 use App\Mail\DispositionCreatedMail;
 use App\Mail\DispositionCompletedMail;
 use App\Mail\DispositionForwardedMail;
@@ -102,31 +103,6 @@ class DispositionController extends Controller
     }
 
     /**
-     * Show the form for creating a new disposition
-     */
-    public function create()
-    {
-        $role = Auth::user()->role;
-        
-        $archives = Archive::orderBy('created_at', 'desc')->get();
-        $assets = Asset::orderBy('created_at', 'desc')->get();
-        
-        // Tentukan users berdasarkan role
-        if ($role === 'admin') {
-            // Admin bisa kirim ke staff dan pimpinan
-            $users = User::whereIn('role', ['staff', 'pimpinan'])->get();
-        } elseif ($role === 'staff') {
-            // Staff hanya bisa kirim ke admin
-            $users = User::where('role', 'admin')->get();
-        } elseif ($role === 'pimpinan') {
-            // Pimpinan hanya bisa kirim ke admin
-            $users = User::where('role', 'admin')->get();
-        }
-        
-        return view("{$role}.disposisi.create", compact('archives', 'assets', 'users'));
-    }
-
-    /**
      * Store a newly created disposition
      */
     public function store(Request $request)
@@ -144,13 +120,57 @@ class DispositionController extends Controller
             'priority' => 'required|in:urgent,high,normal,low',
             'deadline' => 'nullable|date|after:today',
             'forwarding_note' => 'nullable|string', // Catatan untuk penerusan
+            'incoming_letter_mode' => 'nullable|boolean',
         ]);
         
-        // Validasi item
-        if ($validated['item_type'] === 'arsip') {
+        // ── Jika disposisi berasal dari surat masuk (bukan arsip) ──────────
+        if ($request->filled('incoming_letter_mode') && $request->filled('from_letter')) {
+            $incomingLetter = IncomingLetter::findOrFail($request->from_letter);
+
+            // Buat atau gunakan arsip sementara sebagai "wadah" disposisi
+            // Cek apakah sudah ada arsip dari surat masuk ini
+            $existingArchive = Archive::where('from_incoming_letter_id', $incomingLetter->id)->first();
+
+            if ($existingArchive) {
+                $item           = $existingArchive;
+                $disposableType = Archive::class;
+                $validated['item_id'] = $existingArchive->id;
+            } else {
+                // Buat arsip placeholder dari surat masuk
+                $nomorArsip = $incomingLetter->nomor_surat;
+                $counter = 1;
+                while (Archive::where('nomor_surat', $nomorArsip)->exists()) {
+                    $nomorArsip = $incomingLetter->nomor_surat . '-' . $counter++;
+                }
+
+                $item = Archive::create([
+                    'user_id'                 => Auth::id(),
+                    'nomor_surat'             => $nomorArsip,
+                    'judul'                   => $incomingLetter->perihal,
+                    'pengirim'                => $incomingLetter->pengirim,
+                    'jenis_arsip'             => 'Surat Masuk',
+                    'unit'                    => $incomingLetter->unit_tujuan ?? '-',
+                    'tanggal_arsip'           => now()->toDateString(),
+                    'tanggal_surat'           => $incomingLetter->tanggal_surat,
+                    'keterangan'              => 'Arsip dari surat masuk ' . $incomingLetter->nomor_agenda,
+                    'file_path'               => $incomingLetter->file_path ?? 'incoming/' . $incomingLetter->id,
+                    'file_name'               => $incomingLetter->file_name,
+                    'file_size'               => $incomingLetter->file_size,
+                    'file_type'               => $incomingLetter->file_type,
+                    'is_favorite'             => false,
+                    'sumber'                  => 'disposisi',
+                    'from_incoming_letter_id' => $incomingLetter->id,
+                ]);
+
+                $disposableType = Archive::class;
+                $validated['item_id'] = $item->id;
+            }
+        }
+        // ── Validasi item normal (arsip atau aset) ───────────────────────────
+        elseif ($validated['item_type'] === 'arsip') {
             $item = Archive::findOrFail($validated['item_id']);
             $disposableType = Archive::class;
-        } else {
+        } elseif ($validated['item_type'] === 'aset') {
             $item = Asset::findOrFail($validated['item_id']);
             $disposableType = Asset::class;
         }
@@ -196,6 +216,18 @@ class DispositionController extends Controller
             Log::error('Failed to send disposition email', ['error' => $e->getMessage()]);
         }
         
+        // ── Hubungkan ke surat masuk jika disposisi dibuat dari surat masuk ──
+        if ($request->filled('from_letter')) {
+            $incomingLetter = IncomingLetter::find($request->from_letter);
+            if ($incomingLetter && $incomingLetter->status === 'belum_disposisi') {
+                $incomingLetter->update([
+                    'status'         => 'sudah_disposisi',
+                    'disposition_id' => $disposition->id,
+                    'disposisi_at'   => now(),
+                ]);
+            }
+        }
+
         $message = $forwardingStatus === 'pending_forward' 
             ? "Disposisi berhasil dibuat dan menunggu penerusan oleh Admin!" 
             : "Disposisi berhasil dibuat dan dikirim!";
@@ -394,6 +426,16 @@ class DispositionController extends Controller
         if ($validated['status'] === 'completed') {
             $data['completed_at'] = now();
             
+            // ── ARSIP OTOMATIS: buat arsip dari disposisi yang selesai ──────
+            try {
+                $this->buatArsipDariDisposisi($disposition);
+            } catch (\Exception $e) {
+                Log::error('Gagal membuat arsip otomatis dari disposisi: ' . $e->getMessage(), [
+                    'disposition_id' => $disposition->id,
+                ]);
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             // Create notification untuk pemberi disposisi
             Notification::createDispositionCompletedNotification($disposition);
             
@@ -554,4 +596,114 @@ public function downloadCompletionFile($id)
         
         return view('admin.disposisi.needs-forwarding', compact('dispositions'));
     }
+
+    /**
+     * Buat arsip otomatis dari disposisi yang telah selesai
+     */
+    private function buatArsipDariDisposisi(Disposition $disposition): void
+    {
+        // Hanya buat arsip jika belum ada arsip dari disposisi ini
+        $sudahAda = Archive::where('from_disposition_id', $disposition->id)->exists();
+        if ($sudahAda) {
+            return;
+        }
+
+        // Ambil data dari item disposisi (arsip atau aset)
+        $disposable = $disposition->disposable;
+        if (!$disposable) {
+            return;
+        }
+
+        // Tentukan judul arsip
+        $judul = $disposition->subject ?? ($disposable->judul ?? $disposable->name ?? 'Arsip dari Disposisi');
+
+        // Tentukan nomor surat — ambil dari surat masuk jika ada, atau buat otomatis
+        $incomingLetter = IncomingLetter::where('disposition_id', $disposition->id)->first();
+        $nomorSurat     = $incomingLetter?->nomor_surat ?? $disposition->nomor_disposisi;
+        $pengirim       = $incomingLetter?->pengirim ?? ($disposable->pengirim ?? '-');
+        $fromLetterId   = $incomingLetter?->id;
+
+        // Gunakan file dari disposisi (bukti penyelesaian) atau file item asli
+        $filePath = $disposition->completion_file
+            ?? ($disposable->file_path ?? null);
+        $fileName = $disposition->completion_file
+            ? basename($disposition->completion_file)
+            : ($disposable->file_name ?? null);
+        $fileSize = $disposable->file_size ?? null;
+        $fileType = $disposable->file_type ?? null;
+
+        // Buat nomor surat arsip yang unik jika duplikat
+        $nomorArsip = $nomorSurat;
+        $counter = 1;
+        while (Archive::where('nomor_surat', $nomorArsip)->exists()) {
+            $nomorArsip = $nomorSurat . '-' . $counter;
+            $counter++;
+        }
+
+        Archive::create([
+            'user_id'                => $disposition->from_user_id,
+            'nomor_surat'            => $nomorArsip,
+            'judul'                  => $judul,
+            'pengirim'               => $pengirim,
+            'jenis_arsip'            => 'Surat Masuk',
+            'unit'                   => $disposition->toUser->unit ?? '-',
+            'tanggal_arsip'          => now()->toDateString(),
+            'tanggal_surat'          => $incomingLetter?->tanggal_surat ?? now()->toDateString(),
+            'keterangan'             => 'Arsip otomatis dari disposisi ' . $disposition->nomor_disposisi
+                                        . '. ' . ($disposition->completion_description ?? ''),
+            'file_path'              => $filePath ?? 'dispositions/' . $disposition->id,
+            'file_name'              => $fileName ?? 'arsip-disposisi-' . $disposition->id,
+            'file_size'              => $fileSize,
+            'file_type'              => $fileType,
+            'is_favorite'            => false,
+            'from_disposition_id'    => $disposition->id,
+            'from_incoming_letter_id'=> $fromLetterId,
+            'sumber'                 => 'disposisi',
+            'tags'                   => null,
+            'priority'               => $disposition->priority ?? 'normal',
+        ]);
+
+        // Update status surat masuk menjadi selesai
+        if ($incomingLetter) {
+            $incomingLetter->update(['status' => 'selesai']);
+        }
+
+        Log::info('Arsip otomatis berhasil dibuat dari disposisi', [
+            'disposition_id' => $disposition->id,
+            'nomor_disposisi' => $disposition->nomor_disposisi,
+        ]);
+    }
+
+    /**
+     * Show form create — support prefill dari surat masuk
+     */
+    public function create(Request $request)
+    {
+        $role = Auth::user()->role;
+
+        $archives = Archive::orderBy('created_at', 'desc')->get();
+        $assets   = Asset::orderBy('created_at', 'desc')->get();
+
+        if ($role === 'admin') {
+            $users = User::whereIn('role', ['staff', 'pimpinan'])->get();
+        } elseif ($role === 'staff') {
+            $users = User::where('role', 'admin')->get();
+        } elseif ($role === 'pimpinan') {
+            $users = User::where('role', 'admin')->get();
+        }
+
+        // Surat masuk yang belum/sudah disposisi (tampil di dropdown arsip/surat)
+        $incomingLetters = IncomingLetter::whereIn('status', ['belum_disposisi', 'sudah_disposisi'])
+            ->orderBy('tanggal_diterima', 'desc')
+            ->get();
+
+        // Prefill dari surat masuk jika ada query param from_letter
+        $fromLetter = null;
+        if ($request->filled('from_letter')) {
+            $fromLetter = IncomingLetter::find($request->from_letter);
+        }
+
+        return view("{$role}.disposisi.create", compact('archives', 'assets', 'users', 'incomingLetters', 'fromLetter'));
+    }
+
 }
