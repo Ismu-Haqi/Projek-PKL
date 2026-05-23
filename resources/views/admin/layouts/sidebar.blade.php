@@ -103,6 +103,13 @@
                 <span>Peminjaman Aset</span>
             </a>
 
+            {{-- Mutasi Aset --}}
+            <a href="{{ route(Auth::user()->role . '.mutasi.index') }}" 
+               class="sidebar-link {{ Request::routeIs(Auth::user()->role . '.mutasi.*') ? 'active' : '' }}">
+                <svg class="{{ $baseIconClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                <span>Mutasi Aset</span>
+            </a>
+
             {{-- Manajemen User --}}
             @if(Auth::user()->role === 'admin' || Auth::user()->role === 'pimpinan')
             <a href="{{ route(Auth::user()->role . '.user.index') }}" 

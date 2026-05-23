@@ -30,15 +30,56 @@ class Asset extends Model
         'foto',
         'qr_code',
         'keterangan',
+        // ── Perawatan rutin ──────────────────────────────
+        'jadwal_perawatan_selanjutnya',
+        'jenis_perawatan',
+        'terakhir_dirawat',
+        'interval_perawatan_hari',
+        'catatan_perawatan',
     ];
 
     protected $casts = [
-        'tanggal_pembelian' => 'date',
-        'tanggal_garansi_berakhir' => 'date',
-        'harga_pembelian' => 'decimal:2',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'tanggal_pembelian'             => 'date',
+        'tanggal_garansi_berakhir'      => 'date',
+        'jadwal_perawatan_selanjutnya'  => 'date',
+        'terakhir_dirawat'              => 'date',
+        'harga_pembelian'               => 'decimal:2',
+        'created_at'                    => 'datetime',
+        'updated_at'                    => 'datetime',
     ];
+
+    // ── Scope: aset yang jadwal perawatannya H-7 atau kurang ─────────────────
+    public function scopeJatuhTempoPerawatan($query, int $days = 7)
+    {
+        return $query->whereNotNull('jadwal_perawatan_selanjutnya')
+            ->whereRaw('DATEDIFF(jadwal_perawatan_selanjutnya, CURDATE()) BETWEEN 0 AND ?', [$days])
+            ->orderBy('jadwal_perawatan_selanjutnya', 'asc');
+    }
+
+    // ── Scope: aset yang jadwal perawatannya sudah terlewat ──────────────────
+    public function scopePerawatanTerlambat($query)
+    {
+        return $query->whereNotNull('jadwal_perawatan_selanjutnya')
+            ->whereRaw('jadwal_perawatan_selanjutnya < CURDATE()')
+            ->orderBy('jadwal_perawatan_selanjutnya', 'asc');
+    }
+
+    // ── Accessor: sisa hari hingga perawatan ─────────────────────────────────
+    public function getSisaHariPerawatanAttribute(): ?int
+    {
+        if (!$this->jadwal_perawatan_selanjutnya) return null;
+        return now()->startOfDay()->diffInDays($this->jadwal_perawatan_selanjutnya, false);
+    }
+
+    // ── Accessor: status perawatan ───────────────────────────────────────────
+    public function getStatusPerawatanAttribute(): ?string
+    {
+        if (!$this->jadwal_perawatan_selanjutnya) return null;
+        $sisa = $this->sisa_hari_perawatan;
+        if ($sisa < 0)  return 'terlambat';
+        if ($sisa <= 7) return 'segera';
+        return 'aman';
+    }
 
     /**
      * Generate Kode Asset Otomatis

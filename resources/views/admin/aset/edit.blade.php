@@ -261,6 +261,70 @@
             </div>
         </div>
 
+        {{-- ✅ SECTION JADWAL PERAWATAN RUTIN --}}
+        <div class="bg-white rounded-xl shadow-sm border border-yellow-200 overflow-hidden mt-6">
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-white font-bold">Jadwal Perawatan Rutin</h3>
+                <span class="text-yellow-100 text-xs ml-auto">Alert H-7 akan muncul di dashboard</span>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Jadwal Perawatan Selanjutnya
+                    </label>
+                    <input type="date" name="jadwal_perawatan_selanjutnya"
+                           value="{{ old('jadwal_perawatan_selanjutnya', $asset->jadwal_perawatan_selanjutnya ? $asset->jadwal_perawatan_selanjutnya->format('Y-m-d') : '') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400">
+                    <p class="text-xs text-gray-400 mt-1">Sistem akan memberi peringatan H-7 sebelum tanggal ini</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Jenis Perawatan
+                    </label>
+                    <input type="text" name="jenis_perawatan"
+                           value="{{ old('jenis_perawatan', $asset->jenis_perawatan) }}"
+                           placeholder="Contoh: Servis AC, Ganti Oli Genset, Kalibrasi..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Tanggal Terakhir Dirawat
+                    </label>
+                    <input type="date" name="terakhir_dirawat"
+                           value="{{ old('terakhir_dirawat', $asset->terakhir_dirawat ? $asset->terakhir_dirawat->format('Y-m-d') : '') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Interval Perawatan (hari)
+                    </label>
+                    <input type="number" name="interval_perawatan_hari" min="1"
+                           value="{{ old('interval_perawatan_hari', $asset->interval_perawatan_hari) }}"
+                           placeholder="Contoh: 90 = setiap 3 bulan"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400">
+                    <p class="text-xs text-gray-400 mt-1">Opsional — untuk hitung otomatis jadwal berikutnya</p>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Catatan Perawatan Terakhir
+                    </label>
+                    <textarea name="catatan_perawatan" rows="2"
+                              placeholder="Catatan hasil perawatan terakhir..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 resize-none">{{ old('catatan_perawatan', $asset->catatan_perawatan) }}</textarea>
+                </div>
+
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="flex justify-between items-center pt-6 border-t">
             <!-- Tombol Hapus -->

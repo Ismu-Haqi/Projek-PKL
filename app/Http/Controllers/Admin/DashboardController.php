@@ -254,6 +254,17 @@ class DashboardController extends Controller
             ->get();
 
         // ============================================
+        // REMINDER PERAWATAN H-7
+        // ============================================
+        $asetJatuhTempoPerawatan = Asset::jatuhTempoPerawatan(7)
+            ->get(['id', 'kode_asset', 'nama', 'kategori', 'unit', 'lokasi',
+                   'jadwal_perawatan_selanjutnya', 'jenis_perawatan']);
+
+        $asetPerawatanTerlambat = Asset::perawatanTerlambat()
+            ->get(['id', 'kode_asset', 'nama', 'kategori', 'unit', 'lokasi',
+                   'jadwal_perawatan_selanjutnya', 'jenis_perawatan']);
+
+        // ============================================
         // RETURN TO VIEW
         // ============================================
         return view('admin.dashboard', compact(
@@ -275,7 +286,11 @@ class DashboardController extends Controller
             'recentActivities',
             'latestArchives',
             'urgentDispositions',
-            'topContributors'
+            'topContributors',
+
+            // Reminder Perawatan
+            'asetJatuhTempoPerawatan',
+            'asetPerawatanTerlambat'
         ));
     }
 

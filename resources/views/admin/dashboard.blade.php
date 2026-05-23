@@ -11,6 +11,9 @@
         <p class="text-yellow-100">GANDARIA Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
     </div>
 
+    {{-- REMINDER PERAWATAN H-7 --}}
+    @include('partials.reminder-perawatan')
+
     {{-- STATISTIC CARDS --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {{-- Card 1: Total Arsip --}}

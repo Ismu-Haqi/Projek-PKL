@@ -41,6 +41,9 @@
         </div>
     </div>
 
+    {{-- REMINDER PERAWATAN H-7 --}}
+    @include('partials.reminder-perawatan')
+
     {{-- Quick Stats Cards - Staff Focused --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {{-- Disposisi Saya --}}

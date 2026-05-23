@@ -84,6 +84,14 @@ class DashboardController extends Controller
         
         // ✅ Aktivitas terkini (kombinasi dari berbagai sumber + ASET)
         $recentActivities = $this->getRecentActivities($user->id);
+
+        // Reminder Perawatan H-7
+        $asetJatuhTempoPerawatan = Asset::jatuhTempoPerawatan(7)
+            ->get(['id', 'kode_asset', 'nama', 'kategori', 'unit',
+                   'jadwal_perawatan_selanjutnya', 'jenis_perawatan']);
+        $asetPerawatanTerlambat = Asset::perawatanTerlambat()
+            ->get(['id', 'kode_asset', 'nama', 'kategori', 'unit',
+                   'jadwal_perawatan_selanjutnya', 'jenis_perawatan']);
         
         return view('staff.dashboard', compact(
             'pendingDispositions',
@@ -92,7 +100,9 @@ class DashboardController extends Controller
             'unreadNotifications',
             'recentDispositions',
             'recentArchives',
-            'recentActivities'
+            'recentActivities',
+            'asetJatuhTempoPerawatan',
+            'asetPerawatanTerlambat'
         ));
     }
     

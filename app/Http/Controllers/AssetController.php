@@ -238,6 +238,12 @@ public function show($id)
             'penanggung_jawab' => 'nullable|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'keterangan' => 'nullable|string',
+            // Jadwal perawatan
+            'jadwal_perawatan_selanjutnya' => 'nullable|date',
+            'jenis_perawatan'              => 'nullable|string|max:255',
+            'terakhir_dirawat'             => 'nullable|date',
+            'interval_perawatan_hari'      => 'nullable|integer|min:1',
+            'catatan_perawatan'            => 'nullable|string',
         ]);
         
         // ✅ STAFF: Cannot change unit

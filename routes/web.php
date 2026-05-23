@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\AssetBorrowController as AdminAssetBorrowControll
 use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\GoogleDriveBackupController;
+use App\Http\Controllers\AssetMutationController;
 use App\Models\DocumentSignature;
 
 // ── Route publik: validasi TTE (tidak perlu login) ──────────────────────────
@@ -108,7 +109,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{id}/terima-kembali', [AdminAssetBorrowController::class, 'returnAsset'])->name('return');
         Route::delete('/{id}', [AdminAssetBorrowController::class, 'destroy'])->name('destroy');
     });
-    
+
+    // Mutasi Aset
+    Route::prefix('mutasi')->name('mutasi.')->group(function () {
+        Route::get('/', [AssetMutationController::class, 'index'])->name('index');
+        Route::get('/create', [AssetMutationController::class, 'create'])->name('create');
+        Route::post('/', [AssetMutationController::class, 'store'])->name('store');
+        Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [AssetMutationController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [AssetMutationController::class, 'reject'])->name('reject');
+        Route::delete('/{id}', [AssetMutationController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
@@ -262,7 +275,17 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/{id}', [StaffAssetBorrowController::class, 'show'])->name('show');
         Route::delete('/{id}', [StaffAssetBorrowController::class, 'destroy'])->name('destroy');
     });
-    
+
+    // Mutasi Aset (Staff)
+    Route::prefix('mutasi')->name('mutasi.')->group(function () {
+        Route::get('/', [AssetMutationController::class, 'index'])->name('index');
+        Route::get('/create', [AssetMutationController::class, 'create'])->name('create');
+        Route::post('/', [AssetMutationController::class, 'store'])->name('store');
+        Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
+        Route::delete('/{id}', [AssetMutationController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
@@ -286,7 +309,16 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::put('/{id}', [AssetController::class, 'update'])->name('update');
         Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
     });
-    
+
+    // Mutasi Aset (Pimpinan - read only)
+    Route::prefix('mutasi')->name('mutasi.')->group(function () {
+        Route::get('/', [AssetMutationController::class, 'index'])->name('index');
+        Route::get('/create', [AssetMutationController::class, 'create'])->name('create');
+        Route::post('/', [AssetMutationController::class, 'store'])->name('store');
+        Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
+        Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+
     // Laporan
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');

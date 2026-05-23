@@ -291,6 +291,9 @@
         </div>
     </div>
 
+    {{-- REMINDER PERAWATAN H-7 --}}
+    @include('partials.reminder-perawatan')
+
     <!-- Executive Summary Cards -->
     <div class="row g-4 mb-4">
         <!-- Total Arsip -->
