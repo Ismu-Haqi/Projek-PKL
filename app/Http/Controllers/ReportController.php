@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\DocumentSignature;
 
 class ReportController extends Controller
 {
@@ -458,13 +459,42 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        // ✅ TERMASUK LAPORAN KE-6 (Penyusutan) & KE-7 (Peminjaman)
         $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
         
         $data = $this->getExportData($type, $request);
+
+        // ── Generate TTE Token & QR Code ────────────────────────────────────
+        $judulMap = [
+            'arsip'      => 'Laporan Arsip Digital',
+            'disposisi'  => 'Laporan Disposisi',
+            'aset'       => 'Laporan Manajemen Aset',
+            'user'       => 'Laporan Pengguna',
+            'unit'       => 'Laporan Unit Kerja',
+            'penyusutan' => 'Laporan Penyusutan Aset',
+            'peminjaman' => 'Laporan Peminjaman Aset',
+            'maintenance'=> 'Laporan Pemeliharaan Aset',
+            'summary'    => 'Laporan Ringkasan',
+        ];
+
+        $signature = DocumentSignature::generateFor(
+            documentType:  $type,
+            documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
+            signedBy:      'Azwar Arsyadi, S.Kom',
+            signedByTitle: 'Kepala Dinas',
+            metadata:      ['generated_by' => auth()->user()->name ?? 'System', 'ip' => request()->ip()]
+        );
+
+        // Encode URL validasi ke base64 untuk di-pass ke view (DomPDF render QR via PHP)
+        $validasiUrl  = url('/validasi/' . $signature->token);
+        $qrSvg = $this->generateQrDataUri($validasiUrl);
+
+        $data['signature']   = $signature;
+        $data['qrSvg']   = $qrSvg;
+        $data['validasiUrl'] = $validasiUrl;
+        // ────────────────────────────────────────────────────────────────────
 
         $pdf = Pdf::loadView("reports.pdf.{$type}", $data);
         
@@ -486,9 +516,58 @@ class ReportController extends Controller
         
         $data = $this->getExportData($type, $request);
 
+        // ── Generate TTE ─────────────────────────────────────────────────────
+        $judulMap = [
+            'arsip'      => 'Laporan Arsip Digital',
+            'disposisi'  => 'Laporan Disposisi',
+            'aset'       => 'Laporan Manajemen Aset',
+            'user'       => 'Laporan Pengguna',
+            'unit'       => 'Laporan Unit Kerja',
+            'penyusutan' => 'Laporan Penyusutan Aset',
+            'peminjaman' => 'Laporan Peminjaman Aset',
+            'summary'    => 'Laporan Ringkasan',
+        ];
+        $signature = DocumentSignature::generateFor(
+            documentType:  $type,
+            documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
+            signedBy:      'Azwar Arsyadi, S.Kom',
+            signedByTitle: 'Kepala Dinas',
+        );
+        $validasiUrl         = url('/validasi/' . $signature->token);
+        $data['signature']   = $signature;
+        $data['qrSvg']   = $this->generateQrDataUri($validasiUrl);
+        $data['validasiUrl'] = $validasiUrl;
+        // ────────────────────────────────────────────────────────────────────
+
         $pdf = Pdf::loadView("reports.pdf.{$type}", $data);
         
         return $pdf->download("laporan_{$type}_" . date('Y-m-d') . ".pdf");
+    }
+
+    /**
+     * Generate QR Code sebagai data URI base64 PNG
+     */
+    private function generateQrDataUri(string $url): string
+    {
+        try {
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(150)
+                ->margin(1)
+                ->errorCorrection('L')
+                ->generate($url);
+
+            // Simpan ke file sementara di storage/app/public/tte/
+            $filename = 'tte_' . md5($url) . '.svg';
+            $path     = 'tte/' . $filename;
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $qrCode);
+
+            // Kembalikan path absolut untuk DomPDF
+            return \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('QR TTE Error: ' . $e->getMessage());
+            return '';
+        }
     }
 
     public function exportExcel(Request $request)

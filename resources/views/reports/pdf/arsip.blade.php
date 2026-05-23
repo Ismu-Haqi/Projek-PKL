@@ -23,6 +23,7 @@
             display: table-cell;
             width: 15%;
             vertical-align: middle;
+            text-align: center;
         }
         .header-text {
             display: table-cell;
@@ -31,28 +32,12 @@
             vertical-align: middle;
         }
         .logo-left img, .logo-right img {
-           /* Tetapkan ukuran maksimal agar logo tidak melebihi kotak 80x80 */
-        width: 80px;
-        height: 80px;
-        
-        /* Tambahkan ini: memastikan logo selalu mengambil ruangnya secara blok */
-        display: block; 
-        
-        /* Tambahkan ini: Menengahkannya di dalam 'table-cell' */
-        margin: 0 auto;
-        
-        /* Properti ini sangat penting untuk mencegah distorsi */
-        object-fit: contain; 
-    }
-    
-    .logo-left {
-        /* Pastikan konten (logo) berada di tengah kiri */
-        text-align: center; 
-    }
-    .logo-right {
-        /* Pastikan konten (logo) berada di tengah kanan */
-        text-align: center;
-    }
+            width: 80px;
+            height: 80px;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
         .header-text h1 {
             margin: 0;
             font-size: 18px;
@@ -70,9 +55,7 @@
             margin-bottom: 20px;
             border-radius: 5px;
         }
-        .info-box table {
-            width: 100%;
-        }
+        .info-box table { width: 100%; }
         .info-box td {
             padding: 3px 5px;
             font-size: 11px;
@@ -99,29 +82,58 @@
         table tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
+        /* ── Signature Section ── */
         .signature-section {
-            margin-top: 50px;
+            margin-top: 40px;
             text-align: right;
         }
-        .signature-box {
+        .signature-wrapper {
             display: inline-block;
             text-align: center;
             min-width: 200px;
         }
-        .signature-box p {
-            margin: 5px 0;
+        .signature-wrapper p {
+            margin: 4px 0;
             font-size: 11px;
         }
-        .signature-space {
-            height: 60px;
-            margin: 10px 0;
+        /* QR Code di atas nama */
+        .qr-block {
+            margin: 10px auto;
+            text-align: center;
         }
-        .signature-line {
-            border-top: 1px solid #333;
-            padding-top: 5px;
+        .qr-block img {
+            width: 110px;
+            height: 110px;
+            display: block;
+            margin: 0 auto;
+        }
+        .qr-label {
+            font-size: 7.5px;
+            color: #6b7280;
+            margin: 3px 0 0 0;
+        }
+        .qr-url {
+            font-size: 6.5px;
+            color: #9ca3af;
+            word-break: break-all;
+            margin: 2px 0 0 0;
+        }
+        /* Nama penandatangan — tanpa garis */
+        .signer-space {
+            height: 8px;
+        }
+        .signer-name {
             font-weight: bold;
             font-size: 11px;
+            margin: 4px 0 2px 0;
         }
+        .signer-title {
+            font-size: 10px;
+            color: #555;
+            margin: 0;
+        }
+
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -162,7 +174,7 @@
             </tr>
             <tr>
                 <td class="font-bold">Periode Laporan</td>
-                <td>: {{ request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->format('d M Y') : 'Semua' }} 
+                <td>: {{ request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->format('d M Y') : 'Semua' }}
                     s/d {{ request('end_date') ? \Carbon\Carbon::parse(request('end_date'))->format('d M Y') : 'Sekarang' }}</td>
             </tr>
             <tr>
@@ -206,13 +218,25 @@
 
     <!-- Signature Section -->
     <div class="signature-section">
-        <div class="signature-box">
+        <div class="signature-wrapper">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>
             <p>Mengetahui,</p>
-            <div class="signature-space"></div>
-            <div class="signature-line">
-                Azwar Arsyadi, S.Kom
+
+            {{-- QR Code di atas nama --}}
+            @if(isset($qrSvg) && $qrSvg)
+            <div class="qr-block">
+                <img src="{{ $qrSvg }}" alt="QR TTE">
+                <p class="qr-label">Tanda Tangan Elektronik</p>
+                <p class="qr-url">{{ $validasiUrl ?? '' }}</p>
             </div>
+            @else
+            <div style="height: 70px;"></div>
+            @endif
+
+            {{-- Nama tanpa garis --}}
+            <div class="signer-space"></div>
+            <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Azwar Arsyadi, S.Kom' }}</p>
+            <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
 

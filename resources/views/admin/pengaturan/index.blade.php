@@ -586,6 +586,77 @@
                     </div>
                 </div>
             </div>
+
+            {{-- ===== GOOGLE DRIVE BACKUP ===== --}}
+            <div class="mt-8 border-t border-gray-200 pt-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png"
+                         alt="Google Drive" class="w-7 h-7">
+                    <h3 class="text-base font-semibold text-gray-700">Backup ke Google Drive</h3>
+                    <span id="gdrive-status-badge" class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Memeriksa...</span>
+                </div>
+
+                {{-- Info setup --}}
+                <div id="gdrive-setup-info" class="hidden mb-5 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                    <p class="font-semibold mb-2">⚙️ Konfigurasi belum lengkap</p>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li>Buka <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a>, buat project & aktifkan <strong>Google Drive API</strong></li>
+                        <li>Buat <strong>Service Account</strong> di IAM &amp; Admin → Service Accounts</li>
+                        <li>Download JSON key, simpan di <code class="bg-amber-100 px-1 rounded">storage/app/google-credentials.json</code></li>
+                        <li>Buat folder di Google Drive, share ke email service account (akses <strong>Editor</strong>)</li>
+                        <li>Salin ID folder dari URL Drive, isi <code class="bg-amber-100 px-1 rounded">GOOGLE_DRIVE_FOLDER_ID</code> di <code class="bg-amber-100 px-1 rounded">.env</code></li>
+                        <li>Set <code class="bg-amber-100 px-1 rounded">GOOGLE_DRIVE_AUTO_BACKUP=true</code> untuk backup otomatis harian</li>
+                    </ol>
+                </div>
+
+                {{-- Panel konfigurasi terkini --}}
+                <div id="gdrive-config-panel" class="hidden mb-5 bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
+                    <p class="font-semibold text-green-800 mb-2">✅ Konfigurasi Terdeteksi</p>
+                    <div class="grid grid-cols-2 gap-2 text-green-700">
+                        <span>Folder ID:</span> <span id="gdrive-folder-id" class="font-mono">-</span>
+                        <span>Auto Backup:</span> <span id="gdrive-auto-status">-</span>
+                    </div>
+                </div>
+
+                {{-- Tombol aksi --}}
+                <div class="flex flex-wrap gap-3 mb-5">
+                    <button onclick="gdriveTestConnection()"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Tes Koneksi Drive
+                    </button>
+                    <button onclick="gdriveBackup('arsip')"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Backup Arsip ke Drive
+                    </button>
+                    <button onclick="gdriveBackup('disposisi')"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Backup Disposisi ke Drive
+                    </button>
+                    <button onclick="gdriveBackup('all')"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Backup Semua ke Drive
+                    </button>
+                </div>
+
+                {{-- Progress / hasil --}}
+                <div id="gdrive-progress" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span id="gdrive-progress-text">Sedang mengupload file ke Google Drive...</span>
+                    </div>
+                </div>
+
+                <div id="gdrive-result" class="hidden rounded-lg p-4 text-sm"></div>
+            </div>
+            {{-- ===== END GOOGLE DRIVE ===== --}}
+
         </div>
         @endif
     </div>
@@ -1134,5 +1205,100 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+</script>
+@endpush
+{{-- Google Drive JS ditambahkan terpisah --}}
+@push('scripts')
+<script>
+const GDRIVE_CSRF = '{{ csrf_token() }}';
+
+(function gdriveLoadStatus() {
+    fetch('{{ route("admin.pengaturan.gdrive.status") }}', {
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': GDRIVE_CSRF }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const badge     = document.getElementById('gdrive-status-badge');
+        const setupInfo = document.getElementById('gdrive-setup-info');
+        const cfgPanel  = document.getElementById('gdrive-config-panel');
+        if (!badge) return;
+        if (data.is_configured) {
+            badge.textContent = '✅ Terkonfigurasi';
+            badge.className   = 'px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700';
+            if (cfgPanel) cfgPanel.classList.remove('hidden');
+            const folderEl = document.getElementById('gdrive-folder-id');
+            const autoEl   = document.getElementById('gdrive-auto-status');
+            if (folderEl) folderEl.textContent = data.folder_id;
+            if (autoEl)   autoEl.textContent   = data.auto_backup_enabled ? 'Aktif (01:00/hari)' : 'Nonaktif';
+        } else {
+            badge.textContent = '⚠️ Belum dikonfigurasi';
+            badge.className   = 'px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700';
+            if (setupInfo) setupInfo.classList.remove('hidden');
+        }
+    }).catch(() => {});
+})();
+
+function gdriveTestConnection() {
+    const resultEl   = document.getElementById('gdrive-result');
+    const progressEl = document.getElementById('gdrive-progress');
+    resultEl.className = 'hidden';
+    document.getElementById('gdrive-progress-text').textContent = 'Menguji koneksi...';
+    progressEl.classList.remove('hidden');
+    fetch('{{ route("admin.pengaturan.gdrive.test") }}', {
+        method:'POST', headers:{'Accept':'application/json','X-CSRF-TOKEN':GDRIVE_CSRF}
+    }).then(r=>r.json()).then(data=>{
+        progressEl.classList.add('hidden'); resultEl.classList.remove('hidden');
+        if (data.success) {
+            resultEl.className='rounded-lg p-4 text-sm bg-green-50 border border-green-200 text-green-800';
+            resultEl.innerHTML=`✅ <strong>Koneksi berhasil!</strong> Folder: <strong>${data.folder_name}</strong>`;
+        } else {
+            resultEl.className='rounded-lg p-4 text-sm bg-red-50 border border-red-200 text-red-800';
+            resultEl.innerHTML=`❌ <strong>Gagal:</strong> ${data.message}`;
+        }
+    }).catch(()=>{ progressEl.classList.add('hidden'); });
+}
+
+function gdriveBackup(type) {
+    const labels={arsip:'file arsip & surat',disposisi:'bukti disposisi',all:'semua file (arsip + disposisi)'};
+    if (typeof Swal==='undefined') { if(confirm(`Backup ${labels[type]} ke Google Drive?`)) gdriveBackupProcess(type); return; }
+    Swal.fire({
+        title:'☁️ Backup ke Google Drive',
+        html:`Upload <strong>${labels[type]}</strong> ke Drive akan dimulai.<br><small>Jangan tutup halaman ini.</small>`,
+        icon:'question',showCancelButton:true,confirmButtonColor:'#2563eb',cancelButtonColor:'#6b7280',
+        confirmButtonText:'Ya, Backup',cancelButtonText:'Batal'
+    }).then(r=>{ if(r.isConfirmed) gdriveBackupProcess(type); });
+}
+
+function gdriveBackupProcess(type) {
+    const urls={
+        arsip:'{{ route("admin.pengaturan.gdrive.backup-arsip") }}',
+        disposisi:'{{ route("admin.pengaturan.gdrive.backup-disposisi") }}',
+        all:'{{ route("admin.pengaturan.gdrive.backup-all") }}'
+    };
+    const resultEl=document.getElementById('gdrive-result');
+    const progressEl=document.getElementById('gdrive-progress');
+    resultEl.className='hidden';
+    document.getElementById('gdrive-progress-text').textContent='Mengupload ke Google Drive... (jangan tutup halaman ini)';
+    progressEl.classList.remove('hidden');
+    fetch(urls[type],{method:'POST',headers:{'Accept':'application/json','X-CSRF-TOKEN':GDRIVE_CSRF}})
+    .then(r=>r.json()).then(data=>{
+        progressEl.classList.add('hidden'); resultEl.classList.remove('hidden');
+        if (data.success) {
+            resultEl.className='rounded-lg p-4 text-sm bg-green-50 border border-green-200 text-green-800';
+            let html=`✅ <strong>Backup selesai!</strong><br>${data.message}`;
+            if(data.result?.arsip){const a=data.result.arsip;html+=`<br><span class="text-xs block mt-1">📁 Arsip: ${a.success} berhasil, ${a.skipped} dilewati, ${a.failed} gagal</span>`;}
+            if(data.result?.disposisi){const d=data.result.disposisi;html+=`<span class="text-xs block">📎 Disposisi: ${d.success} berhasil, ${d.skipped} dilewati, ${d.failed} gagal</span>`;}
+            resultEl.innerHTML=html;
+            if(typeof Swal!=='undefined') Swal.fire({icon:'success',title:'✅ Selesai',text:data.message,timer:3000,showConfirmButton:false,toast:true,position:'top-end'});
+        } else {
+            resultEl.className='rounded-lg p-4 text-sm bg-red-50 border border-red-200 text-red-800';
+            resultEl.innerHTML=`❌ <strong>Gagal:</strong> ${data.message}`;
+        }
+    }).catch(()=>{
+        progressEl.classList.add('hidden'); resultEl.classList.remove('hidden');
+        resultEl.className='rounded-lg p-4 text-sm bg-red-50 border border-red-200 text-red-800';
+        resultEl.textContent='❌ Kesalahan jaringan saat upload.';
+    });
+}
 </script>
 @endpush

@@ -12,7 +12,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Backup file surat & arsip ke Google Drive — setiap hari jam 01.00
+        // Aktifkan dengan set GOOGLE_DRIVE_AUTO_BACKUP=true di .env
+        if (config('google-drive.auto_backup_enabled', false)) {
+            $schedule->command('backup:drive --type=all --silent')
+                     ->dailyAt('01:00')
+                     ->withoutOverlapping()
+                     ->appendOutputTo(storage_path('logs/backup-drive.log'));
+        }
     }
 
     /**

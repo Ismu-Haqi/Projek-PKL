@@ -100,9 +100,10 @@ class IncomingLetterController extends Controller
         ]);
 
         try {
+            $nomorAgenda = IncomingLetter::generateNomorAgenda();
             $data = [
-                'nomor_agenda'     => IncomingLetter::generateNomorAgenda(),
-                'nomor_surat'      => $request->nomor_surat,
+                'nomor_agenda'     => $nomorAgenda,
+                'nomor_surat'      => $request->nomor_surat ?: $nomorAgenda, // fallback ke nomor agenda
                 'tanggal_surat'    => $request->tanggal_surat,
                 'tanggal_diterima' => $request->tanggal_diterima,
                 'pengirim'         => $request->pengirim,

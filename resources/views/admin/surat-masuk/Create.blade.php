@@ -36,19 +36,21 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">
                         Nomor Surat <span class="text-red-500">*</span>
-                        <span class="text-gray-400 font-normal text-xs ml-1">(atau biarkan kosong untuk pakai nomor agenda)</span>
+                        <span class="text-gray-400 font-normal text-xs ml-1">(opsional, bisa pakai nomor agenda)</span>
                     </label>
                     <div class="relative">
                         <input type="text" name="nomor_surat" id="nomor_surat"
                                value="{{ old('nomor_surat') }}"
-                               placeholder="Contoh: 100/DKP/V/2026 — kosongkan untuk otomatis"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nomor_surat') border-red-400 @enderror pr-24">
+                               placeholder="Contoh: 100/DKP/V/2026"
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-28 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nomor_surat') border-red-400 @enderror">
                         <button type="button" onclick="pakaiNomorAgenda()"
-                                class="absolute right-2 top-1.5 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium hover:bg-blue-200 transition">
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded font-semibold transition whitespace-nowrap">
                             Pakai Agenda
                         </button>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Nomor agenda: <span class="font-mono font-semibold text-blue-600">{{ $nomorAgenda }}</span></p>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Nomor agenda: <span class="font-mono font-semibold text-blue-600" id="nomor-agenda-display">{{ $nomorAgenda }}</span>
+                    </p>
                     @error('nomor_surat')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -143,7 +145,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                     </svg>
                     <p class="text-sm text-gray-500" id="file-label">Klik untuk pilih file atau drag & drop</p>
-                    <input type="file" id="file_surat" name="file_surat" class="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                    <input type="file" id="file_surat" name="file_surat" class="hidden"
+                           accept=".pdf,.jpg,.jpeg,.png"
                            onchange="document.getElementById('file-label').textContent = this.files[0]?.name ?? 'Klik untuk pilih file'">
                 </div>
                 @error('file_surat')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
@@ -163,4 +166,23 @@
         </form>
     </div>
 </div>
+
+<script>
+// ── Auto-fill nomor surat dengan nomor agenda saat halaman load ──────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const nomorSuratInput = document.getElementById('nomor_surat');
+    const nomorAgenda     = '{{ $nomorAgenda }}';
+
+    // Jika field kosong (bukan old value), isi otomatis dengan nomor agenda
+    if (nomorSuratInput && !nomorSuratInput.value) {
+        nomorSuratInput.value = nomorAgenda;
+    }
+});
+
+// ── Tombol "Pakai Agenda" — reset ke nomor agenda ────────────────────────────
+function pakaiNomorAgenda() {
+    const nomorAgenda = document.getElementById('nomor-agenda-display').textContent.trim();
+    document.getElementById('nomor_surat').value = nomorAgenda;
+}
+</script>
 @endsection

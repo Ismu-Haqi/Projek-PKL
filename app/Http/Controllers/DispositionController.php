@@ -108,19 +108,29 @@ class DispositionController extends Controller
     public function store(Request $request)
     {
         $role = Auth::user()->role;
-        
+
+        // Bersihkan item_id jika masih ada prefix 'letter_' (fallback jika JS gagal)
+        if ($request->has('item_id') && str_starts_with($request->item_id, 'letter_')) {
+            $letterId = str_replace('letter_', '', $request->item_id);
+            $request->merge([
+                'item_id'              => $letterId,
+                'incoming_letter_mode' => '1',
+                'from_letter'          => $letterId,
+            ]);
+        }
+
         // Validation
         $validated = $request->validate([
-            'item_type' => 'required|in:arsip,aset',
-            'item_id' => 'required|integer',
-            'to_user_id' => 'required|exists:users,id',
-            'final_recipient_id' => 'nullable|exists:users,id', // Untuk forwarding
-            'subject' => 'required|string|max:255',
-            'instruction' => 'required|string',
-            'priority' => 'required|in:urgent,high,normal,low',
-            'deadline' => 'nullable|date|after:today',
-            'forwarding_note' => 'nullable|string', // Catatan untuk penerusan
-            'incoming_letter_mode' => 'nullable|boolean',
+            'item_type'            => 'required|in:arsip,aset',
+            'item_id'              => 'nullable|integer',
+            'to_user_id'           => 'required|exists:users,id',
+            'final_recipient_id'   => 'nullable|exists:users,id',
+            'subject'              => 'required|string|max:255',
+            'instruction'          => 'required|string',
+            'priority'             => 'required|in:urgent,high,normal,low',
+            'deadline'             => 'nullable|date|after:today',
+            'forwarding_note'      => 'nullable|string',
+            'incoming_letter_mode' => 'nullable',
         ]);
         
         // ── Jika disposisi berasal dari surat masuk (bukan arsip) ──────────

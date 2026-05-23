@@ -17,6 +17,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AssetBorrowController as AdminAssetBorrowController;
 use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowController;
 use App\Http\Controllers\IncomingLetterController;
+use App\Http\Controllers\GoogleDriveBackupController;
+use App\Models\DocumentSignature;
+
+// ── Route publik: validasi TTE (tidak perlu login) ──────────────────────────
+Route::get('/validasi/{token}', function (string $token) {
+    $signature = DocumentSignature::where('token', $token)->first();
+    return view('validasi', compact('signature'));
+})->name('validasi.tte');
 
 // Halaman Login
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
@@ -165,6 +173,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/backup', [SettingController::class, 'backup'])->name('backup');
         Route::get('/backup-list', [SettingController::class, 'backupList'])->name('backup-list');
         Route::get('/backup/download/{filename}', [SettingController::class, 'downloadBackup'])->name('backup-download');
+        Route::delete('/backup/{filename}', [SettingController::class, 'deleteBackup'])->name('backup-delete');
+
+        // Google Drive Backup
+        Route::prefix('gdrive')->name('gdrive.')->group(function () {
+            Route::get('/status', [GoogleDriveBackupController::class, 'status'])->name('status');
+            Route::post('/test', [GoogleDriveBackupController::class, 'testConnection'])->name('test');
+            Route::post('/backup-arsip', [GoogleDriveBackupController::class, 'backupArsip'])->name('backup-arsip');
+            Route::post('/backup-disposisi', [GoogleDriveBackupController::class, 'backupDisposisi'])->name('backup-disposisi');
+            Route::post('/backup-all', [GoogleDriveBackupController::class, 'backupAll'])->name('backup-all');
+        });
     });
     
     // Surat Masuk (Admin)

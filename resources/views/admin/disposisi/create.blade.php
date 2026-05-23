@@ -3,7 +3,7 @@
 @section('title', 'Buat Disposisi Baru')
 
 @section('content')
-<div class="max-w-4xl mx-auto" x-data="{ itemType: 'arsip' }">
+<div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center mb-4">
@@ -30,31 +30,13 @@
             </h2>
         </div>
 
-        <form action="{{ route('admin.disposisi.store') }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.disposisi.store') }}" method="POST" class="p-6 space-y-6" id="form-disposisi" onsubmit="return prepareSubmit()">
             @csrf
 
-            {{-- ✅ Hidden input: surat masuk asal --}}
-            @if(isset($fromLetter) && $fromLetter)
-            <input type="hidden" name="from_letter" value="{{ $fromLetter->id }}">
-
-            {{-- Banner info surat masuk --}}
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-                <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-semibold text-blue-800 text-sm">Disposisi dari Surat Masuk</p>
-                    <p class="text-blue-700 text-xs mt-0.5">
-                        <strong>No. Agenda:</strong> {{ $fromLetter->nomor_agenda }} &nbsp;|&nbsp;
-                        <strong>Dari:</strong> {{ $fromLetter->pengirim }} &nbsp;|&nbsp;
-                        <strong>Perihal:</strong> {{ $fromLetter->perihal }}
-                    </p>
-                    <p class="text-blue-500 text-xs mt-1">Data subject & perihal sudah terisi otomatis dari surat masuk ini.</p>
-                </div>
-            </div>
-            @endif
+            {{-- Hidden inputs backend --}}
+            <input type="hidden" name="item_id"              id="final_item_id"   value="">
+            <input type="hidden" name="incoming_letter_mode" id="letter_mode"     value="0">
+            <input type="hidden" name="from_letter"          id="final_letter_id" value="">
 
             <!-- Select Item Type -->
             <div>
@@ -62,11 +44,9 @@
                     Tipe Item <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500" 
-                           :class="itemType === 'arsip' ? 'border-purple-500 bg-purple-50' : 'border-gray-300'"
-                           @click="itemType = 'arsip'">
-                        <input type="radio" name="item_type" value="arsip" class="sr-only" 
-                               :checked="itemType === 'arsip'">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500 border-purple-500 bg-purple-50"
+                           id="label-arsip" onclick="switchType('arsip')">
+                        <input type="radio" name="item_type" value="arsip" id="radio-arsip" checked class="sr-only">
                         <div class="flex items-center w-full">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,11 +60,9 @@
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-pink-500"
-                           :class="itemType === 'aset' ? 'border-pink-500 bg-pink-50' : 'border-gray-300'"
-                           @click="itemType = 'aset'">
-                        <input type="radio" name="item_type" value="aset" class="sr-only"
-                               :checked="itemType === 'aset'">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-pink-500 border-gray-300"
+                           id="label-aset" onclick="switchType('aset')">
+                        <input type="radio" name="item_type" value="aset" id="radio-aset" class="sr-only">
                         <div class="flex items-center w-full">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,39 +84,36 @@
             <!-- Select Item (Dynamic based on type) -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    <span x-text="itemType === 'aset' ? 'Pilih Aset' : 'Pilih Arsip/Surat'"></span>
+                    <span id="label-item">Pilih Arsip/Surat</span>
                     <span class="text-red-500">*</span>
                 </label>
-                
-                <!-- Arsip Select -->
-                <div x-show="itemType === 'arsip'" x-cloak>
-                    <select name="item_id" id="item_select_arsip" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 @error('item_id') border-red-500 @enderror">
+
+                <!-- Satu dropdown yang berubah isinya sesuai tipe item -->
+                <div id="arsip-wrapper">
+                    <select id="item_select_arsip"
+                            onchange="onArsipChange(this)"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">-- Pilih Arsip/Surat --</option>
 
-                        {{-- ✅ GRUP 1: Surat Masuk (dari tabel incoming_letters) --}}
                         @if(isset($incomingLetters) && $incomingLetters->count())
                         <optgroup label="📨 Surat Masuk">
                             @foreach($incomingLetters as $letter)
-                            <option value="incoming_{{ $letter->id }}"
-                                data-subject="{{ $letter->perihal }}"
-                                {{ isset($fromLetter) && $fromLetter?->id == $letter->id ? 'selected' : '' }}
-                                {{ old('item_id') == 'incoming_'.$letter->id ? 'selected' : '' }}>
-                                [SM] {{ $letter->nomor_agenda }} — {{ Str::limit($letter->perihal, 50) }}
-                                @if($letter->status === 'sudah_disposisi') (sudah disposisi) @endif
+                            <option value="letter_{{ $letter->id }}"
+                                    data-subject="{{ $letter->perihal }}"
+                                    data-letter="{{ $letter->id }}">
+                                [SM] {{ $letter->nomor_agenda }} — {{ Str::limit($letter->perihal, 45) }}
                             </option>
                             @endforeach
                         </optgroup>
                         @endif
 
-                        {{-- GRUP 2: Arsip Digital (dari tabel archives) --}}
                         @if($archives->count())
                         <optgroup label="🗂️ Arsip Digital">
                             @foreach($archives as $archive)
-                            <option value="{{ $archive->id }}"
-                                data-subject="{{ $archive->judul }}"
-                                {{ old('item_id') == $archive->id ? 'selected' : '' }}>
-                                {{ $archive->nomor_surat }} - {{ Str::limit($archive->judul, 50) }}
+                            <option value="archive_{{ $archive->id }}"
+                                    data-subject="{{ $archive->judul }}"
+                                    data-archive="{{ $archive->id }}">
+                                {{ $archive->nomor_surat }} — {{ Str::limit($archive->judul, 45) }}
                             </option>
                             @endforeach
                         </optgroup>
@@ -146,13 +121,13 @@
                     </select>
                 </div>
 
-                <!-- Aset Select -->
-                <div x-show="itemType === 'aset'" x-cloak>
-                    <select name="item_id" id="item_select_aset" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 @error('item_id') border-red-500 @enderror">
+                <div id="aset-wrapper" style="display:none;">
+                    <select id="item_select_aset"
+                            onchange="onAsetChange(this)"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
                         <option value="">-- Pilih Aset --</option>
                         @foreach($assets as $asset)
-                        <option value="{{ $asset->id }}" {{ old('item_id') == $asset->id ? 'selected' : '' }}>
+                        <option value="{{ $asset->id }}" data-subject="{{ $asset->nama }}">
                             {{ $asset->kode_asset }} - {{ $asset->nama }}
                         </option>
                         @endforeach
@@ -162,10 +137,7 @@
                 @error('item_id')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-                <p class="text-xs text-gray-500 mt-1">
-                    <span x-show="itemType === 'arsip'">Pilih surat yang akan didisposisikan</span>
-                    <span x-show="itemType === 'aset'" x-cloak>Pilih aset yang akan didisposisikan</span>
-                </p>
+                <p class="text-xs text-gray-500 mt-1" id="hint-item">Pilih surat yang akan didisposisikan</p>
             </div>
 
             <!-- Recipient -->
@@ -194,7 +166,7 @@
                     Subjek Disposisi <span class="text-red-500">*</span>
                 </label>
                 <input type="text" name="subject" id="subject" required
-                    value="{{ old('subject', isset($fromLetter) && $fromLetter ? $fromLetter->perihal : '') }}"
+                    value="{{ old('subject') }}"
                     placeholder="Contoh: Tindak Lanjut Surat Edaran"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 @error('subject') border-red-500 @enderror">
                 @error('subject')
@@ -288,87 +260,109 @@
     </div>
 </div>
 
-<!-- Alpine.js -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-<style>
-[x-cloak] { 
-    display: none !important; 
-}
-</style>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const arsipSelect  = document.getElementById('item_select_arsip');
-    const asetSelect   = document.getElementById('item_select_aset');
+// ── Switch tipe item (arsip / aset) ─────────────────────────────────────────
+function switchType(type) {
+    const arsipWrapper = document.getElementById('arsip-wrapper');
+    const asetWrapper  = document.getElementById('aset-wrapper');
+    const labelArsip   = document.getElementById('label-arsip');
+    const labelAset    = document.getElementById('label-aset');
+    const labelItem    = document.getElementById('label-item');
+    const hintItem     = document.getElementById('hint-item');
+    const radioArsip   = document.getElementById('radio-arsip');
+    const radioAset    = document.getElementById('radio-aset');
+
+    // Reset hidden inputs
+    document.getElementById('final_item_id').value   = '';
+    document.getElementById('letter_mode').value     = '0';
+    document.getElementById('final_letter_id').value = '';
+
+    if (type === 'arsip') {
+        arsipWrapper.style.display = 'block';
+        asetWrapper.style.display  = 'none';
+        labelArsip.className = labelArsip.className.replace('border-gray-300', 'border-purple-500 bg-purple-50');
+        labelAset.className  = labelAset.className.replace('border-pink-500 bg-pink-50', 'border-gray-300');
+        labelItem.textContent = 'Pilih Arsip/Surat';
+        hintItem.textContent  = 'Pilih surat yang akan didisposisikan';
+        radioArsip.checked = true;
+        radioAset.checked  = false;
+    } else {
+        arsipWrapper.style.display = 'none';
+        asetWrapper.style.display  = 'block';
+        labelAset.className = labelAset.className.replace('border-gray-300', 'border-pink-500 bg-pink-50');
+        labelArsip.className = labelArsip.className.replace('border-purple-500 bg-purple-50', 'border-gray-300');
+        labelItem.textContent = 'Pilih Aset';
+        hintItem.textContent  = 'Pilih aset yang akan didisposisikan';
+        radioAset.checked  = true;
+        radioArsip.checked = false;
+    }
+}
+
+// ── Handler perubahan dropdown arsip ────────────────────────────────────────
+function onArsipChange(sel) {
+    const selected    = sel.options[sel.selectedIndex];
+    const val         = selected.value;
+    const dataSubject = selected.getAttribute('data-subject') || '';
     const subjectInput = document.getElementById('subject');
 
-    if (arsipSelect) {
-        arsipSelect.addEventListener('change', function() {
-            const selected = this.options[this.selectedIndex];
-            // Gunakan data-subject jika ada, fallback ke teks option
-            const dataSubject = selected.getAttribute('data-subject');
-            if (dataSubject && !subjectInput.value) {
-                subjectInput.value = 'Disposisi: ' + dataSubject;
-            } else if (this.value && !subjectInput.value) {
-                const itemName = selected.text.split(' — ')[1] || selected.text.split(' - ')[1] || selected.text;
-                subjectInput.value = 'Disposisi: ' + itemName.replace(/\(sudah disposisi\)/g, '').trim();
-            }
-        });
+    if (!val) {
+        document.getElementById('final_item_id').value   = '';
+        document.getElementById('letter_mode').value     = '0';
+        document.getElementById('final_letter_id').value = '';
+        return;
     }
 
-    if (asetSelect) {
-        asetSelect.addEventListener('change', function() {
-            if (this.value && !subjectInput.value) {
-                const selectedText = this.options[this.selectedIndex].text;
-                const itemName = selectedText.split(' - ')[1] || selectedText;
-                subjectInput.value = 'Disposisi: ' + itemName;
-            }
-        });
+    if (val.startsWith('letter_')) {
+        const lid = selected.getAttribute('data-letter');
+        document.getElementById('final_item_id').value   = lid;
+        document.getElementById('letter_mode').value     = '1';
+        document.getElementById('final_letter_id').value = lid;
+    } else if (val.startsWith('archive_')) {
+        const aid = selected.getAttribute('data-archive');
+        document.getElementById('final_item_id').value   = aid;
+        document.getElementById('letter_mode').value     = '0';
+        document.getElementById('final_letter_id').value = '';
     }
 
-    // Handle form submit: konversi "incoming_X" → set from_letter hidden input
-    const form = arsipSelect ? arsipSelect.closest('form') : null;
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const val = arsipSelect.value;
-            if (val && val.startsWith('incoming_')) {
-                e.preventDefault();
-                const letterId = val.replace('incoming_', '');
-
-                // Set item_type ke arsip, item_id ke letterId, tandai sebagai surat masuk
-                let hiddenLetter = form.querySelector('input[name="from_letter"]');
-                if (!hiddenLetter) {
-                    hiddenLetter = document.createElement('input');
-                    hiddenLetter.type = 'hidden';
-                    hiddenLetter.name = 'from_letter';
-                    form.appendChild(hiddenLetter);
-                }
-                hiddenLetter.value = letterId;
-
-                // Ganti nilai item_id ke letterId (angka murni) untuk validasi backend
-                let hiddenItem = document.createElement('input');
-                hiddenItem.type = 'hidden';
-                hiddenItem.name = 'item_id';
-                hiddenItem.value = letterId;
-
-                // Nonaktifkan select agar tidak kirim dua item_id
-                arsipSelect.removeAttribute('name');
-                form.appendChild(hiddenItem);
-
-                // Set item_type ke surat_masuk agar controller tahu
-                let itemTypeInput = form.querySelector('input[name="item_type"]:checked') ||
-                                    form.querySelector('input[name="item_type"]');
-                let hiddenType = document.createElement('input');
-                hiddenType.type = 'hidden';
-                hiddenType.name = 'incoming_letter_mode';
-                hiddenType.value = '1';
-                form.appendChild(hiddenType);
-
-                form.submit();
-            }
-        });
+    if (dataSubject && !subjectInput.value) {
+        subjectInput.value = 'Disposisi: ' + dataSubject;
     }
-});
+}
+
+// ── Handler perubahan dropdown aset ─────────────────────────────────────────
+function onAsetChange(sel) {
+    const selected    = sel.options[sel.selectedIndex];
+    const val         = selected.value;
+    const dataSubject = selected.getAttribute('data-subject') || '';
+    const subjectInput = document.getElementById('subject');
+
+    document.getElementById('final_item_id').value   = val;
+    document.getElementById('letter_mode').value     = '0';
+    document.getElementById('final_letter_id').value = '';
+
+    if (dataSubject && !subjectInput.value) {
+        subjectInput.value = 'Disposisi: ' + dataSubject;
+    }
+}
+
+// ── Validasi & prepare sebelum submit ───────────────────────────────────────
+function prepareSubmit() {
+    const itemId = document.getElementById('final_item_id').value;
+
+    if (!itemId) {
+        const activeType = document.getElementById('radio-aset').checked ? 'aset' : 'arsip';
+        if (activeType === 'arsip') {
+            alert('Pilih arsip atau surat masuk terlebih dahulu.');
+            document.getElementById('item_select_arsip').style.borderColor = '#ef4444';
+            document.getElementById('item_select_arsip').focus();
+        } else {
+            alert('Pilih aset terlebih dahulu.');
+            document.getElementById('item_select_aset').style.borderColor = '#ef4444';
+            document.getElementById('item_select_aset').focus();
+        }
+        return false;
+    }
+    return true;
+}
 </script>
 @endsection
