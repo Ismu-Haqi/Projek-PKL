@@ -350,7 +350,16 @@
                     <span>Dashboard</span>
                 </a>
                 
-                <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">MANAJEMEN</p>
+                <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">SURAT & ARSIP</p>
+
+                {{-- Surat Masuk (read-only) --}}
+                <a href="{{ route('pimpinan.surat-masuk.index') }}"
+                   class="sidebar-link {{ Request::routeIs('pimpinan.surat-masuk.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Surat Masuk</span>
+                </a>
                 
                 {{-- ✅ Arsip Digital --}}
                 <a href="{{ route('pimpinan.arsip.index') }}" 
@@ -396,16 +405,7 @@
                     </svg>
                     <span>Manajemen Aset</span>
                 </a>
-
-                {{-- ✅ Mutasi Aset --}}
-                <a href="{{ route('pimpinan.mutasi.index') }}"
-                   class="sidebar-link {{ Request::routeIs('pimpinan.mutasi.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                    </svg>
-                    <span>Mutasi Aset</span>
-                </a>
-
+                
                 {{-- ✅ Manajemen User --}}
                 <a href="{{ route('pimpinan.user.index') }}" 
                    class="sidebar-link {{ Request::routeIs('pimpinan.user.*') ? 'active' : '' }}">

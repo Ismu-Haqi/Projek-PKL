@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('pimpinan.layouts.app')
 
 @section('title', 'Detail Surat Masuk')
 
@@ -7,7 +7,7 @@
 
     {{-- Header --}}
     <div class="flex items-center mb-6">
-        <a href="{{ route('admin.surat-masuk.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
+        <a href="{{ route('pimpinan.surat-masuk.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -20,14 +20,14 @@
         {{-- Tombol aksi --}}
         <div class="flex gap-2">
             @if($letter->status === 'belum_disposisi')
-            <a href="{{ route('admin.surat-masuk.buat-disposisi', $letter->id) }}"
+            <a href="{{ route('pimpinan.surat-masuk.buat-disposisi', $letter->id) }}"
                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Buat Disposisi
             </a>
-            <a href="{{ route('admin.surat-masuk.edit', $letter->id) }}"
+            <a href="{{ route('pimpinan.surat-masuk.edit', $letter->id) }}"
                class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -37,7 +37,7 @@
             @endif
 
             @if($letter->file_path)
-            <a href="{{ route('admin.surat-masuk.download', $letter->id) }}"
+            <a href="{{ route('pimpinan.surat-masuk.download', $letter->id) }}"
                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -155,11 +155,11 @@
                     </div>
                 </div>
                 <div class="flex gap-2 mt-3">
-                    <a href="{{ route('admin.surat-masuk.preview', $letter->id) }}" target="_blank"
+                    <a href="{{ route('pimpinan.surat-masuk.preview', $letter->id) }}" target="_blank"
                        class="flex-1 text-center text-xs py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 font-medium transition">
                         Preview
                     </a>
-                    <a href="{{ route('admin.surat-masuk.download', $letter->id) }}"
+                    <a href="{{ route('pimpinan.surat-masuk.download', $letter->id) }}"
                        class="flex-1 text-center text-xs py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 font-medium transition">
                         Download
                     </a>
@@ -178,7 +178,7 @@
                 </h3>
                 <p class="text-xs font-mono text-purple-600 font-semibold">{{ $letter->disposition->nomor_disposisi }}</p>
                 <p class="text-xs text-gray-600 mt-1">Ke: {{ $letter->disposition->toUser->name ?? '-' }}</p>
-                <a href="{{ route('admin.disposisi.show', $letter->disposition->id) }}"
+                <a href="{{ route('pimpinan.disposisi.show', $letter->disposition->id) }}"
                    class="mt-2 inline-block text-xs text-purple-600 hover:underline font-medium">
                     Lihat Disposisi →
                 </a>

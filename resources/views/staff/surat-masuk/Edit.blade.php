@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('staff.layouts.app')
 
 @section('title', 'Edit Surat Masuk')
 
@@ -6,7 +6,7 @@
 <div class="max-w-4xl mx-auto p-6">
 
     <div class="flex items-center mb-6">
-        <a href="{{ route('admin.surat-masuk.show', $letter->id) }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
+        <a href="{{ route('staff.surat-masuk.show', $letter->id) }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -22,7 +22,7 @@
             <h2 class="text-xl font-bold text-white">Edit Data Surat</h2>
         </div>
 
-        <form action="{{ route('admin.surat-masuk.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+        <form action="{{ route('staff.surat-masuk.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
             @csrf
             @method('PUT')
 
@@ -101,7 +101,7 @@
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('admin.surat-masuk.show', $letter->id) }}"
+                <a href="{{ route('staff.surat-masuk.show', $letter->id) }}"
                    class="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
                     Batal
                 </a>
