@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetMutation;
-use App\Models\Unit;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,7 +49,7 @@ class AssetMutationController extends Controller
             'ditolak'   => AssetMutation::where('status', 'ditolak')->count(),
         ];
 
-        $units = Unit::orderBy('nama_unit')->pluck('nama_unit', 'nama_unit');
+        $units = Asset::whereNotNull('unit')->distinct()->orderBy('unit')->pluck('unit', 'unit');
 
         return view("{$role}.mutasi.index", compact('mutations', 'stats', 'units'));
     }
@@ -62,7 +61,7 @@ class AssetMutationController extends Controller
     {
         $role   = Auth::user()->role;
         $assets = Asset::orderBy('nama')->get(['id', 'nama', 'kode_asset', 'unit', 'lokasi']);
-        $units  = Unit::orderBy('nama_unit')->pluck('nama_unit', 'nama_unit');
+        $units  = Asset::whereNotNull('unit')->distinct()->orderBy('unit')->pluck('unit', 'unit');
 
         return view("{$role}.mutasi.create", compact('assets', 'units'));
     }

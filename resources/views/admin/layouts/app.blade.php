@@ -441,6 +441,44 @@
                 {{-- ============================================= --}}
                 {{-- END MENU PEMINJAMAN --}}
                 {{-- ============================================= --}}
+
+                {{-- ============================================= --}}
+                {{-- MENU MUTASI ASET --}}
+                {{-- ============================================= --}}
+                @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('admin.mutasi.index') }}"
+                       class="sidebar-link {{ Request::routeIs('admin.mutasi.*') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                        <span>Mutasi Aset</span>
+                        @php $pendingMutasi = \App\Models\AssetMutation::where('status', 'menunggu')->count(); @endphp
+                        @if($pendingMutasi > 0)
+                        <span class="ml-auto bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $pendingMutasi }}
+                        </span>
+                        @endif
+                    </a>
+                @elseif(Auth::user()->role === 'staff')
+                    <a href="{{ route('staff.mutasi.index') }}"
+                       class="sidebar-link {{ Request::routeIs('staff.mutasi.*') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                        <span>Mutasi Aset</span>
+                    </a>
+                @elseif(Auth::user()->role === 'pimpinan')
+                    <a href="{{ route('pimpinan.mutasi.index') }}"
+                       class="sidebar-link {{ Request::routeIs('pimpinan.mutasi.*') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                        <span>Mutasi Aset</span>
+                    </a>
+                @endif
+                {{-- ============================================= --}}
+                {{-- END MENU MUTASI ASET --}}
+                {{-- ============================================= --}}
                 
                 <a href="{{ route('admin.user.index') }}" class="sidebar-link {{ Request::routeIs('admin.user.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
