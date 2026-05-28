@@ -7,12 +7,13 @@ use App\Models\Asset;
 use App\Models\Disposition;
 use App\Models\User;
 use App\Models\AssetBorrow;
+use App\Models\IncomingLetter;
+use App\Models\DocumentSignature;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\DocumentSignature;
 
 class ReportController extends Controller
 {
@@ -302,21 +303,31 @@ class ReportController extends Controller
             abort(403, 'Unauthorized');
         }
         
-        $type = $request->input('type', 'monthly');
+        $type  = $request->input('type', 'monthly');
         $month = $request->input('month', Carbon::now()->month);
-        $year = $request->input('year', Carbon::now()->year);
+        $year  = $request->input('year', Carbon::now()->year);
         
         if ($type === 'monthly') {
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+            $endDate   = Carbon::create($year, $month, 1)->endOfMonth();
         } else {
             $startDate = Carbon::create($year, 1, 1)->startOfYear();
-            $endDate = Carbon::create($year, 12, 31)->endOfYear();
+            $endDate   = Carbon::create($year, 12, 31)->endOfYear();
         }
 
+        // ── Filter berdasarkan role ────────────────────────────────────────
+        $archiveQuery     = Archive::whereBetween('archives.created_at', [$startDate, $endDate]);
+        $dispositionQuery = Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate]);
+
+        if ($role === 'staff') {
+            $archiveQuery->where('archives.user_id', Auth::id());
+            $dispositionQuery->where('dispositions.to_user_id', Auth::id());
+        }
+        // ──────────────────────────────────────────────────────────────────
+
         $archiveStats = [
-            'total' => Archive::whereBetween('archives.created_at', [$startDate, $endDate])->count(),
-            'by_category' => Archive::whereBetween('archives.created_at', [$startDate, $endDate])
+            'total'       => (clone $archiveQuery)->count(),
+            'by_category' => (clone $archiveQuery)
                 ->join('categories', 'archives.category_id', '=', 'categories.id')
                 ->selectRaw('categories.name as category, COUNT(*) as total')
                 ->groupBy('categories.name')
@@ -324,20 +335,20 @@ class ReportController extends Controller
         ];
 
         $dispositionStats = [
-            'total' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->count(),
-            'pending' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->where('status', 'pending')->count(),
-            'in_progress' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->where('status', 'in_progress')->count(),
-            'completed' => Disposition::whereBetween('dispositions.created_at', [$startDate, $endDate])->where('status', 'completed')->count(),
+            'total'       => (clone $dispositionQuery)->count(),
+            'pending'     => (clone $dispositionQuery)->where('status', 'pending')->count(),
+            'in_progress' => (clone $dispositionQuery)->where('status', 'in_progress')->count(),
+            'completed'   => (clone $dispositionQuery)->where('status', 'completed')->count(),
         ];
 
         if ($type === 'monthly') {
-            $chartData = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
+            $chartData = (clone $archiveQuery)
                 ->selectRaw('DAY(archives.created_at) as period, COUNT(*) as total')
                 ->groupBy('period')
                 ->orderBy('period')
                 ->pluck('total', 'period');
         } else {
-            $chartData = Archive::whereBetween('archives.created_at', [$startDate, $endDate])
+            $chartData = (clone $archiveQuery)
                 ->selectRaw('MONTH(archives.created_at) as period, COUNT(*) as total')
                 ->groupBy('period')
                 ->orderBy('period')
@@ -346,41 +357,40 @@ class ReportController extends Controller
 
         if ($type === 'monthly') {
             $prevStartDate = Carbon::create($year, $month, 1)->subMonth()->startOfMonth();
-            $prevEndDate = Carbon::create($year, $month, 1)->subMonth()->endOfMonth();
+            $prevEndDate   = Carbon::create($year, $month, 1)->subMonth()->endOfMonth();
         } else {
             $prevStartDate = Carbon::create($year - 1, 1, 1)->startOfYear();
-            $prevEndDate = Carbon::create($year - 1, 12, 31)->endOfYear();
+            $prevEndDate   = Carbon::create($year - 1, 12, 31)->endOfYear();
+        }
+
+        $prevArchiveQuery     = Archive::whereBetween('archives.created_at', [$prevStartDate, $prevEndDate]);
+        $prevDispositionQuery = Disposition::whereBetween('dispositions.created_at', [$prevStartDate, $prevEndDate]);
+
+        if ($role === 'staff') {
+            $prevArchiveQuery->where('archives.user_id', Auth::id());
+            $prevDispositionQuery->where('dispositions.to_user_id', Auth::id());
         }
 
         $comparison = [
             'archives' => [
-                'current' => $archiveStats['total'],
-                'previous' => Archive::whereBetween('archives.created_at', [$prevStartDate, $prevEndDate])->count(),
+                'current'  => $archiveStats['total'],
+                'previous' => $prevArchiveQuery->count(),
             ],
             'dispositions' => [
-                'current' => $dispositionStats['total'],
-                'previous' => Disposition::whereBetween('dispositions.created_at', [$prevStartDate, $prevEndDate])->count(),
+                'current'  => $dispositionStats['total'],
+                'previous' => $prevDispositionQuery->count(),
             ],
         ];
 
         foreach ($comparison as $key => $data) {
-            if ($data['previous'] > 0) {
-                $comparison[$key]['percentage'] = round((($data['current'] - $data['previous']) / $data['previous']) * 100, 1);
-            } else {
-                $comparison[$key]['percentage'] = 0;
-            }
+            $comparison[$key]['percentage'] = $data['previous'] > 0
+                ? round((($data['current'] - $data['previous']) / $data['previous']) * 100, 1)
+                : 0;
         }
 
         return view("{$role}.laporan.periode", compact(
-            'archiveStats',
-            'dispositionStats',
-            'chartData',
-            'comparison',
-            'type',
-            'month',
-            'year',
-            'startDate',
-            'endDate'
+            'archiveStats', 'dispositionStats', 'chartData',
+            'comparison', 'type', 'month', 'year', 'startDate', 'endDate'
         ));
     }
 
@@ -455,28 +465,70 @@ class ReportController extends Controller
     /**
      * PRINT PDF
      */
+    /**
+     * Laporan Surat Masuk — staff hanya miliknya, pimpinan & admin semua
+     */
+    public function suratMasuk(Request $request)
+    {
+        $role = Auth::user()->role;
+        $query = IncomingLetter::with(['uploader', 'disposition'])
+            ->orderBy('tanggal_diterima', 'desc');
+
+        if ($role === 'staff') {
+            $query->where('uploaded_by', Auth::id());
+        }
+        if ($request->filled('status'))     $query->where('status', $request->status);
+        if ($request->filled('sifat'))      $query->where('sifat', $request->sifat);
+        if ($request->filled('start_date')) $query->whereDate('tanggal_diterima', '>=', $request->start_date);
+        if ($request->filled('end_date'))   $query->whereDate('tanggal_diterima', '<=', $request->end_date);
+
+        $letters = $query->paginate(15)->withQueryString();
+
+        $baseQuery = $role === 'staff'
+            ? IncomingLetter::where('uploaded_by', Auth::id())
+            : IncomingLetter::query();
+
+        $stats = [
+            'total'           => (clone $baseQuery)->count(),
+            'belum_disposisi' => (clone $baseQuery)->where('status', 'belum_disposisi')->count(),
+            'sudah_disposisi' => (clone $baseQuery)->where('status', 'sudah_disposisi')->count(),
+            'selesai'         => (clone $baseQuery)->where('status', 'selesai')->count(),
+            'bulan_ini'       => (clone $baseQuery)->whereMonth('tanggal_diterima', now()->month)
+                                                   ->whereYear('tanggal_diterima', now()->year)->count(),
+        ];
+
+        $totalSurat     = $stats['total'];
+        $belumDisposisi = $stats['belum_disposisi'];
+        $sudahDisposisi = $stats['sudah_disposisi'];
+        $selesai        = $stats['selesai'];
+
+        return view("{$role}.laporan.surat-masuk", compact(
+            'letters', 'stats', 'totalSurat', 'belumDisposisi', 'sudahDisposisi', 'selesai'
+        ));
+    }
+
     public function printPdf(Request $request)
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
         
         $data = $this->getExportData($type, $request);
 
-        // ── Generate TTE Token & QR Code ────────────────────────────────────
         $judulMap = [
-            'arsip'      => 'Laporan Arsip Digital',
-            'disposisi'  => 'Laporan Disposisi',
-            'aset'       => 'Laporan Manajemen Aset',
-            'user'       => 'Laporan Pengguna',
-            'unit'       => 'Laporan Unit Kerja',
-            'penyusutan' => 'Laporan Penyusutan Aset',
-            'peminjaman' => 'Laporan Peminjaman Aset',
-            'maintenance'=> 'Laporan Pemeliharaan Aset',
-            'summary'    => 'Laporan Ringkasan',
+            'arsip'       => 'Laporan Arsip Digital',
+            'disposisi'   => 'Laporan Disposisi',
+            'aset'        => 'Laporan Manajemen Aset',
+            'user'        => 'Laporan Pengguna',
+            'unit'        => 'Laporan Unit Kerja',
+            'penyusutan'  => 'Laporan Penyusutan Aset',
+            'peminjaman'  => 'Laporan Peminjaman Aset',
+            'maintenance' => 'Laporan Pemeliharaan Aset',
+            'surat-masuk' => 'Laporan Surat Masuk',
+            'summary'     => 'Laporan Ringkasan',
         ];
 
         $signature = DocumentSignature::generateFor(
@@ -508,24 +560,24 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        // ✅ TERMASUK LAPORAN KE-6 (Penyusutan) & KE-7 (Peminjaman)
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
         
         $data = $this->getExportData($type, $request);
 
-        // ── Generate TTE ─────────────────────────────────────────────────────
         $judulMap = [
-            'arsip'      => 'Laporan Arsip Digital',
-            'disposisi'  => 'Laporan Disposisi',
-            'aset'       => 'Laporan Manajemen Aset',
-            'user'       => 'Laporan Pengguna',
-            'unit'       => 'Laporan Unit Kerja',
-            'penyusutan' => 'Laporan Penyusutan Aset',
-            'peminjaman' => 'Laporan Peminjaman Aset',
-            'summary'    => 'Laporan Ringkasan',
+            'arsip'       => 'Laporan Arsip Digital',
+            'disposisi'   => 'Laporan Disposisi',
+            'aset'        => 'Laporan Manajemen Aset',
+            'user'        => 'Laporan Pengguna',
+            'unit'        => 'Laporan Unit Kerja',
+            'penyusutan'  => 'Laporan Penyusutan Aset',
+            'peminjaman'  => 'Laporan Peminjaman Aset',
+            'maintenance' => 'Laporan Pemeliharaan Aset',
+            'surat-masuk' => 'Laporan Surat Masuk',
+            'summary'     => 'Laporan Ringkasan',
         ];
         $signature = DocumentSignature::generateFor(
             documentType:  $type,
@@ -784,11 +836,25 @@ class ReportController extends Controller
                     ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
                 
                 if (Auth::user()->role === 'staff') {
-                    $query->where('user_id', Auth::id());
+                    $query->where('borrower_id', Auth::id());
                 }
                 
                 $data['borrows'] = $query->orderBy('created_at', 'desc')->get();
                 $data['period'] = $dateRange['label'];
+                break;
+
+            case 'surat-masuk':
+                $role = Auth::user()->role;
+                $smQuery = IncomingLetter::with(['uploader', 'disposition'])
+                    ->orderBy('tanggal_diterima', 'desc');
+                if ($role === 'staff') {
+                    $smQuery->where('uploaded_by', Auth::id());
+                }
+                if ($request->filled('status'))     $smQuery->where('status', $request->status);
+                if ($request->filled('start_date')) $smQuery->whereDate('tanggal_diterima', '>=', $request->start_date);
+                if ($request->filled('end_date'))   $smQuery->whereDate('tanggal_diterima', '<=', $request->end_date);
+                $data['letters'] = $smQuery->get();
+                $data['period']  = 'Hingga ' . now()->format('d M Y');
                 break;
 
             case 'maintenance':
@@ -934,7 +1000,7 @@ class ReportController extends Controller
             ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
 
         if ($role === 'staff') {
-            $query->where('user_id', $user->id); 
+            $query->where('borrower_id', $user->id);
         }
 
         $borrows = $query->orderBy('created_at', 'desc')->get();

@@ -1,462 +1,231 @@
-@extends(Auth::user()->role . '.layouts.app')
+@extends('pimpinan.layouts.app')
 
-@section('title', 'Laporan & Statistik')
+@section('title', 'Laporan Eksekutif')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header Section -->
+<div class="p-6 space-y-6">
+
+    {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📊 Laporan & Statistik</h1>
-            <p class="text-gray-600 mt-1">Dashboard lengkap untuk monitoring dan analisis data</p>
+            <h1 class="text-3xl font-bold text-gray-800">📊 Laporan Eksekutif</h1>
+            <p class="text-gray-600 mt-1">Monitoring menyeluruh seluruh aktivitas sistem GANDARIA</p>
         </div>
-    </div>
-
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-        <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        5 Jenis Laporan Tersedia
-    </h3>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        
-        <!-- 1. Laporan Arsip Digital -->
-        <a href="{{ route(Auth::user()->role . '.laporan.arsip') }}" 
-           class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <span class="text-blue-600 font-bold text-sm">01</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Arsip Digital</h4>
-            <p class="text-sm text-gray-600">Rekap arsip berdasarkan periode & kategori</p>
-        </a>
-
-        <!-- 2. Laporan Disposisi -->
-        <a href="{{ route(Auth::user()->role . '.laporan.disposisi') }}" 
-           class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <span class="text-purple-600 font-bold text-sm">02</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Disposisi</h4>
-            <p class="text-sm text-gray-600">Tracking disposisi arsip & aset</p>
-        </a>
-
-        <!-- 3. Laporan Aktivitas User (Admin/Pimpinan Only) -->
-        @if(Auth::user()->role === 'admin' || Auth::user()->role === 'pimpinan')
-        <a href="{{ route(Auth::user()->role . '.laporan.user') }}" 
-           class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                </div>
-                <span class="text-green-600 font-bold text-sm">03</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Aktivitas User</h4>
-            <p class="text-sm text-gray-600">Monitoring aktivitas pengguna</p>
-        </a>
-        @endif
-
-        <!-- 4. ✅ LAPORAN ASET (GANTI DARI STATISTIK PERIODE) -->
-        <a href="{{ route(Auth::user()->role . '.laporan.aset') }}" 
-           class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </div>
-                <span class="text-orange-600 font-bold text-sm">04</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Aset</h4>
-            <p class="text-sm text-gray-600">Inventaris aset per periode & kategori</p>
-        </a>
-
-        <!-- 5. Laporan Produktivitas Unit -->
-        <a href="{{ route(Auth::user()->role . '.laporan.unit-kerja') }}" 
-           class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                </div>
-                <span class="text-indigo-600 font-bold text-sm">05</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Produktivitas Unit</h4>
-            <p class="text-sm text-gray-600">Perbandingan kinerja antar unit</p>
-        </a>
-        
-    </div>
-</div>
-
-    <!-- Summary Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Arsip -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-sm text-gray-600 mb-1">Total Arsip</p>
-            <p class="text-3xl font-bold text-gray-800">{{ $archiveStats['total'] }}</p>
-            <p class="text-xs text-gray-500 mt-2">Periode saat ini</p>
-        </div>
-
-        <!-- Total Disposisi -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-sm text-gray-600 mb-1">Total Disposisi</p>
-            <p class="text-3xl font-bold text-gray-800">{{ $dispositionStats['total'] }}</p>
-            <p class="text-xs text-gray-500 mt-2">
-                <span class="text-green-600 font-semibold">{{ $dispositionStats['completed'] }}</span> selesai
-            </p>
-        </div>
-
-        <!-- Pending -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-sm text-gray-600 mb-1">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600">{{ $dispositionStats['pending'] }}</p>
-            <p class="text-xs text-gray-500 mt-2">Menunggu proses</p>
-        </div>
-
-        <!-- Overdue -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-sm text-gray-600 mb-1">Overdue</p>
-            <p class="text-3xl font-bold text-red-600">{{ $dispositionStats['overdue'] }}</p>
-            <p class="text-xs text-gray-500 mt-2">Melewati deadline</p>
-        </div>
-    </div>
-
-<!-- Tombol Untuk Print dan Download -->
-    @if(auth()->user()->role === 'admin')
-<div class="flex gap-2 mb-4">
-    <a href="{{ route('admin.laporan.print-pdf', ['type' => 'summary']) }}" 
-       target="_blank"
-       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-        </svg>
-        Print PDF
-    </a>
-    
-    <a href="{{ route('admin.laporan.export-pdf', ['type' => 'summary']) }}" 
-       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Download PDF
-    </a>
-</div>
-@endif
-    <!-- Charts Section with Fixed Height -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Archives by Category Chart -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                </svg>
-                Arsip per Kategori
-            </h3>
-            <div class="relative" style="height: 300px;">
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Dispositions by Status Chart -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                Disposisi per Status
-            </h3>
-            <div class="relative" style="height: 300px;">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Archives per Month Chart -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2 text-purple-700 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
             </svg>
-            Tren Arsip per Bulan
-        </h3>
-        <div class="relative" style="height: 350px;">
-            <canvas id="monthlyChart"></canvas>
+            Akses Pimpinan — Semua Laporan + TTE
         </div>
     </div>
-</div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Prevent auto scroll issue
-document.addEventListener('DOMContentLoaded', function() {
-    // Category Chart
-    const categoryCtx = document.getElementById('categoryChart');
-    if (categoryCtx) {
-        new Chart(categoryCtx.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: @json($chartData['archives_by_category']->keys()),
-                datasets: [{
-                    data: @json($chartData['archives_by_category']->values()),
-                    backgroundColor: [
-                        'rgb(59, 130, 246)',
-                        'rgb(168, 85, 247)',
-                        'rgb(34, 197, 94)',
-                        'rgb(249, 115, 22)',
-                        'rgb(239, 68, 68)',
-                        'rgb(236, 72, 153)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
+    {{-- Banner --}}
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-xl p-5 text-white">
+        <div class="flex items-start gap-4">
+            <div class="bg-white/20 p-3 rounded-lg flex-shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold text-lg">9 Laporan Eksekutif dengan Tanda Tangan Elektronik</p>
+                <p class="text-purple-100 text-sm mt-1">Setiap laporan dilengkapi tombol <strong>PDF + TTE</strong> — dokumen yang diekspor memiliki QR Code yang dapat diverifikasi keasliannya.</p>
+            </div>
+        </div>
+    </div>
 
-    // Status Chart
-    const statusCtx = document.getElementById('statusChart');
-    if (statusCtx) {
-        new Chart(statusCtx.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: @json($chartData['dispositions_by_status']->keys()),
-                datasets: [{
-                    label: 'Total',
-                    data: @json($chartData['dispositions_by_status']->values()),
-                    backgroundColor: [
-                        'rgba(234, 179, 8, 0.8)',
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(34, 197, 94, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgb(234, 179, 8)',
-                        'rgb(59, 130, 246)',
-                        'rgb(34, 197, 94)'
-                    ],
-                    borderWidth: 2,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { precision: 0 }
-                    }
-                }
-            }
-        });
-    }
+    {{-- Grid 9 Laporan --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-    // Monthly Chart
-    const monthlyCtx = document.getElementById('monthlyChart');
-    if (monthlyCtx) {
-        new Chart(monthlyCtx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: @json($chartData['archives_per_month']->keys()),
-                datasets: [{
-                    label: 'Arsip',
-                    data: @json($chartData['archives_per_month']->values()),
-                    borderColor: 'rgb(34, 197, 94)',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { precision: 0 }
-                    }
-                }
-            }
-        });
-    }
-});
-</script>
-{{-- Print Styles --}}
-<style media="print">
-    /* Hide elements when printing */
-    @media print {
-        /* Hide navigation, sidebar, buttons */
-        nav, .sidebar, aside, header, footer,
-        button, .no-print, .print-hide,
-        a[href^="http"]:not(.print-show),
-        .bg-gradient-to-r.from-purple-500,
-        .bg-gradient-to-r.from-orange-500,
-        svg.w-6.h-6.text-gray-600,
-        .flex.items-center > a[href*="laporan.index"] {
-            display: none !important;
-        }
+        {{-- 01. Arsip Digital --}}
+        <div class="bg-white rounded-xl border-2 border-blue-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.arsip') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <span class="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-0.5 rounded-full">01</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Arsip Digital</h4>
+                <p class="text-xs text-gray-500">Rekap seluruh arsip semua unit & bidang</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'arsip']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        /* Reset page margins */
-        @page {
-            margin: 1cm;
-            size: A4;
-        }
+        {{-- 02. Disposisi --}}
+        <div class="bg-white rounded-xl border-2 border-purple-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.disposisi') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <span class="text-purple-600 font-bold text-sm bg-purple-50 px-2 py-0.5 rounded-full">02</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Disposisi</h4>
+                <p class="text-xs text-gray-500">Progress disposisi seluruh unit & efektivitas</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'disposisi']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: white !important;
-        }
+        {{-- 03. Surat Masuk --}}
+        <div class="bg-white rounded-xl border-2 border-teal-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.surat-masuk') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-teal-600 font-bold text-sm bg-teal-50 px-2 py-0.5 rounded-full">03</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Surat Masuk</h4>
+                <p class="text-xs text-gray-500">Rekap surat masuk seluruh instansi & status</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'surat-masuk']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        /* Make tables fit on page */
-        table {
-            page-break-inside: auto;
-            width: 100%;
-            border-collapse: collapse;
-        }
+        {{-- 04. Aset --}}
+        <div class="bg-white rounded-xl border-2 border-green-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.aset') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <span class="text-green-600 font-bold text-sm bg-green-50 px-2 py-0.5 rounded-full">04</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Aset</h4>
+                <p class="text-xs text-gray-500">Inventaris aset seluruh bidang & nilainya</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'aset']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-        }
+        {{-- 05. Penyusutan --}}
+        <div class="bg-white rounded-xl border-2 border-orange-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.penyusutan') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                    </div>
+                    <span class="text-orange-600 font-bold text-sm bg-orange-50 px-2 py-0.5 rounded-full">05</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Penyusutan Aset</h4>
+                <p class="text-xs text-gray-500">Nilai penyusutan & estimasi umur aset</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'penyusutan']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        thead {
-            display: table-header-group;
-        }
+        {{-- 06. Peminjaman --}}
+        <div class="bg-white rounded-xl border-2 border-yellow-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.peminjaman') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-yellow-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    </div>
+                    <span class="text-yellow-600 font-bold text-sm bg-yellow-50 px-2 py-0.5 rounded-full">06</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Peminjaman Aset</h4>
+                <p class="text-xs text-gray-500">Rekap peminjaman aset seluruh staff & unit</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'peminjaman']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        /* Add page header for print */
-        .print-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #333;
-        }
+        {{-- 07. Kinerja Per Unit --}}
+        <div class="bg-white rounded-xl border-2 border-indigo-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.unit-kerja') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <span class="text-indigo-600 font-bold text-sm bg-indigo-50 px-2 py-0.5 rounded-full">07</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Kinerja Per Unit</h4>
+                <p class="text-xs text-gray-500">Produktivitas arsip & disposisi tiap bidang</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'unit']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        .print-header h1 {
-            font-size: 18px;
-            margin: 0;
-            color: #333;
-        }
+        {{-- 08. Pengguna --}}
+        <div class="bg-white rounded-xl border-2 border-pink-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.user') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <span class="text-pink-600 font-bold text-sm bg-pink-50 px-2 py-0.5 rounded-full">08</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Pengguna</h4>
+                <p class="text-xs text-gray-500">Monitoring aktivitas seluruh pengguna sistem</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'user']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        .print-header p {
-            font-size: 12px;
-            margin: 5px 0;
-            color: #666;
-        }
+        {{-- 09. Pemeliharaan Aset --}}
+        <div class="bg-white rounded-xl border-2 border-red-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.maintenance') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <span class="text-red-600 font-bold text-sm bg-red-50 px-2 py-0.5 rounded-full">09</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Pemeliharaan Aset</h4>
+                <p class="text-xs text-gray-500">Status aset rusak & dalam pemeliharaan</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'maintenance']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
 
-        /* Remove colors for black & white printing */
-        * {
-            color: #000 !important;
-            background: white !important;
-            box-shadow: none !important;
-        }
-
-        /* Keep badges visible */
-        .badge, span[class*="bg-"] {
-            border: 1px solid #333 !important;
-            padding: 2px 6px !important;
-            color: #000 !important;
-        }
-
-        /* Chart containers */
-        canvas {
-            max-height: 400px !important;
-        }
-
-        /* Remove shadows and gradients */
-        .shadow-sm, .shadow-lg, .shadow-xl {
-            box-shadow: none !important;
-        }
-
-        /* Adjust spacing */
-        .space-y-6 > * + * {
-            margin-top: 20px !important;
-        }
-
-        /* Footer for print */
-        .print-footer {
-            display: block !important;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-        }
-    }
-</style>
-
-{{-- Print Header (hidden on screen) --}}
-<div class="print-header" style="display: none;">
-    <h1>LAPORAN [NAMA LAPORAN]</h1>
-    <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
-    <p>Dinas Komunikasi dan Informatika</p>
-    <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
-</div>
-
-{{-- Print Footer (hidden on screen) --}}
-<div class="print-footer" style="display: none;">
-    <p>GANDARIA - Sistem Arsip Digital | Halaman [Page] dari [Total Pages]</p>
+    </div>
 </div>
 @endsection

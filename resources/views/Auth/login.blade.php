@@ -105,13 +105,13 @@
                 </div>
                 
                 <h1 class="system-title text-3xl md:text-5xl font-bold text-white mb-2 md:mb-3 tracking-wide">GANDARIA</h1>
-                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Sistem penGelolaan Arsip dan Data aset terpAdu, teRstruktur, Informatif, dan Akuntabel</p>
+                <p class="subtitle text-base md:text-xl text-white font-normal mb-4 md:mb-6 px-4">Pengelolaan arsip dan data aset, terstruktur, informatif, dan akuntabel</p>
                 
                 <div class="description-box bg-white/10 backdrop-blur-sm rounded-2xl p-4 md:p-6 mt-3 md:mt-4 text-white mx-4 md:mx-0">
                     <p class="text-xs md:text-sm leading-relaxed text-center">
-                        <strong>GANDARIA</strong> adalah aplikasi <strong>PERTAMA</strong> yang ditetapkan 
+                        <strong>GANDARIA</strong> adalah aplikasi <strong>pertama kantor diskominfo</strong> yang ditetapkan 
                         berdasarkan Keputusan Kepala Diskominfo Kabupaten Barito Kuala untuk 
-                        Sistem Pengelolaan Arsip dan Data Aset Terpadu, Terstruktur, Informatif, dan Akuntabel.
+                        aplikasi pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel.
                     </p>
                 </div>
             </div>
@@ -194,18 +194,7 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Login Sebagai</label>
-                        <select name="role" required class="input-field w-full px-3 md:px-4 py-2.5 md:py-3 border-2 border-gray-200 rounded-xl focus:border-sky-500 focus:outline-none bg-gray-50 appearance-none cursor-pointer text-sm md:text-base">
-                            <option value="">-- Pilih Role --</option>
-                            <option value="admin" class="role-option" {{ old('role') == 'admin' ? 'selected' : '' }}>👨‍💼 Administrator</option>
-                            <option value="staff" class="role-option" {{ old('role') == 'staff' ? 'selected' : '' }}>👤 Staff</option>
-                            <option value="pimpinan" class="role-option" {{ old('role') == 'pimpinan' ? 'selected' : '' }}>👔 Pimpinan</option>
-                        </select>
-                        <p class="text-xs text-gray-500 mt-1" id="roleInfoText">
-                            <i class="fas fa-info-circle mr-1"></i> Pilih sesuai dengan akses akun Anda
-                        </p>
-                    </div>
+
 
                     <div>
                         <div class="captcha-container bg-gray-100 border-2 border-gray-200 rounded-xl p-3 md:p-4 flex items-center justify-between">
@@ -306,8 +295,7 @@
         document.querySelector('form').addEventListener('submit', function(e) {
             const email = document.querySelector('input[name="email"]').value.trim();
             const password = document.querySelector('input[name="password"]').value;
-            const role = document.querySelector('select[name="role"]').value;
-            const captcha = document.getElementById('captchaInput').value.trim();
+const captcha = document.getElementById('captchaInput').value.trim();
             
             if (!validateCaptcha()) {
                 e.preventDefault();
@@ -341,24 +329,7 @@
             resizeTimer = setTimeout(function() { generateCaptcha(); }, 250);
         });
         
-        document.querySelector('select[name="role"]').addEventListener('change', function() {
-            const selectedRole = this.value;
-            const roleMessages = {
-                'admin': '👨‍💼 Akses penuh ke semua fitur sistem',
-                'staff': '👤 Akses untuk mengelola arsip & disposisi',
-                'pimpinan': '👔 Akses monitoring & laporan eksekutif'
-            };
-            
-            const infoElement = document.getElementById('roleInfoText');
-            if (selectedRole && roleMessages[selectedRole] && infoElement) {
-                infoElement.innerHTML = `<i class="fas fa-info-circle mr-1"></i>${roleMessages[selectedRole]}`;
-                infoElement.style.color = selectedRole === 'admin' ? '#3b82f6' : selectedRole === 'staff' ? '#10b981' : '#8b5cf6';
-            } else if (infoElement) {
-                infoElement.innerHTML = `<i class="fas fa-info-circle mr-1"></i> Pilih sesuai dengan akses akun Anda`;
-                infoElement.style.color = '#6b7280';
-            }
-        });
-        
+
         window.onload = function() { generateCaptcha(); };
     </script>
 </body>

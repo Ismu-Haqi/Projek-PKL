@@ -120,6 +120,22 @@
             <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Peminjaman</h4>
             <p class="text-sm text-gray-600">Sirkulasi riwayat peminjaman aset</p>
         </a>
+
+        {{-- Card Surat Masuk --}}
+        <a href="{{ route(Auth::user()->role . '.laporan.surat-masuk') }}"
+           class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <span class="text-teal-600 font-bold text-sm">08</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Surat Masuk</h4>
+            <p class="text-sm text-gray-600">Rekap surat masuk & status disposisi</p>
+        </a>
+
         <a href="{{ route(Auth::user()->role . '.laporan.maintenance') }}" class="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border-2 border-red-200 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-lg bg-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -128,7 +144,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                 </div>
-                <span class="text-red-600 font-bold text-sm">08</span>
+                <span class="text-red-600 font-bold text-sm">09</span>
             </div>
             <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Pemeliharaan</h4>
             <p class="text-sm text-gray-600">Daftar aset rusak dan pemeliharaan</p>

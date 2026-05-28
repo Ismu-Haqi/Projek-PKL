@@ -49,18 +49,14 @@ class LoginController extends Controller
     {
         // ✅ UPDATED: Validasi input termasuk captcha dan role pimpinan
         $request->validate([
-            'email' => 'required|string',
-            'password' => 'required|string',
-            'role' => 'required|in:admin,staff,pimpinan',
-            'captcha' => 'required|string',
+            'email'        => 'required|string',
+            'password'     => 'required|string',
+            'captcha'      => 'required|string',
             'captcha_code' => 'required|string',
         ], [
-            'email.required' => 'Email/Username harus diisi',
+            'email.required'    => 'Email/Username harus diisi',
             'password.required' => 'Password harus diisi',
-            'role.required' => 'Pilih role terlebih dahulu',
-            'role.in' => 'Role yang dipilih tidak valid',
-            'captcha.required' => 'Captcha harus diisi',
-            'captcha_code.required' => 'Kode captcha tidak valid',
+            'captcha.required'  => 'Captcha harus diisi',
         ]);
 
         // ✅ VALIDASI CAPTCHA - Cek apakah captcha cocok
@@ -73,33 +69,28 @@ class LoginController extends Controller
         // Cek apakah email valid
         $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        // ✅ Cek user dulu sebelum attempt login
-        $user = User::where($loginType, $request->email)
-                    ->where('role', $request->role)
-                    ->first();
+        // Cek user tanpa filter role — role ditentukan dari database
+        $user = User::where($loginType, $request->email)->first();
 
         // ✅ Cek apakah user ada
         if (!$user) {
             return back()
-                ->with('login_error', 'Email/username tidak ditemukan atau role tidak sesuai. Pastikan Anda memilih role yang benar (Administrator, Staff, atau Pimpinan).')
-                ->withInput($request->only('email', 'role'));
+            ->with('login_error', 'Email/username tidak ditemukan. Pastikan username yang Anda masukkan benar.')
+            ->withInput($request->only('email'));
         }
 
-        // ✅ Cek apakah user aktif
+        // Cek apakah user tidak aktif
         if (!$user->is_active) {
             return back()
-                ->with('warning', 'Akun Anda tidak aktif. Silakan hubungi administrator untuk mengaktifkan kembali akun Anda.')
-                ->withInput($request->only('email', 'role'));
+                ->with('warning', 'Akun Anda tidak aktif. Silakan hubungi administrator.')
+                ->withInput($request->only('email'));
         }
 
-        // Credentials untuk login
         $credentials = [
             $loginType => $request->email,
             'password' => $request->password,
-            'role' => $request->role,
         ];
 
-        // ✅ Attempt login dengan remember me
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             // ✅ Regenerate session untuk keamanan
             $request->session()->regenerate();
@@ -150,10 +141,9 @@ class LoginController extends Controller
             return back()->with('error', 'Role tidak valid untuk akses sistem. Hubungi administrator.');
         }
 
-        // ✅ LOGIN GAGAL - PASSWORD SALAH
         return back()
-            ->with('password_error', 'Password yang Anda masukkan salah. Silakan periksa kembali atau gunakan fitur lupa password jika Anda tidak ingat.')
-            ->withInput($request->only('email', 'role'));
+            ->with('password_error', 'Password yang Anda masukkan salah. Silakan periksa kembali.')
+            ->withInput($request->only('email'));
     }
 
     /**

@@ -4,31 +4,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
+    | CORS Configuration — GANDARIA
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
-    |
-    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-    |
+    | Batasi akses cross-origin hanya dari origin yang diizinkan.
+    | Untuk production, ganti allowed_origins dengan domain resmi.
+    |--------------------------------------------------------------------------
     */
 
+    // Hanya berlaku untuk API route, bukan web route
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
-    'allowed_origins' => ['*'],
+    // Di local: izinkan semua. Di production: ganti dengan domain resmi
+    // Contoh production: ['https://gandaria.diskominfo.batola.go.id']
+    'allowed_origins' => env('APP_ENV') === 'production'
+        ? explode(',', env('CORS_ALLOWED_ORIGINS', ''))
+        : ['*'],
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => [
+        'Content-Type',
+        'X-Requested-With',
+        'Authorization',
+        'X-CSRF-TOKEN',
+        'Accept',
+    ],
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 3600,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

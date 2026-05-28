@@ -166,6 +166,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
         Route::get('/aset', [ReportController::class, 'aset'])->name('aset');
         Route::get('/user', [ReportController::class, 'user'])->name('user');
+        Route::get('/surat-masuk', [ReportController::class, 'suratMasuk'])->name('surat-masuk');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
@@ -324,6 +325,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/arsip', [ReportController::class, 'arsip'])->name('arsip');
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
+        Route::get('/surat-masuk', [ReportController::class, 'suratMasuk'])->name('surat-masuk');
+        Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
@@ -420,6 +423,16 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
     
+    Route::prefix('mutasi')->name('mutasi.')->group(function () {
+        Route::get('/', [AssetMutationController::class, 'index'])->name('index');
+        Route::get('/create', [AssetMutationController::class, 'create'])->name('create');
+        Route::post('/', [AssetMutationController::class, 'store'])->name('store');
+        Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [AssetMutationController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [AssetMutationController::class, 'reject'])->name('reject');
+        Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+
     // Manajemen User (Read-Only)
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
@@ -433,6 +446,7 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/disposisi', [ReportController::class, 'disposisi'])->name('disposisi');
         Route::get('/aset', [ReportController::class, 'aset'])->name('aset');
         Route::get('/user', [ReportController::class, 'user'])->name('user');
+        Route::get('/surat-masuk', [ReportController::class, 'suratMasuk'])->name('surat-masuk');
         Route::get('/periode', [ReportController::class, 'periode'])->name('periode');
         Route::get('/unit-kerja', [ReportController::class, 'unitKerja'])->name('unit-kerja');
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
