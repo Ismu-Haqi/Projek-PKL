@@ -154,9 +154,9 @@
                 <img src="{{ public_path('images/logo-selidah.png') }}" alt="Logo Selidah">
             </div>
             <div class="header-text">
-                <h1>LAPORAN ARSIP DIGITAL</h1>
+                <h1>LAPORAN ARSIP </h1>
                 <p><strong>GANDARIA</strong></p>
-                <p>Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
+                <p>Pengelolaan arsip dan data aset terstruktur, informatif dan akuntabel</p>
                 <p>Dinas Komunikasi dan Informatika Kab. Barito Kuala</p>
             </div>
             <div class="logo-right">
@@ -235,7 +235,7 @@
 
             {{-- Nama tanpa garis --}}
             <div class="signer-space"></div>
-            <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Azwar Arsyadi, S.Kom' }}</p>
+            <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Aris Saputera, S.STP.,MSi.' }}</p>
             <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
@@ -243,7 +243,7 @@
     <!-- Footer -->
     <div class="footer">
         <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
-        <p>GANDARIA - Sistem Arsip Digital | Halaman 1 dari 1</p>
+        <p>GANDARIA | Halaman 1 dari 1</p>
     </div>
 </body>
 </html>

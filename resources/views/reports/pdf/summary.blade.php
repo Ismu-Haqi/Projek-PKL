@@ -228,13 +228,13 @@
             <p>Mengetahui,</p>
             <div class="signature-space"></div>
             <div class="signature-line">
-                Azwar Arsyadi, S.Kom
+                Aris Saputera, S.STP.,MSi.
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <p>GANDARIA - Sistem Arsip Dan Aset Digital | Halaman 1 dari 1</p>
+        <p>GANDARIA | Halaman 1 dari 1</p>
     </div>
 </body>
 </html>

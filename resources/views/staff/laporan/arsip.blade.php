@@ -309,13 +309,13 @@
 {{-- Print Header (hidden on screen) --}}
 <div class="print-header" style="display: none;">
     <h1>LAPORAN [NAMA LAPORAN]</h1>
-    <p>GANDARIA - Generasi Arsip Nasional Digital Reformasi Indonesia Anda</p>
-    <p>Dinas Komunikasi dan Informatika</p>
+    <p>GANDARIA - Pengelolaan arsip dan data aset terpadu, informatif dan akuntabel</p>
+    <p>Dinas Komunikasi dan Informatika Barito Kuala</p>
     <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
 </div>
 
 {{-- Print Footer (hidden on screen) --}}
 <div class="print-footer" style="display: none;">
-    <p>GANDARIA - Sistem Arsip Digital | Halaman [Page] dari [Total Pages]</p>
+    <p>GANDARIA  | Halaman [Page] dari [Total Pages]</p>
 </div>
 @endsection

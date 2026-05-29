@@ -20,12 +20,22 @@
         table.data td { padding: 6px 8px; border: 1px solid #ddd; font-size: 9px; vertical-align: top; }
         .text-red { color: #dc2626; font-weight: bold; }
         .text-yellow { color: #d97706; font-weight: bold; }
-        .signature-section { margin-top: 50px; text-align: right; }
-        .signature-box { display: inline-block; text-align: center; min-width: 200px; }
-        .signature-box p { margin: 5px 0; font-size: 11px; }
-        .signature-space { height: 60px; margin: 10px 0; }
-        .signature-line { border-top: 1px solid #333; padding-top: 5px; font-weight: bold; font-size: 11px; }
-        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10px; color: #666; padding: 10px; border-top: 1px solid #ddd; }
+        /* ── TTE & Signature ────────────────────────── */
+        .signature-section { margin-top: 30px; page-break-inside: avoid; }
+        .signature-table   { width: 100%; border-collapse: collapse; }
+        .sig-left          { width: 55%; vertical-align: bottom; }
+        .sig-right         { width: 45%; vertical-align: top; text-align: center; }
+        .tte-box           { display: inline-block; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; background: #f9fafb; text-align: center; width: 155px; }
+        .tte-box img       { width: 105px; height: 105px; display: block; margin: 0 auto 4px auto; }
+        .tte-label-bold    { font-size: 8px; font-weight: bold; color: #374151; margin: 2px 0; }
+        .tte-label         { font-size: 7px; color: #6b7280; margin: 1px 0; line-height: 1.3; }
+        .tte-url           { font-size: 6px; color: #9ca3af; word-break: break-all; margin-top: 2px; }
+        .ttd-area          { text-align: center; margin-top: 6px; }
+        .ttd-area p        { margin: 3px 0; font-size: 11px; }
+        .ttd-space         { height: 50px; }
+        .signer-name       { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
+        .signer-title      { font-size: 10px; color: #555; margin: 0; }
+        .footer            { text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ddd; padding-top: 6px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -35,7 +45,7 @@
             <div class="header-text">
                 <h1>LAPORAN PEMELIHARAAN & KERUSAKAN ASET</h1>
                 <p><strong>GANDARIA</strong></p>
-                <p>Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
+                <p>Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
             </div>
             <div class="logo-right"><img src="{{ public_path('images/gandaria.png') }}"></div>
         </div>
@@ -79,12 +89,29 @@
     </table>
 
     <div class="signature-section">
-        <div class="signature-box">
-            <p>Marabahan, {{ now()->format('d F Y') }}</p><p>Mengetahui,</p>
-            <div class="signature-space"></div>
-            <div class="signature-line">Azwar Arsyadi, S.Kom</div>
+        <div class="signature-wrapper">
+            <p>Marabahan, {{ now()->format('d F Y') }}</p>
+            <p>Mengetahui,</p>
+
+            {{-- QR Code di atas nama --}}
+            @if(isset($qrSvg) && $qrSvg)
+            <div class="qr-block">
+                <img src="{{ $qrSvg }}" alt="QR TTE">
+                <p class="qr-label">Tanda Tangan Elektronik</p>
+                <p class="qr-url">{{ $validasiUrl ?? '' }}</p>
+            </div>
+            @else
+            <div style="height: 70px;"></div>
+            @endif
+
+            {{-- Nama tanpa garis --}}
+            <div class="signer-space"></div>
+            <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Aris Saputera, S.STP.,MSi.' }}</p>
+            <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
-    <div class="footer"><p>GANDARIA - Sistem Arsip Dan Aset Digital</p></div>
+    <div class="footer">
+        Dicetak: {{ now()->format('d F Y H:i:s') }} &nbsp;|&nbsp; GANDARIA  &nbsp;|&nbsp; Halaman 1 dari 1
+    </div>
 </body>
 </html>

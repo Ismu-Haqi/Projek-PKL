@@ -13,7 +13,7 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">📁 Laporan Arsip Digital</h1>
+                <h1 class="text-3xl font-bold text-gray-800">📁 Laporan Arsip </h1>
                 <p class="text-gray-600 mt-1">Rekap arsip berdasarkan kategori, periode, dan unit kerja</p>
             </div>
         </div>
