@@ -534,7 +534,7 @@ class ReportController extends Controller
         $signature = DocumentSignature::generateFor(
             documentType:  $type,
             documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
-            signedBy:      'Aris Saputera,S.STP.,M.Si.',
+            signedBy:      'Azwar Arsyadi, S.Kom',
             signedByTitle: 'Kepala Dinas',
             metadata:      ['generated_by' => auth()->user()->name ?? 'System', 'ip' => request()->ip()]
         );
@@ -582,7 +582,7 @@ class ReportController extends Controller
         $signature = DocumentSignature::generateFor(
             documentType:  $type,
             documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
-            signedBy:      'Aris Saputera,S.STP.,M.Si.',
+            signedBy:      'Azwar Arsyadi, S.Kom',
             signedByTitle: 'Kepala Dinas',
         );
         $validasiUrl         = url('/validasi/' . $signature->token);
@@ -771,11 +771,6 @@ class ReportController extends Controller
                 $query = Archive::with(['category', 'uploader'])
                     ->whereBetween('archives.created_at', [$dateRange['start'], $dateRange['end']]);
                 
-                // Filter per staff
-                if (Auth::user()->role === 'staff') {
-                    $query->where('archives.user_id', Auth::id());
-                }
-                
                 if ($request->filled('category_id')) {
                     $query->where('category_id', $request->category_id);
                 }
@@ -790,11 +785,6 @@ class ReportController extends Controller
                 
                 $query = Disposition::with(['fromUser', 'toUser', 'disposable'])
                     ->whereBetween('dispositions.created_at', [$dateRange['start'], $dateRange['end']]);
-                
-                // Filter per staff
-                if (Auth::user()->role === 'staff') {
-                    $query->where('dispositions.to_user_id', Auth::id());
-                }
                 
                 if ($request->filled('status')) {
                     $query->where('status', $request->status);

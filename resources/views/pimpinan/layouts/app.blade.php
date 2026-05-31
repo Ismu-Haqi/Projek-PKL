@@ -321,6 +321,125 @@
                 min-width: 44px;
             }
         }
+        /* ========================================
+           MOBILE OPTIMIZATION - POCO X6 PRO & similar
+           Target: max-width 430px (6.67 inch screens)
+           ======================================== */
+
+        /* ── Tabel: scroll horizontal yang nyaman ── */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 0.5rem;
+        }
+        .table-responsive table {
+            min-width: 600px;
+        }
+        /* Semua wrapper tabel yang ada overflow-x-auto */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 640px) {
+
+            /* ── Layout padding lebih lega ── */
+            .p-6 { padding: 1rem !important; }
+            .p-8 { padding: 1rem !important; }
+            .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+
+            /* ── Stats grid: 2 kolom di mobile ── */
+            .grid.grid-cols-1.md\:grid-cols-4,
+            .grid.grid-cols-1.md\:grid-cols-5,
+            .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.625rem !important;
+            }
+
+            /* ── Stat card lebih compact ── */
+            .stat-icon { padding: 0.5rem !important; }
+            .stat-icon svg { width: 1.25rem !important; height: 1.25rem !important; }
+
+            /* ── Filter form: stack vertikal ── */
+            form .flex.flex-wrap.gap-3,
+            form .flex.flex-wrap.gap-4,
+            .filter-form { flex-direction: column !important; }
+            form .flex.flex-wrap.gap-3 > *,
+            form .flex.flex-wrap.gap-4 > * { width: 100% !important; min-width: 0 !important; }
+            form select, form input[type="text"],
+            form input[type="date"], form input[type="search"] {
+                width: 100% !important;
+                font-size: 16px !important; /* cegah zoom di iOS */
+            }
+
+            /* ── Tombol aksi: full width di mobile ── */
+            .action-buttons { flex-direction: column !important; gap: 0.5rem !important; }
+            .action-buttons a, .action-buttons button { width: 100% !important; justify-content: center !important; }
+
+            /* ── Header halaman: stack vertikal ── */
+            .page-header.flex.justify-between,
+            .flex.justify-between.items-center.mb-6 {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.75rem !important;
+            }
+            .flex.justify-between.items-center.mb-6 > a,
+            .flex.justify-between.items-center.mb-6 > button {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+
+            /* ── Tabel: min-width agar tidak terlalu sempit ── */
+            table { min-width: 580px !important; }
+            table th, table td { padding: 0.5rem 0.625rem !important; font-size: 0.8125rem !important; }
+
+            /* ── Card grid aset: 1 kolom di mobile ── */
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3,
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-4 {
+                grid-template-columns: repeat(1, 1fr) !important;
+            }
+
+            /* ── Form input penuh ── */
+            .max-w-3xl, .max-w-4xl, .max-w-2xl { max-width: 100% !important; }
+            .grid.grid-cols-2 { grid-template-columns: repeat(1, 1fr) !important; }
+            .grid.grid-cols-1.md\:grid-cols-2 { grid-template-columns: repeat(1, 1fr) !important; }
+
+            /* ── Detail show: 2 kolom menjadi 1 ── */
+            .lg\:col-span-2 { grid-column: span 1 !important; }
+            .grid.grid-cols-1.lg\:grid-cols-3 { grid-template-columns: repeat(1, 1fr) !important; }
+
+            /* ── Badge & chip lebih kecil ── */
+            .px-3.py-1 { padding: 0.2rem 0.5rem !important; font-size: 0.75rem !important; }
+
+            /* ── Modal / popup lebih lebar ── */
+            .max-w-md { max-width: calc(100vw - 2rem) !important; }
+            .max-w-lg { max-width: calc(100vw - 1.5rem) !important; }
+            .max-w-xl { max-width: calc(100vw - 1rem) !important; }
+
+            /* ── Tombol top-header ── */
+            .top-header .flex.items-center.gap-3 { gap: 0.5rem !important; }
+
+            /* ── Breadcrumb ── */
+            .flex.items-center.gap-2.text-sm { flex-wrap: wrap !important; font-size: 0.75rem !important; }
+
+            /* ── Chart/grafik container ── */
+            canvas { max-width: 100% !important; }
+
+            /* ── Perpindahan info (mutasi) ── */
+            .flex.items-stretch.gap-3,
+            .flex.items-center.gap-4 { flex-direction: column !important; }
+
+            /* ── Scroll hint: indikator ada konten horizontal ── */
+            .overflow-x-auto::after {
+                content: '';
+                display: block;
+            }
+        }
+
+        /* ── Scrollbar mobile tipis ── */
+        @media (max-width: 640px) {
+            ::-webkit-scrollbar { height: 3px; width: 3px; }
+            ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        }
     </style>
     
     @stack('styles')

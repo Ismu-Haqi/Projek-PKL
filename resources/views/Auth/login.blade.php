@@ -88,6 +88,44 @@
             .description-box { font-size: 0.75rem !important; padding: 0.875rem !important; }
             .partner-logo { width: 40px !important; height: 40px !important; }
         }
+
+        /* ── Login: Mobile khusus layar HP ── */
+        @media (max-width: 640px) {
+            /* Sembunyikan panel kiri (logo/deskripsi), fokus ke form login */
+            .grid.md\:grid-cols-2 { grid-template-columns: 1fr !important; }
+            .grid.md\:grid-cols-2 > div:first-child { display: none !important; }
+
+            /* Form card full width */
+            .container { padding: 1rem !important; }
+            .container > .grid > div:last-child { padding: 0 !important; }
+
+            /* Card form lebih lega */
+            .bg-white.rounded-3xl { border-radius: 1.25rem !important; padding: 1.5rem !important; }
+
+            /* Input font-size 16px cegah zoom di iOS/Android */
+            input[type="text"], input[type="password"], input[type="email"],
+            input[type="number"], select, textarea {
+                font-size: 16px !important;
+            }
+
+            /* Logo kecil di atas form */
+            .bg-white.rounded-3xl::before {
+                content: '';
+                display: block;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            /* Captcha canvas full width */
+            #captchaCanvas { width: 100% !important; max-width: 160px; }
+
+            /* Tombol masuk full width */
+            button[type="submit"] { width: 100% !important; padding: 0.875rem !important; font-size: 1rem !important; }
+
+            /* Kurangi padding body */
+            body.gradient-bg { padding: 0.5rem !important; }
+            .py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">

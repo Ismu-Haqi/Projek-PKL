@@ -151,6 +151,7 @@
     </style>
 </head>
 <body>
+<div class="content-wrap">
     <div class="header">
         <div class="header-logos">
             <div class="logo-left">

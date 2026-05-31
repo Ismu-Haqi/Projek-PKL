@@ -119,7 +119,15 @@
         
         
                 /* ── TTE & Signature ── */
-        .signature-section { margin-top: 30px; page-break-inside: avoid; }
+        .signature-section { margin-top: 40px; text-align: right; } /* ✅ DIUBAH: tambah text-align right */
+        .signature-wrapper { display: inline-block; text-align: center; min-width: 200px; } /* ✅ TAMBAHAN BARU */
+        .qr-block { margin: 8px auto; text-align: center; }                                  /* ✅ TAMBAHAN BARU */
+        .qr-block img { width: 110px; height: 110px; display: block; margin: 0 auto; }       /* ✅ TAMBAHAN BARU */
+        .qr-label { font-size: 7.5px; color: #6b7280; margin: 3px 0 0 0; }                   /* ✅ TAMBAHAN BARU */
+        .qr-url { font-size: 6.5px; color: #9ca3af; word-break: break-all; margin: 2px 0; }  /* ✅ TAMBAHAN BARU */
+        .signer-space { height: 8px; }                                                        /* ✅ TAMBAHAN BARU */
+        .signer-name { font-weight: bold; font-size: 11px; margin: 4px 0 2px 0; }            /* ✅ TAMBAHAN BARU */
+        .signer-title { font-size: 10px; color: #555; margin: 0; } 
         .signature-table   { width: 100%; border-collapse: collapse; }
         .sig-left          { width: 55%; vertical-align: bottom; }
         .sig-right         { width: 45%; vertical-align: top; text-align: center; }

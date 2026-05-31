@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Produktivitas Unit Kerja</title>
+    <title>Laporan Aktivitas User</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,39 +82,6 @@
             font-weight: bold;
             color: #333;
         }
-        .top-units {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .top-unit {
-            display: table-cell;
-            width: 33.33%;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid #ddd;
-            background-color: #fef3c7;
-        }
-        .top-unit.second {
-            background-color: #f3f4f6;
-        }
-        .top-unit.third {
-            background-color: #fed7aa;
-        }
-        .top-unit .rank {
-            font-size: 20px;
-            font-weight: bold;
-            color: #666;
-        }
-        .top-unit .unit-name {
-            font-size: 13px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .top-unit .stats {
-            font-size: 10px;
-            color: #666;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -143,30 +110,44 @@
             font-size: 8px;
             font-weight: bold;
         }
-        .badge-excellent { background-color: #d1fae5; color: #065f46; }
-        .badge-good { background-color: #dbeafe; color: #1e40af; }
-        .badge-fair { background-color: #fef3c7; color: #92400e; }
-        .badge-poor { background-color: #fee2e2; color: #991b1b; }
+        .badge-admin { background-color: #e9d5ff; color: #6b21a8; }
+        .badge-staff { background-color: #d1fae5; color: #065f46; }
+        .badge-pimpinan { background-color: #fee2e2; color: #991b1b; }
         
         
         
         
         
-                /* ── TTE & Signature ── */
-        .signature-section { margin-top: 30px; page-break-inside: avoid; }
-        .signature-table   { width: 100%; border-collapse: collapse; }
-        .sig-left          { width: 55%; vertical-align: bottom; }
-        .sig-right         { width: 45%; vertical-align: top; text-align: center; }
-        .tte-box           { display: inline-block; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; background: #f9fafb; text-align: center; width: 155px; }
-        .tte-box img       { width: 105px; height: 105px; display: block; margin: 0 auto 4px auto; }
-        .tte-label-bold    { font-size: 8px; font-weight: bold; color: #374151; margin: 2px 0; }
-        .tte-label         { font-size: 7px; color: #6b7280; margin: 1px 0; line-height: 1.3; }
-        .tte-url           { font-size: 6px; color: #9ca3af; word-break: break-all; margin-top: 2px; }
-        .ttd-area          { text-align: center; margin-top: 6px; }
-        .ttd-area p        { margin: 3px 0; font-size: 11px; }
-        .ttd-space         { height: 50px; }
-        .signer-name       { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
-        .signer-title      { font-size: 10px; color: #555; margin: 0; }
+                        /* ── TTE Fix di pojok kanan bawah ─────────────────────────────── */
+        .content-wrap { padding-bottom: 180px; }
+        .signature-section {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 200px;
+            text-align: center;
+        }
+        .signature-wrapper { text-align: center; }
+        .signature-wrapper p { margin: 3px 0; font-size: 11px; }
+        .qr-block { margin: 6px auto; text-align: center; }
+        .qr-block img { width: 100px; height: 100px; display: block; margin: 0 auto; }
+        .qr-label { font-size: 7px; color: #6b7280; margin: 2px 0 0 0; }
+        .qr-url { font-size: 6px; color: #9ca3af; word-break: break-all; margin: 1px 0 0 0; }
+        .signer-space { height: 6px; }
+        .signer-name { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
+        .signer-title { font-size: 10px; color: #555; margin: 0; }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding: 4px 0;
+            background: white;
+        }
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -180,13 +161,15 @@
     </style>
 </head>
 <body>
+<div class="content-wrap">
+    <!-- Header with Logos -->
     <div class="header">
         <div class="header-logos">
             <div class="logo-left">
                 <img src="{{ public_path('images/logo-selidah.png') }}" alt="Logo Selidah">
             </div>
             <div class="header-text">
-                <h1>LAPORAN PRODUKTIVITAS UNIT KERJA</h1>
+                <h1>LAPORAN AKTIVITAS USER</h1>
                 <p><strong>GANDARIA</strong></p>
                 <p>Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
                 <p>Dinas Komunikasi dan Informatika Kab. Barito Kuala</p>
@@ -197,6 +180,7 @@
         </div>
     </div>
 
+    <!-- Info Box -->
     <div class="info-box">
         <table>
             <tr>
@@ -208,92 +192,72 @@
                 <td>: {{ $start_date->format('d M Y') }} s/d {{ $end_date->format('d M Y') }}</td>
             </tr>
             <tr>
-                <td class="font-bold">Total Unit Kerja</td>
-                <td>: {{ count($units) }} Unit</td>
+                <td class="font-bold">Total User</td>
+                <td>: {{ count($users) }} Pengguna</td>
             </tr>
         </table>
     </div>
 
+    <!-- Statistics -->
     <div class="stats-grid">
         <div class="stat-box">
-            <h3>Rata-rata Arsip/Unit</h3>
-            <div class="number">{{ number_format(collect($units)->avg('total_archives'), 1) }}</div>
+            <h3>Total Pengguna</h3>
+            <div class="number">{{ count($users) }}</div>
         </div>
         <div class="stat-box">
-            <h3>Rata-rata Disposisi/Unit</h3>
-            <div class="number">{{ number_format(collect($units)->avg('total_dispositions'), 1) }}</div>
+            <h3>Admin</h3>
+            <div class="number">{{ collect($users)->where('role', 'admin')->count() }}</div>
         </div>
         <div class="stat-box">
-            <h3>Avg Completion Rate</h3>
-            <div class="number">{{ number_format(collect($units)->avg('completion_rate'), 1) }}%</div>
+            <h3>Staff</h3>
+            <div class="number">{{ collect($users)->where('role', 'staff')->count() }}</div>
         </div>
         <div class="stat-box">
-            <h3>Unit Terbaik</h3>
-            <div class="number" style="font-size: 12px;">{{ collect($units)->first()['unit'] ?? '-' }}</div>
+            <h3>Total Arsip</h3>
+            <div class="number">{{ collect($users)->sum('archives_count') }}</div>
         </div>
     </div>
 
-    @if(count($units) >= 3)
-    <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 13px;">Top 3 Unit Terbaik</h3>
-    <div class="top-units">
-        @foreach(array_slice($units, 0, 3) as $index => $unit)
-        <div class="top-unit {{ $index == 1 ? 'second' : ($index == 2 ? 'third' : '') }}">
-            <div class="rank">#{{ $index + 1 }}</div>
-            <div class="unit-name">{{ $unit['unit'] }}</div>
-            <div class="stats">
-                Arsip: {{ $unit['total_archives'] }} | 
-                Disposisi: {{ $unit['total_dispositions'] }} | 
-                Rate: {{ $unit['completion_rate'] }}%
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
-
-    <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 13px;">Detail Produktivitas per Unit</h3>
+    <!-- Data Table -->
     <table>
         <thead>
             <tr>
-                <th width="5%">Rank</th>
-                <th width="25%">Unit Kerja</th>
-                <th width="12%">Arsip</th>
-                <th width="12%">Disposisi</th>
-                <th width="12%">Selesai</th>
-                <th width="14%">Completion Rate</th>
-                <th width="20%">Performance</th>
+                <th width="5%">No</th>
+                <th width="20%">Nama</th>
+                <th width="20%">Email</th>
+                <th width="10%">Role</th>
+                <th width="15%">Unit</th>
+                <th width="10%">Arsip</th>
+                <th width="10%">Disp. Terkirim</th>
+                <th width="10%">Disp. Diterima</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($units as $index => $unit)
+            @forelse($users as $index => $user)
             <tr>
-                <td class="text-center font-bold">{{ $index + 1 }}</td>
-                <td>{{ $unit['unit'] }}</td>
-                <td class="text-center">{{ $unit['total_archives'] }}</td>
-                <td class="text-center">{{ $unit['total_dispositions'] }}</td>
-                <td class="text-center">{{ $unit['completed_dispositions'] }}</td>
-                <td class="text-center">{{ $unit['completion_rate'] }}%</td>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td>{{ $user->name }}</td>
+                <td>{{ $user->email }}</td>
                 <td class="text-center">
-                    @if($unit['completion_rate'] >= 80)
-                        <span class="badge badge-excellent">Baik Sekali</span>
-                    @elseif($unit['completion_rate'] >= 60)
-                        <span class="badge badge-good">Baik</span>
-                    @elseif($unit['completion_rate'] >= 40)
-                        <span class="badge badge-fair">Lumayan</span>
-                    @else
-                        <span class="badge badge-poor">Tingkatkan Lagi</span>
-                    @endif
+                    <span class="badge badge-{{ $user->role }}">{{ strtoupper($user->role) }}</span>
                 </td>
+                <td>{{ $user->unit ?? '-' }}</td>
+                <td class="text-center">{{ $user->archives_count }}</td>
+                <td class="text-center">{{ $user->sent_dispositions_count }}</td>
+                <td class="text-center">{{ $user->received_dispositions_count }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="text-center">Tidak ada data</td>
+                <td colspan="8" class="text-center">Tidak ada data</td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
-        <!-- TTE Signature -->
-   <div class="signature-section">
+</div><!-- end content-wrap -->
+    <!-- TTE Signature -->
+</div><!-- end content-wrap -->
+    <div class="signature-section">
         <div class="signature-wrapper">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>
             <p>Mengetahui,</p>

@@ -147,6 +147,7 @@
     </style>
 </head>
 <body>
+<div class="content-wrap">
     <!-- Header with Logos -->
     <div class="header">
         <div class="header-logos">
@@ -216,7 +217,9 @@
         </tbody>
     </table>
 
+</div><!-- end content-wrap -->
     <!-- Signature Section -->
+</div><!-- end content-wrap -->
     <div class="signature-section">
         <div class="signature-wrapper">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>

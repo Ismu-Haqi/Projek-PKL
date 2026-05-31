@@ -29,21 +29,36 @@
         .badge-orange { background: #ffedd5; color: #9a3412; }
         .badge-gray   { background: #f3f4f6; color: #374151; }
 
-        /* ── TTE & Signature ────────────────────────── */
-        .signature-section { margin-top: 30px; page-break-inside: avoid; }
-        .signature-table   { width: 100%; border-collapse: collapse; }
-        .sig-left          { width: 55%; vertical-align: bottom; }
-        .sig-right         { width: 45%; vertical-align: top; text-align: center; }
-        .tte-box           { display: inline-block; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; background: #f9fafb; text-align: center; width: 155px; }
-        .tte-box img       { width: 105px; height: 105px; display: block; margin: 0 auto 4px auto; }
-        .tte-label-bold    { font-size: 8px; font-weight: bold; color: #374151; margin: 2px 0; }
-        .tte-label         { font-size: 7px; color: #6b7280; margin: 1px 0; line-height: 1.3; }
-        .tte-url           { font-size: 6px; color: #9ca3af; word-break: break-all; margin-top: 2px; }
-        .ttd-area          { text-align: center; margin-top: 6px; }
-        .ttd-area p        { margin: 3px 0; font-size: 11px; }
-        .ttd-space         { height: 50px; }
-        .signer-name       { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
-        .signer-title      { font-size: 10px; color: #555; margin: 0; }
+                /* ── TTE Fix di pojok kanan bawah ─────────────────────────────── */
+        .content-wrap { padding-bottom: 180px; }
+        .signature-section {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 200px;
+            text-align: center;
+        }
+        .signature-wrapper { text-align: center; }
+        .signature-wrapper p { margin: 3px 0; font-size: 11px; }
+        .qr-block { margin: 6px auto; text-align: center; }
+        .qr-block img { width: 100px; height: 100px; display: block; margin: 0 auto; }
+        .qr-label { font-size: 7px; color: #6b7280; margin: 2px 0 0 0; }
+        .qr-url { font-size: 6px; color: #9ca3af; word-break: break-all; margin: 1px 0 0 0; }
+        .signer-space { height: 6px; }
+        .signer-name { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
+        .signer-title { font-size: 10px; color: #555; margin: 0; }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding: 4px 0;
+            background: white;
+        }
         .footer            { text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ddd; padding-top: 6px; margin-top: 15px; }
 
         /* Pisah data per halaman, tiap halaman ada TTE */
