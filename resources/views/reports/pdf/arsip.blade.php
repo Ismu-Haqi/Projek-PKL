@@ -84,66 +84,44 @@
         }
 
         /* ── Signature Section ── */
-        .signature-section {
-            margin-top: 40px;
-            text-align: right;
-        }
-        .signature-wrapper {
-            display: inline-block;
-            text-align: center;
-            min-width: 200px;
-        }
-        .signature-wrapper p {
-            margin: 4px 0;
-            font-size: 11px;
-        }
+
         /* QR Code di atas nama */
-        .qr-block {
-            margin: 10px auto;
-            text-align: center;
-        }
-        .qr-block img {
-            width: 110px;
-            height: 110px;
-            display: block;
-            margin: 0 auto;
-        }
-        .qr-label {
-            font-size: 7.5px;
-            color: #6b7280;
-            margin: 3px 0 0 0;
-        }
-        .qr-url {
-            font-size: 6.5px;
-            color: #9ca3af;
-            word-break: break-all;
-            margin: 2px 0 0 0;
-        }
+
         /* Nama penandatangan — tanpa garis */
-        .signer-space {
-            height: 8px;
-        }
-        .signer-name {
-            font-weight: bold;
-            font-size: 11px;
-            margin: 4px 0 2px 0;
-        }
-        .signer-title {
-            font-size: 10px;
-            color: #555;
-            margin: 0;
-        }
 
         .footer {
-            margin-top: 30px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding: 6px 0;
+            background: #fff;
         }
         .text-center { text-align: center; }
         .font-bold { font-weight: bold; }
+            .signature-section {
+            margin-top: 30px;
+            width: 100%;
+            page-break-inside: avoid;
+        }
+        .signature-inner {
+            width: 200px;
+            float: right;
+            text-align: center;
+        }
+        
+        
+        .qr-block { margin: 6px auto; text-align: center; }
+        .qr-block img { width: 100px; height: 100px; display: block; margin: 0 auto; }
+        .qr-label { font-size: 7px; color: #6b7280; margin: 2px 0 0 0; }
+        .qr-url { font-size: 6px; color: #9ca3af; word-break: break-all; margin: 1px 0 0 0; }
+        .signer-space { height: 6px; }
+        .signer-name { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
+        .signer-title { font-size: 10px; color: #555; margin: 0; }
     </style>
 </head>
 <body>
@@ -217,15 +195,13 @@
         </tbody>
     </table>
 
-</div><!-- end content-wrap -->
-    <!-- Signature Section -->
-</div><!-- end content-wrap -->
+
+
     <div class="signature-section">
-        <div class="signature-wrapper">
+        <div class="signature-inner">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>
             <p>Mengetahui,</p>
 
-            {{-- QR Code di atas nama --}}
             @if(isset($qrSvg) && $qrSvg)
             <div class="qr-block">
                 <img src="{{ $qrSvg }}" alt="QR TTE">
@@ -236,17 +212,18 @@
             <div style="height: 70px;"></div>
             @endif
 
-            {{-- Nama tanpa garis --}}
             <div class="signer-space"></div>
             <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Aris Saputera, S.STP.,MSi.' }}</p>
             <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
 
-    <!-- Footer -->
+</div><!-- end content-wrap -->
+
+
     <div class="footer">
-        <p>Dicetak pada: {{ now()->format('d F Y H:i:s') }}</p>
-        <p>GANDARIA | Halaman 1 dari 1</p>
+        Dicetak: {{ now()->format('d F Y H:i:s') }} &nbsp;|&nbsp; GANDARIA &nbsp;|&nbsp; Halaman 1 dari 1
     </div>
+
 </body>
 </html>

@@ -102,14 +102,17 @@
                         /* ── TTE Fix di pojok kanan bawah ─────────────────────────────── */
         .content-wrap { padding-bottom: 180px; }
         .signature-section {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
+            margin-top: 30px;
+            width: 100%;
+            page-break-inside: avoid;
+        }
+        .signature-inner {
             width: 200px;
+            float: right;
             text-align: center;
         }
-        .signature-wrapper { text-align: center; }
-        .signature-wrapper p { margin: 3px 0; font-size: 11px; }
+        
+        
         .qr-block { margin: 6px auto; text-align: center; }
         .qr-block img { width: 100px; height: 100px; display: block; margin: 0 auto; }
         .qr-label { font-size: 7px; color: #6b7280; margin: 2px 0 0 0; }
@@ -117,6 +120,11 @@
         .signer-space { height: 6px; }
         .signer-name { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
         .signer-title { font-size: 10px; color: #555; margin: 0; }
+        
+        
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+    
         .footer {
             position: fixed;
             bottom: 0;
@@ -126,19 +134,9 @@
             font-size: 9px;
             color: #666;
             border-top: 1px solid #ddd;
-            padding: 4px 0;
-            background: white;
+            padding: 6px 0;
+            background: #fff;
         }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-        }
-        .text-center { text-align: center; }
-        .font-bold { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -234,9 +232,10 @@
     </table>
 
         <!-- TTE Signature -->
- </div><!-- end content-wrap -->
+ 
+
     <div class="signature-section">
-        <div class="signature-wrapper">
+        <div class="signature-inner">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>
             <p>Mengetahui,</p>
 
@@ -257,6 +256,9 @@
             <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
+
+</div><!-- end content-wrap -->
+
     <div class="footer">
         Dicetak: {{ now()->format('d F Y H:i:s') }} &nbsp;|&nbsp; GANDARIA  &nbsp;|&nbsp; Halaman 1 dari 1
     </div>

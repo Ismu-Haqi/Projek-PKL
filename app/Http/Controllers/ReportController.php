@@ -534,7 +534,7 @@ class ReportController extends Controller
         $signature = DocumentSignature::generateFor(
             documentType:  $type,
             documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
-            signedBy:      'Azwar Arsyadi, S.Kom',
+            signedBy:      'Aris Saputera, S.STP.,MSi',
             signedByTitle: 'Kepala Dinas',
             metadata:      ['generated_by' => auth()->user()->name ?? 'System', 'ip' => request()->ip()]
         );
@@ -582,7 +582,7 @@ class ReportController extends Controller
         $signature = DocumentSignature::generateFor(
             documentType:  $type,
             documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
-            signedBy:      'Azwar Arsyadi, S.Kom',
+            signedBy:      'Aris Saputera, S.STP.,MSi',
             signedByTitle: 'Kepala Dinas',
         );
         $validasiUrl         = url('/validasi/' . $signature->token);

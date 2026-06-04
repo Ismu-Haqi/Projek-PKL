@@ -7,7 +7,7 @@
     
     {{-- MAIN HEADER DASHBOARD --}}
     <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl text-white mb-6 shadow-lg card-animate">
-        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! 👋</h1>
+        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! </h1>
         <p class="text-yellow-100">GANDARIA Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
     </div>
 

@@ -116,38 +116,39 @@
             border: 1px solid #ddd;
             font-size: 10px;
         }
-        .signature-section {
-            margin-top: 50px;
-            text-align: right;
-        }
-        .signature-box {
-            display: inline-block;
-            text-align: center;
-            min-width: 200px;
-        }
-        .signature-box p {
-            margin: 5px 0;
-            font-size: 11px;
-        }
-        .signature-space {
-            height: 60px;
-            margin: 10px 0;
-        }
-        .signature-line {
-            border-top: 1px solid #333;
-            padding-top: 5px;
-            font-weight: bold;
-            font-size: 11px;
-        }
+
         .footer {
-            margin-top: 30px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding: 6px 0;
+            background: #fff;
         }
         .font-bold { font-weight: bold; }
+            .signature-section {
+            margin-top: 30px;
+            width: 100%;
+            page-break-inside: avoid;
+        }
+        .signature-inner {
+            width: 200px;
+            float: right;
+            text-align: center;
+        }
+        
+        
+        .qr-block { margin: 6px auto; text-align: center; }
+        .qr-block img { width: 100px; height: 100px; display: block; margin: 0 auto; }
+        .qr-label { font-size: 7px; color: #6b7280; margin: 2px 0 0 0; }
+        .qr-url { font-size: 6px; color: #9ca3af; word-break: break-all; margin: 1px 0 0 0; }
+        .signer-space { height: 6px; }
+        .signer-name { font-weight: bold; font-size: 11px; margin: 3px 0 1px 0; }
+        .signer-title { font-size: 10px; color: #555; margin: 0; }
     </style>
 </head>
 <body>
@@ -169,23 +170,23 @@
         </div>
     </div>
 
-    @if(isset($stats))
+    @if(isset($archives))
     <div class="stats-grid">
         <div class="stat-box">
             <h3>TOTAL ARSIP</h3>
-            <div class="number">{{ $stats['total_arsip'] ?? 0 }}</div>
+            <div class="number">{{ $archives ?? 0 }}</div>
         </div>
         <div class="stat-box">
             <h3>TOTAL ASET</h3>
-            <div class="number">{{ $stats['total_aset'] ?? 0 }}</div>
+            <div class="number">{{ $assets ?? 0 }}</div>
         </div>
         <div class="stat-box">
-            <h3>ARSIP BULAN INI</h3>
-            <div class="number">{{ $stats['arsip_bulan_ini'] ?? 0 }}</div>
+            <h3>TOTAL DISPOSISI</h3>
+            <div class="number">{{ $dispositions ?? 0 }}</div>
         </div>
         <div class="stat-box">
-            <h3>ASET BARU</h3>
-            <div class="number">{{ $stats['aset_baru'] ?? 0 }}</div>
+            <h3>TOTAL USER</h3>
+            <div class="number">{{ $users ?? 0 }}</div>
         </div>
     </div>
     @endif
@@ -203,7 +204,7 @@
         </table>
     </div>
 
-    @if(isset($archive_summary))
+    @if(isset($archive_stats) && count($archive_stats) > 0)
     <div class="section-title">Summary Arsip Berdasarkan Kategori</div>
     <table class="detail-table">
         <thead>
@@ -213,27 +214,75 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($archive_summary as $summary)
+            @foreach($archive_stats as $item)
             <tr>
-                <td>{{ $summary->kategori }}</td>
-                <td>{{ $summary->total }}</td>
+                <td>{{ $item['category'] }}</td>
+                <td>{{ $item['total'] }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
     @endif
 
+    @if(isset($disposition_stats) && count($disposition_stats) > 0)
+    <div class="section-title">Summary Disposisi Berdasarkan Status</div>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Jumlah</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($disposition_stats as $item)
+            <tr>
+                <td>{{ ucfirst(str_replace('_', ' ', $item['status'])) }}</td>
+                <td>{{ $item['total'] }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    @if(isset($asset_stats) && count($asset_stats) > 0)
+    <div class="section-title">Summary Aset Berdasarkan Kategori</div>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Kategori</th>
+                <th>Jumlah</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($asset_stats as $item)
+            <tr>
+                <td>{{ $item['kategori'] ?? '-' }}</td>
+                <td>{{ $item['total'] }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
     <div class="signature-section">
-        <div class="signature-box">
+        <div class="signature-inner">
             <p>Marabahan, {{ now()->format('d F Y') }}</p>
             <p>Mengetahui,</p>
-            <div class="signature-space"></div>
-            <div class="signature-line">
-                Aris Saputera, S.STP.,MSi.
+
+            @if(isset($qrSvg) && $qrSvg)
+            <div class="qr-block">
+                <img src="{{ $qrSvg }}" alt="QR TTE">
+                <p class="qr-label">Tanda Tangan Elektronik</p>
+                <p class="qr-url">{{ $validasiUrl ?? '' }}</p>
             </div>
+            @else
+            <div style="height: 70px;"></div>
+            @endif
+
+            <div class="signer-space"></div>
+            <p class="signer-name">{{ isset($signature) ? $signature->signed_by : 'Aris Saputera, S.STP.,MSi.' }}</p>
+            <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
-
     <div class="footer">
         <p>GANDARIA | Halaman 1 dari 1</p>
     </div>
