@@ -599,7 +599,7 @@ class ReportController extends Controller
     /**
      * Generate QR Code sebagai data URI base64 PNG
      */
-    private function generateQrDataUri(string $url): string
+    public function generateQrDataUri(string $url): string
     {
         try {
             $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
@@ -707,7 +707,7 @@ class ReportController extends Controller
         ];
     }
 
-    private function getExportData($type, $request)
+    public function getExportData($type, $request)
     {
         $data = [];
 

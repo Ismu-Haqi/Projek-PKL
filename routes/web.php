@@ -19,6 +19,7 @@ use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowControll
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\GoogleDriveBackupController;
 use App\Http\Controllers\AssetMutationController;
+use App\Http\Controllers\LaporanPengajuanController;
 use App\Models\DocumentSignature;
 
 // ── Route publik: validasi TTE (tidak perlu login) ──────────────────────────
@@ -175,6 +176,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
+
+        // Pengajuan TTE ke pimpinan
+        Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+            Route::get('/', [LaporanPengajuanController::class, 'index'])->name('index');
+            Route::post('/ajukan', [LaporanPengajuanController::class, 'ajukan'])->name('ajukan');
+            Route::post('/{id}/ajukan-ulang', [LaporanPengajuanController::class, 'ajukanUlang'])->name('ajukan-ulang');
+            Route::get('/{id}/download', [LaporanPengajuanController::class, 'download'])->name('download');
+        });
     });
     
     // Pengaturan
@@ -332,6 +341,14 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+
+        // Pengajuan TTE ke pimpinan
+        Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+            Route::get('/', [LaporanPengajuanController::class, 'index'])->name('index');
+            Route::post('/ajukan', [LaporanPengajuanController::class, 'ajukan'])->name('ajukan');
+            Route::post('/{id}/ajukan-ulang', [LaporanPengajuanController::class, 'ajukanUlang'])->name('ajukan-ulang');
+            Route::get('/{id}/download', [LaporanPengajuanController::class, 'download'])->name('download');
+        });
     });
     
     // Surat Masuk (Staff)
@@ -455,6 +472,15 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
+
+        // Validasi TTE pengajuan laporan
+        Route::prefix('validasi')->name('validasi.')->group(function () {
+            Route::get('/', [LaporanPengajuanController::class, 'daftarValidasi'])->name('index');
+            Route::get('/{id}/preview', [LaporanPengajuanController::class, 'previewValidasi'])->name('preview');
+            Route::post('/{id}/setujui', [LaporanPengajuanController::class, 'setujui'])->name('setujui');
+            Route::post('/{id}/tolak', [LaporanPengajuanController::class, 'tolak'])->name('tolak');
+            Route::get('/{id}/download', [LaporanPengajuanController::class, 'downloadPimpinan'])->name('download');
+        });
     });
     
     // Surat Masuk (Pimpinan - read only)

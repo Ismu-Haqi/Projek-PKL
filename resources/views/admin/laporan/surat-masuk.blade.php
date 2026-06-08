@@ -8,37 +8,7 @@
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="flex items-center">
-            <a href="{{ route(Auth::user()->role . '.laporan.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">📨 Laporan Surat Masuk</h1>
-                <p class="text-gray-600 mt-1">
-                    @if(Auth::user()->role === 'staff')
-                        Rekap surat masuk yang Anda input beserta status disposisinya
-                    @else
-                        Monitoring seluruh surat masuk
-                    @endif
-                </p>
-            </div>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-            <a href="{{ route(Auth::user()->role . '.laporan.print-pdf', ['type' => 'surat-masuk']) }}" target="_blank"
-               class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                Print PDF
-            </a>
-            <a href="{{ route(Auth::user()->role . '.laporan.export-pdf', ['type' => 'surat-masuk']) }}"
-               class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-                Export PDF + TTE
-            </a>
+            @include('partials.laporan-buttons', ['type' => 'surat-masuk'])
             {{-- <a href="{{ route(Auth::user()->role . '.laporan.export-excel', ['type' => 'surat-masuk']) }}"
                class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
