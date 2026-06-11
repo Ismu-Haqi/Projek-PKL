@@ -74,7 +74,6 @@
 
     <div class="info">
         <table>
-            <tr><td width="20%"><strong>Periode:</strong></td><td>{{ $period }}</td></tr>
             <tr><td><strong>Dicetak oleh:</strong></td><td>{{ Auth::user()->name }} ({{ ucfirst(Auth::user()->role) }})</td></tr>
         </table>
     </div>

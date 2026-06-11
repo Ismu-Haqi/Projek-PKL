@@ -152,11 +152,6 @@
                 <td>: {{ now()->format('d F Y H:i:s') }}</td>
             </tr>
             <tr>
-                <td class="font-bold">Periode Laporan</td>
-                <td>: {{ request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->format('d M Y') : 'Semua' }}
-                    s/d {{ request('end_date') ? \Carbon\Carbon::parse(request('end_date'))->format('d M Y') : 'Sekarang' }}</td>
-            </tr>
-            <tr>
                 <td class="font-bold">Total Arsip</td>
                 <td>: {{ $archives->count() }} Dokumen</td>
             </tr>

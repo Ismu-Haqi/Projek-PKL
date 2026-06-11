@@ -76,7 +76,10 @@
 
 @php
     // Potong data per 20 baris agar tiap halaman punya TTE
-    $chunks = isset($letters) ? $letters->chunk(20) : collect([collect([])]);
+    $lettersCollection = isset($letters) ? collect($letters) : collect([]);
+    $chunks = $lettersCollection->isEmpty()
+        ? collect([collect([])])  // tetap 1 halaman walau data kosong
+        : $lettersCollection->chunk(20);
     $totalPages = $chunks->count();
 @endphp
 
@@ -91,7 +94,7 @@
             </div>
             <div class="header-text">
                 <h1>LAPORAN SURAT MASUK</h1>
-                <p><strong>GANDARIA</strong> — Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
+                <p><strong>GANDARIA</strong> Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
                 <p>Dinas Komunikasi dan Informatika Kab. Barito Kuala</p>
             </div>
             <div class="logo-right">
@@ -112,8 +115,8 @@
                 <td>: {{ isset($letters) ? $letters->count() : 0 }} surat</td>
             </tr>
             <tr>
-                <td>Periode</td>
-                <td>: {{ $period ?? 'Semua Data' }}</td>
+                <td>Dicetak oleh</td>
+                <td>: {{ Auth::user()->name }}</td>
                 <td></td>
                 <td><strong>Halaman</strong></td>
                 <td>: {{ $pageNum + 1 }} dari {{ $totalPages }}</td>

@@ -31,7 +31,7 @@ class DocumentSignature extends Model
     public static function generateFor(
         string $documentType,
         string $documentTitle,
-        string $signedBy = 'Azwar Arsyadi, S.Kom',
+        string $signedBy = 'Aris Saputera, S.STP.,MSi.',
         string $signedByTitle = 'Kepala Dinas',
         array $metadata = []
     ): self {

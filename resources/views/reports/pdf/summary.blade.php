@@ -130,6 +130,9 @@
             background: #fff;
         }
         .font-bold { font-weight: bold; }
+        .content-wrap {
+            padding-bottom: 80px;
+        }
             .signature-section {
             margin-top: 30px;
             width: 100%;
@@ -283,6 +286,9 @@
             <p class="signer-title">{{ isset($signature) && $signature->signed_by_title ? $signature->signed_by_title : 'Kepala Dinas' }}</p>
         </div>
     </div>
+
+</div><!-- end content-wrap -->
+
     <div class="footer">
         <p>GANDARIA | Halaman 1 dari 1</p>
     </div>

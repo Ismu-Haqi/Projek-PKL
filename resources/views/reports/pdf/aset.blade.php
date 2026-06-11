@@ -137,7 +137,6 @@
                 <p><strong>GANDARIA</strong></p>
                 <p>Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
                 <p>Dinas Komunikasi dan Informatika Kab. Barito Kuala</p>
-                <p>Periode: {{ $period ?? 'Semua Periode' }}</p>
             </div>
             <div class="logo-right">
                 <img src="{{ public_path('images/gandaria.png') }}" alt="Logo Gandaria">

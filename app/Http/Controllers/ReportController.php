@@ -518,37 +518,13 @@ class ReportController extends Controller
         
         $data = $this->getExportData($type, $request);
 
-        $judulMap = [
-            'arsip'       => 'Laporan Arsip Digital',
-            'disposisi'   => 'Laporan Disposisi',
-            'aset'        => 'Laporan Manajemen Aset',
-            'user'        => 'Laporan Pengguna',
-            'unit'        => 'Laporan Unit Kerja',
-            'penyusutan'  => 'Laporan Penyusutan Aset',
-            'peminjaman'  => 'Laporan Peminjaman Aset',
-            'maintenance' => 'Laporan Pemeliharaan Aset',
-            'surat-masuk' => 'Laporan Surat Masuk',
-            'summary'     => 'Laporan Ringkasan',
-        ];
+        // Print PDF = TANPA TTE (preview saja)
+        $data['signature']   = null;
+        $data['qrSvg']       = null;
+        $data['validasiUrl'] = null;
 
-        $signature = DocumentSignature::generateFor(
-            documentType:  $type,
-            documentTitle: $judulMap[$type] ?? 'Laporan ' . ucfirst($type),
-            signedBy:      'Aris Saputera, S.STP.,MSi',
-            signedByTitle: 'Kepala Dinas',
-            metadata:      ['generated_by' => auth()->user()->name ?? 'System', 'ip' => request()->ip()]
-        );
-
-        // Encode URL validasi ke base64 untuk di-pass ke view (DomPDF render QR via PHP)
-        $validasiUrl  = url('/validasi/' . $signature->token);
-        $qrSvg = $this->generateQrDataUri($validasiUrl);
-
-        $data['signature']   = $signature;
-        $data['qrSvg']   = $qrSvg;
-        $data['validasiUrl'] = $validasiUrl;
-        // ────────────────────────────────────────────────────────────────────
-
-        $pdf = Pdf::loadView("reports.pdf.{$type}", $data);
+        $pdf = Pdf::loadView("reports.pdf.{$type}", $data)
+            ->setPaper('a4', 'portrait');
         
         return $pdf->stream("laporan_{$type}_" . date('Y-m-d') . ".pdf");
     }

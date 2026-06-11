@@ -183,7 +183,7 @@ class LaporanPengajuanController extends Controller
             documentType:  $pengajuan->jenis_laporan,
             documentTitle: $pengajuan->judul,
             signedBy:      Auth::user()->name,
-            signedByTitle: 'Kepala Dinas',
+            signedByTitle: 'Aris Saputera, S.STP.,MSi.',
             metadata:      [
                 'pengajuan_id'  => $pengajuan->id,
                 'diajukan_oleh' => $pengajuan->pengaju->name ?? '-',
@@ -201,7 +201,7 @@ class LaporanPengajuanController extends Controller
         // Notifikasi ke pengaju
         Notification::create([
             'user_id' => $pengajuan->diajukan_oleh,
-            'title'   => '✅ Laporan Disetujui & TTE',
+            'title'   => 'Laporan Disetujui & TTE',
             'message' => "{$pengajuan->judul} telah disetujui dan ditandatangani oleh " . Auth::user()->name . ". Silakan download PDF dengan TTE.",
             'type'    => 'success',
             'is_read' => false,

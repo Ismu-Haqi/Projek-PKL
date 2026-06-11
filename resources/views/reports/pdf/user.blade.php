@@ -194,10 +194,6 @@
                 <td>: {{ now()->format('d F Y H:i:s') }}</td>
             </tr>
             <tr>
-                <td class="font-bold">Periode Laporan</td>
-                <td>: {{ $start_date->format('d M Y') }} s/d {{ $end_date->format('d M Y') }}</td>
-            </tr>
-            <tr>
                 <td class="font-bold">Total User</td>
                 <td>: {{ count($users) }} Pengguna</td>
             </tr>
