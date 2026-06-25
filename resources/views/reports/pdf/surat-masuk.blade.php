@@ -94,7 +94,7 @@
             </div>
             <div class="header-text">
                 <h1>LAPORAN SURAT MASUK</h1>
-                <p><strong>GANDARIA</strong> Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
+                <p><strong>GANDARIA</strong> — Pengelolaan arsip dan data aset terstruktur, informatif, dan akuntabel</p>
                 <p>Dinas Komunikasi dan Informatika Kab. Barito Kuala</p>
             </div>
             <div class="logo-right">
