@@ -1,4 +1,4 @@
-@extends('pimpinan.layouts.app')
+@extends('staff.layouts.app')
 
 @section('title', 'Input Surat Masuk')
 
@@ -7,7 +7,7 @@
 
     {{-- Header --}}
     <div class="flex items-center mb-6">
-        <a href="{{ route('pimpinan.surat-masuk.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
+        <a href="{{ route('staff.surat-masuk.index') }}" class="mr-4 p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -28,7 +28,7 @@
             <span class="ml-auto text-blue-100 text-sm font-mono">{{ $nomorAgenda }}</span>
         </div>
 
-        <form action="{{ route('pimpinan.surat-masuk.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+        <form action="{{ route('staff.surat-masuk.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
             @csrf
 
             {{-- Nomor Surat & Tanggal Surat --}}
@@ -36,10 +36,21 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">
                         Nomor Surat <span class="text-red-500">*</span>
+                        <span class="text-gray-400 font-normal text-xs ml-1">(opsional, bisa pakai nomor agenda)</span>
                     </label>
-                    <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                           placeholder="Contoh: 100/DKP/V/2026"
-                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nomor_surat') border-red-400 @enderror">
+                    <div class="relative">
+                        <input type="text" name="nomor_surat" id="nomor_surat"
+                               value="{{ old('nomor_surat') }}"
+                               placeholder="Contoh: 100/DKP/V/2026"
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-28 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nomor_surat') border-red-400 @enderror">
+                        <button type="button" onclick="pakaiNomorAgenda()"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded font-semibold transition whitespace-nowrap">
+                            Pakai Agenda
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Nomor agenda: <span class="font-mono font-semibold text-blue-600" id="nomor-agenda-display">{{ $nomorAgenda }}</span>
+                    </p>
                     @error('nomor_surat')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -142,7 +153,7 @@
 
             {{-- Tombol --}}
             <div class="flex justify-end gap-3 pt-2">
-                <a href="{{ route('pimpinan.surat-masuk.index') }}"
+                <a href="{{ route('staff.surat-masuk.index') }}"
                    class="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
                     Batal
                 </a>
@@ -154,4 +165,23 @@
         </form>
     </div>
 </div>
+
+<script>
+// ── Auto-fill nomor surat dengan nomor agenda saat halaman load ──────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const nomorSuratInput = document.getElementById('nomor_surat');
+    const nomorAgenda     = '{{ $nomorAgenda }}';
+
+    // Jika field kosong (bukan old value), isi otomatis dengan nomor agenda
+    if (nomorSuratInput && !nomorSuratInput.value) {
+        nomorSuratInput.value = nomorAgenda;
+    }
+});
+
+// ── Tombol "Pakai Agenda" — reset ke nomor agenda ────────────────────────────
+function pakaiNomorAgenda() {
+    const nomorAgenda = document.getElementById('nomor-agenda-display').textContent.trim();
+    document.getElementById('nomor_surat').value = nomorAgenda;
+}
+</script>
 @endsection

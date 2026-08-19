@@ -264,17 +264,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     });
     
     // Disposisi
-    Route::prefix('disposisi')->name('disposisi.')->group(function () {
-        Route::get('/', [DispositionController::class, 'index'])->name('index');
-        Route::get('/create', [DispositionController::class, 'create'])->name('create');
-        Route::post('/', [DispositionController::class, 'store'])->name('store');
-        Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [DispositionController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [DispositionController::class, 'update'])->name('update');
-        Route::delete('/{id}', [DispositionController::class, 'destroy'])->name('destroy');
-        Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
-    });
+Route::prefix('disposisi')->name('disposisi.')->group(function () {
+    Route::get('/', [DispositionController::class, 'index'])->name('index');
+    Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
+    Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
+    Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
+});
     
     // Peminjaman Aset (Staff)
     Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -447,6 +442,7 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
         Route::post('/{id}/approve', [AssetMutationController::class, 'approve'])->name('approve');
         Route::post('/{id}/reject', [AssetMutationController::class, 'reject'])->name('reject');
+        Route::delete('/{id}', [AssetMutationController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
     });
 
