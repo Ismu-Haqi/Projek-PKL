@@ -3,7 +3,10 @@
 @section('title', 'Edit Disposisi')
 
 @section('content')
-<div class="max-w-4xl mx-auto" x-data="{ itemType: '{{ old('item_type', $disposition->item_type === 'Arsip' ? 'arsip' : 'aset') }}' }">
+@php
+    $initialItemType = old('item_type', $disposition->item_type === 'Arsip' ? 'arsip' : 'aset');
+@endphp
+<div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-6">
         <div class="flex items-center mb-4">
@@ -40,11 +43,10 @@
                     Tipe Item <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-4">
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500" 
-                           :class="itemType === 'arsip' ? 'border-purple-500 bg-purple-50' : 'border-gray-300'"
-                           @click="itemType = 'arsip'">
-                        <input type="radio" name="item_type" value="arsip" class="sr-only" 
-                               :checked="itemType === 'arsip'">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500 {{ $initialItemType === 'arsip' ? 'border-purple-500 bg-purple-50' : 'border-gray-300' }}"
+                           id="label-arsip" onclick="switchItemType('arsip')">
+                        <input type="radio" name="item_type" value="arsip" id="radio-arsip" class="sr-only"
+                               {{ $initialItemType === 'arsip' ? 'checked' : '' }}>
                         <div class="flex items-center w-full">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,11 +60,10 @@
                         </div>
                     </label>
 
-                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-pink-500"
-                           :class="itemType === 'aset' ? 'border-pink-500 bg-pink-50' : 'border-gray-300'"
-                           @click="itemType = 'aset'">
-                        <input type="radio" name="item_type" value="aset" class="sr-only"
-                               :checked="itemType === 'aset'">
+                    <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-pink-500 {{ $initialItemType === 'aset' ? 'border-pink-500 bg-pink-50' : 'border-gray-300' }}"
+                           id="label-aset" onclick="switchItemType('aset')">
+                        <input type="radio" name="item_type" value="aset" id="radio-aset" class="sr-only"
+                               {{ $initialItemType === 'aset' ? 'checked' : '' }}>
                         <div class="flex items-center w-full">
                             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
                                 <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,13 +85,13 @@
             <!-- Select Item (Dynamic) -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    <span x-text="itemType === 'aset' ? 'Pilih Aset' : 'Pilih Arsip/Surat'"></span>
+                    <span id="label-item">{{ $initialItemType === 'aset' ? 'Pilih Aset' : 'Pilih Arsip/Surat' }}</span>
                     <span class="text-red-500">*</span>
                 </label>
                 
                 <!-- Arsip Select -->
-                <div x-show="itemType === 'arsip'" x-cloak>
-                    <select name="item_id" id="item_select_arsip" required
+                <div id="arsip-wrapper" style="{{ $initialItemType === 'arsip' ? '' : 'display:none' }}">
+                    <select name="item_id" id="item_select_arsip" {{ $initialItemType === 'arsip' ? 'required' : 'disabled' }}
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('item_id') border-red-500 @enderror">
                         <option value="">-- Pilih Arsip/Surat --</option>
                         @foreach($archives as $archive)
@@ -103,8 +104,8 @@
                 </div>
 
                 <!-- Aset Select -->
-                <div x-show="itemType === 'aset'" x-cloak>
-                    <select name="item_id" id="item_select_aset" required
+                <div id="aset-wrapper" style="{{ $initialItemType === 'aset' ? '' : 'display:none' }}">
+                    <select name="item_id" id="item_select_aset" {{ $initialItemType === 'aset' ? 'required' : 'disabled' }}
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 @error('item_id') border-red-500 @enderror">
                         <option value="">-- Pilih Aset --</option>
                         @foreach($assets as $asset)
@@ -229,12 +230,47 @@
     </div>
 </div>
 
-<!-- Alpine.js -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+function switchItemType(type) {
+    const arsipWrapper  = document.getElementById('arsip-wrapper');
+    const asetWrapper   = document.getElementById('aset-wrapper');
+    const labelArsip    = document.getElementById('label-arsip');
+    const labelAset     = document.getElementById('label-aset');
+    const labelItem     = document.getElementById('label-item');
+    const radioArsip    = document.getElementById('radio-arsip');
+    const radioAset     = document.getElementById('radio-aset');
+    const selectArsip   = document.getElementById('item_select_arsip');
+    const selectAset    = document.getElementById('item_select_aset');
 
-<style>
-[x-cloak] { 
-    display: none !important; 
+    if (type === 'arsip') {
+        arsipWrapper.style.display = 'block';
+        asetWrapper.style.display  = 'none';
+        labelArsip.classList.add('border-purple-500', 'bg-purple-50');
+        labelArsip.classList.remove('border-gray-300');
+        labelAset.classList.add('border-gray-300');
+        labelAset.classList.remove('border-pink-500', 'bg-pink-50');
+        labelItem.textContent = 'Pilih Arsip/Surat';
+        radioArsip.checked = true;
+        radioAset.checked  = false;
+        selectArsip.disabled = false;
+        selectArsip.setAttribute('required', 'required');
+        selectAset.disabled = true;
+        selectAset.removeAttribute('required');
+    } else {
+        arsipWrapper.style.display = 'none';
+        asetWrapper.style.display  = 'block';
+        labelAset.classList.add('border-pink-500', 'bg-pink-50');
+        labelAset.classList.remove('border-gray-300');
+        labelArsip.classList.add('border-gray-300');
+        labelArsip.classList.remove('border-purple-500', 'bg-purple-50');
+        labelItem.textContent = 'Pilih Aset';
+        radioAset.checked  = true;
+        radioArsip.checked = false;
+        selectAset.disabled = false;
+        selectAset.setAttribute('required', 'required');
+        selectArsip.disabled = true;
+        selectArsip.removeAttribute('required');
+    }
 }
-</style>
+</script>
 @endsection
