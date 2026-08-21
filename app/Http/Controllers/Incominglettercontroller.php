@@ -47,12 +47,19 @@ class IncomingLetterController extends Controller
 
         $letters = $query->paginate(15)->withQueryString();
 
+        // Statistik: staff hanya lihat statistik surat miliknya sendiri,
+        // admin & pimpinan tetap lihat statistik global (semua surat)
+        $statsQuery = IncomingLetter::query();
+        if ($role === 'staff') {
+            $statsQuery->where('uploaded_by', Auth::id());
+        }
+
         $stats = [
-            'total'           => IncomingLetter::count(),
-            'belum_disposisi' => IncomingLetter::byStatus('belum_disposisi')->count(),
-            'sudah_disposisi' => IncomingLetter::byStatus('sudah_disposisi')->count(),
-            'selesai'         => IncomingLetter::byStatus('selesai')->count(),
-            'bulan_ini'       => IncomingLetter::whereMonth('tanggal_diterima', now()->month)
+            'total'           => (clone $statsQuery)->count(),
+            'belum_disposisi' => (clone $statsQuery)->byStatus('belum_disposisi')->count(),
+            'sudah_disposisi' => (clone $statsQuery)->byStatus('sudah_disposisi')->count(),
+            'selesai'         => (clone $statsQuery)->byStatus('selesai')->count(),
+            'bulan_ini'       => (clone $statsQuery)->whereMonth('tanggal_diterima', now()->month)
                                                ->whereYear('tanggal_diterima', now()->year)
                                                ->count(),
         ];

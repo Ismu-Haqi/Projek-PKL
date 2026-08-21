@@ -20,13 +20,6 @@
         {{-- Tombol aksi --}}
         <div class="flex gap-2">
             @if($letter->status === 'belum_disposisi')
-            <a href="{{ route('staff.surat-masuk.buat-disposisi', $letter->id) }}"
-               class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Buat Disposisi
-            </a>
             <a href="{{ route('staff.surat-masuk.edit', $letter->id) }}"
                class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,24 +157,6 @@
                         Download
                     </a>
                 </div>
-            </div>
-            @endif
-
-            {{-- Info disposisi --}}
-            @if($letter->disposition)
-            <div class="bg-purple-50 rounded-xl border border-purple-200 p-4">
-                <h3 class="font-semibold text-purple-700 mb-2 text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Disposisi Terkait
-                </h3>
-                <p class="text-xs font-mono text-purple-600 font-semibold">{{ $letter->disposition->nomor_disposisi }}</p>
-                <p class="text-xs text-gray-600 mt-1">Ke: {{ $letter->disposition->toUser->name ?? '-' }}</p>
-                <a href="{{ route('staff.disposisi.show', $letter->disposition->id) }}"
-                   class="mt-2 inline-block text-xs text-purple-600 hover:underline font-medium">
-                    Lihat Disposisi →
-                </a>
             </div>
             @endif
         </div>
