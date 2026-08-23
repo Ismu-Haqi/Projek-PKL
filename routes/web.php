@@ -19,6 +19,8 @@ use App\Http\Controllers\Staff\AssetBorrowController as StaffAssetBorrowControll
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\GoogleDriveBackupController;
 use App\Http\Controllers\AssetMutationController;
+use App\Http\Controllers\AssetDestructionController;
+use App\Http\Controllers\DashboardGalleryController;
 use App\Http\Controllers\LaporanPengajuanController;
 use App\Models\DocumentSignature;
 
@@ -122,6 +124,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('/{id}', [AssetMutationController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
     });
+
+    // Pemusnahan Aset (Admin - approve/reject)
+    Route::prefix('pemusnahan')->name('pemusnahan.')->group(function () {
+        Route::get('/', [AssetDestructionController::class, 'index'])->name('index');
+        Route::get('/{id}', [AssetDestructionController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [AssetDestructionController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [AssetDestructionController::class, 'reject'])->name('reject');
+        Route::get('/{id}/download-ba', [AssetDestructionController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+    // Galeri Dashboard (Admin - kelola gambar dokumentasi)
+    Route::prefix('galeri')->name('galeri.')->group(function () {
+        Route::get('/', [DashboardGalleryController::class, 'index'])->name('index');
+        Route::post('/', [DashboardGalleryController::class, 'store'])->name('store');
+        Route::put('/{id}', [DashboardGalleryController::class, 'update'])->name('update');
+        Route::delete('/{id}', [DashboardGalleryController::class, 'destroy'])->name('destroy');
+    });
+
 
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
@@ -266,7 +285,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->grou
     // Disposisi
 Route::prefix('disposisi')->name('disposisi.')->group(function () {
     Route::get('/', [DispositionController::class, 'index'])->name('index');
+    Route::get('/create', [DispositionController::class, 'create'])->name('create');
+    Route::post('/', [DispositionController::class, 'store'])->name('store');
     Route::get('/{id}', [DispositionController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [DispositionController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [DispositionController::class, 'update'])->name('update');
+    Route::delete('/{id}', [DispositionController::class, 'destroy'])->name('destroy');
     Route::put('/{id}/status', [DispositionController::class, 'updateStatus'])->name('updateStatus');
     Route::get('/{id}/download-completion', [DispositionController::class, 'downloadCompletionFile'])->name('downloadCompletion');
 });
@@ -289,6 +313,16 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/{id}', [AssetMutationController::class, 'show'])->name('show');
         Route::delete('/{id}', [AssetMutationController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/download-ba', [AssetMutationController::class, 'downloadBeritaAcara'])->name('download-ba');
+    });
+
+    // Pemusnahan Aset (Staff - ajukan usulan)
+    Route::prefix('pemusnahan')->name('pemusnahan.')->group(function () {
+        Route::get('/', [AssetDestructionController::class, 'index'])->name('index');
+        Route::get('/create', [AssetDestructionController::class, 'create'])->name('create');
+        Route::post('/', [AssetDestructionController::class, 'store'])->name('store');
+        Route::get('/{id}', [AssetDestructionController::class, 'show'])->name('show');
+        Route::delete('/{id}', [AssetDestructionController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/download-ba', [AssetDestructionController::class, 'downloadBeritaAcara'])->name('download-ba');
     });
 
     // Notifikasi

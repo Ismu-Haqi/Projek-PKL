@@ -405,6 +405,8 @@
         </div>
     </div>
 </div>
+
+    @include('partials.dashboard-gallery')
 @endsection
 
 @push('styles')

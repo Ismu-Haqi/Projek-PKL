@@ -501,4 +501,6 @@
 </script>
 @endpush
 
+
+    @include('partials.dashboard-gallery')
 @endsection
