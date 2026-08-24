@@ -1,7 +1,8 @@
 {{-- ============================================================
      Galeri Dokumentasi Dashboard
      Tampil di bagian paling bawah dashboard semua role.
-     Gambar bergulir horizontal, membesar saat cursor menyentuh (hover),
+     Gambar bergulir OTOMATIS ke kiri terus-menerus, BERHENTI saat
+     cursor disentuhkan ke galeri, dan membesar saat hover per-gambar,
      dengan judul + deskripsi singkat di bawah tiap gambar.
 ============================================================ --}}
 @php
@@ -15,24 +16,27 @@
         <h2 class="text-lg font-bold text-gray-800">Dokumentasi Kegiatan</h2>
     </div>
 
-    <div class="gandaria-gallery-scroll">
-        @foreach($dashboardGalleryImages as $img)
-        <div class="gandaria-gallery-item">
-            <div class="gandaria-gallery-image-wrap">
-                <img src="{{ $img->gambar_url }}" alt="{{ $img->judul ?? 'Dokumentasi' }}" loading="lazy">
-            </div>
-            @if($img->judul || $img->deskripsi)
-            <div class="gandaria-gallery-caption">
-                @if($img->judul)
-                    <p class="gandaria-gallery-title">{{ $img->judul }}</p>
+    <div id="gandariaGalleryScroll" class="gandaria-gallery-scroll">
+        {{-- Gambar digandakan 2x supaya efek bergulir tak berujung terasa mulus --}}
+        @for($rep = 0; $rep < 2; $rep++)
+            @foreach($dashboardGalleryImages as $img)
+            <div class="gandaria-gallery-item">
+                <div class="gandaria-gallery-image-wrap">
+                    <img src="{{ $img->gambar_url }}" alt="{{ $img->judul ?? 'Dokumentasi' }}" loading="lazy" draggable="false">
+                </div>
+                @if($img->judul || $img->deskripsi)
+                <div class="gandaria-gallery-caption">
+                    @if($img->judul)
+                        <p class="gandaria-gallery-title">{{ $img->judul }}</p>
+                    @endif
+                    @if($img->deskripsi)
+                        <p class="gandaria-gallery-desc">{{ $img->deskripsi }}</p>
+                    @endif
+                </div>
                 @endif
-                @if($img->deskripsi)
-                    <p class="gandaria-gallery-desc">{{ $img->deskripsi }}</p>
-                @endif
             </div>
-            @endif
-        </div>
-        @endforeach
+            @endforeach
+        @endfor
     </div>
 </div>
 
@@ -40,16 +44,13 @@
     .gandaria-gallery-scroll {
         display: flex;
         gap: 18px;
-        overflow-x: auto;
+        overflow-x: hidden; /* scroll dikontrol via JS, bukan drag manual */
         overflow-y: visible;
         padding: 10px 4px 20px 4px;
-        scroll-behavior: smooth;
-        scrollbar-width: thin;
-        scrollbar-color: #14b8a6 #f1f5f9;
+        scrollbar-width: none;
+        cursor: default;
     }
-    .gandaria-gallery-scroll::-webkit-scrollbar { height: 8px; }
-    .gandaria-gallery-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-    .gandaria-gallery-scroll::-webkit-scrollbar-thumb { background: #14b8a6; border-radius: 10px; }
+    .gandaria-gallery-scroll::-webkit-scrollbar { display: none; }
 
     .gandaria-gallery-item {
         flex: 0 0 auto;
@@ -72,9 +73,10 @@
         object-fit: cover;
         display: block;
         transition: transform 0.35s ease;
+        user-select: none;
     }
 
-    /* Hover: gambar membesar, muncul di atas item lain */
+    /* Hover: gambar membesar, muncul di atas item lain, dan otomatis berhenti bergulir (lihat JS) */
     .gandaria-gallery-item:hover {
         transform: scale(1.08);
         z-index: 10;
@@ -115,4 +117,42 @@
         .gandaria-gallery-image-wrap { height: 120px; }
     }
 </style>
+
+<script>
+(function () {
+    const track = document.getElementById('gandariaGalleryScroll');
+    if (!track) return;
+
+    let isPaused   = false;
+    let scrollSpeed = 0.6; // px per frame, atur di sini kalau mau lebih cepat/lambat
+    let halfWidth   = 0;
+
+    function calcHalfWidth() {
+        // Karena gambar digandakan 2x, separuh dari scrollWidth = panjang 1 set asli
+        halfWidth = track.scrollWidth / 2;
+    }
+    calcHalfWidth();
+    window.addEventListener('resize', calcHalfWidth);
+
+    function step() {
+        if (!isPaused) {
+            track.scrollLeft += scrollSpeed;
+            // Kalau sudah melewati satu set penuh, reset ke awal secara mulus (efek tak berujung)
+            if (track.scrollLeft >= halfWidth) {
+                track.scrollLeft -= halfWidth;
+            }
+        }
+        requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // Berhenti saat cursor menyentuh galeri, lanjut lagi saat cursor keluar
+    track.addEventListener('mouseenter', () => { isPaused = true; });
+    track.addEventListener('mouseleave', () => { isPaused = false; });
+
+    // Untuk layar sentuh (tablet/hp): berhenti saat disentuh, lanjut saat jari dilepas
+    track.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
+    track.addEventListener('touchend',   () => { isPaused = false; }, { passive: true });
+})();
+</script>
 @endif

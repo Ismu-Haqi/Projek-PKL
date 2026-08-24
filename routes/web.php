@@ -195,6 +195,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
+        Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
 
         // Pengajuan TTE ke pimpinan
         Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
@@ -370,6 +371,7 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/print-pdf', [ReportController::class, 'printPdf'])->name('print-pdf');
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
 
         // Pengajuan TTE ke pimpinan
         Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
@@ -502,6 +504,7 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/penyusutan', [ReportController::class, 'penyusutan'])->name('penyusutan');
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
+        Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
 
         // Validasi TTE pengajuan laporan
         Route::prefix('validasi')->name('validasi.')->group(function () {

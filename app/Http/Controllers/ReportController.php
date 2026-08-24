@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\AssetBorrow;
 use App\Models\IncomingLetter;
 use App\Models\DocumentSignature;
+use App\Models\AssetDestruction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -511,7 +512,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -536,7 +537,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -553,6 +554,7 @@ class ReportController extends Controller
             'peminjaman'  => 'Laporan Peminjaman Aset',
             'maintenance' => 'Laporan Pemeliharaan Aset',
             'surat-masuk' => 'Laporan Surat Masuk',
+            'pemusnahan'  => 'Laporan Pemusnahan Aset',
             'summary'     => 'Laporan Ringkasan',
         ];
         $signature = DocumentSignature::generateFor(
@@ -840,6 +842,23 @@ class ReportController extends Controller
                 $data['period'] = 'Hingga ' . now()->format('d M Y');
                 break;
 
+            case 'pemusnahan':
+                $role = Auth::user()->role;
+                $destructionQuery = AssetDestruction::with(['asset', 'pengaju', 'penyetuju'])
+                    ->orderBy('created_at', 'desc');
+
+                if ($role === 'staff') {
+                    $destructionQuery->where('diajukan_oleh', Auth::id());
+                }
+
+                if ($request->filled('status')) {
+                    $destructionQuery->where('status', $request->status);
+                }
+
+                $data['destructions'] = $destructionQuery->get();
+                $data['period'] = 'Hingga ' . now()->format('d M Y');
+                break;
+
             case 'user':
                 $period = $request->input('period', '1month');
                 $dateRange = $this->getDateRangeFromPeriod($period, $request);
@@ -1009,5 +1028,48 @@ class ReportController extends Controller
         ];
 
         return view("{$role}.laporan.maintenance", compact('assets', 'stats'));
+    }
+
+    // ========================
+    // LAPORAN PEMUSNAHAN ASET
+    // ========================
+    public function pemusnahan(Request $request)
+    {
+        $role = Auth::user()->role;
+
+        if (!in_array($role, ['admin', 'staff', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $query = AssetDestruction::with(['asset', 'pengaju', 'penyetuju'])
+            ->orderBy('created_at', 'desc');
+
+        if ($role === 'staff') {
+            $query->where('diajukan_oleh', Auth::id());
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('tanggal_usulan', [$request->start_date, $request->end_date]);
+        }
+
+        $destructions = $query->get();
+
+        $statsBase = AssetDestruction::query();
+        if ($role === 'staff') {
+            $statsBase->where('diajukan_oleh', Auth::id());
+        }
+
+        $stats = [
+            'total'     => (clone $statsBase)->count(),
+            'menunggu'  => (clone $statsBase)->where('status', 'menunggu')->count(),
+            'disetujui' => (clone $statsBase)->where('status', 'disetujui')->count(),
+            'ditolak'   => (clone $statsBase)->where('status', 'ditolak')->count(),
+        ];
+
+        return view("{$role}.laporan.pemusnahan", compact('destructions', 'stats'));
     }
 }

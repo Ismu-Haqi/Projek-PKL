@@ -226,6 +226,29 @@
             </div>
         </div>
 
+        {{-- 10. Pemusnahan Aset --}}
+        <div class="bg-white rounded-xl border-2 border-gray-300 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.pemusnahan') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </div>
+                    <span class="text-gray-600 font-bold text-sm bg-gray-100 px-2 py-0.5 rounded-full">10</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Pemusnahan Aset</h4>
+                <p class="text-xs text-gray-500">Rekap usulan & persetujuan pemusnahan aset</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'pemusnahan']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
 @endsection

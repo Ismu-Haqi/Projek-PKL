@@ -290,9 +290,11 @@ class AssetDestructionController extends Controller
             return back()->with('error', 'Berita Acara belum tersedia (usulan belum disetujui).');
         }
 
+        $safeNomor = str_replace('/', '-', $destruction->nomor_pemusnahan);
+
         return Storage::disk('public')->download(
             $destruction->berita_acara,
-            "BeritaAcara_Pemusnahan_{$destruction->nomor_pemusnahan}.pdf"
+            "BeritaAcara_Pemusnahan_{$safeNomor}.pdf"
         );
     }
 }
