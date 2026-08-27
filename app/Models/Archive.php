@@ -16,6 +16,9 @@ class Archive extends Model
         'nomor_surat',
         'tanggal_surat',
         'tanggal_arsip',
+        'tanggal_retensi',
+        'retensi_notif_mendekati_terkirim',
+        'retensi_notif_kedaluwarsa_terkirim',
         'judul',
         'pengirim',
         'unit',
@@ -34,6 +37,9 @@ class Archive extends Model
     protected $casts = [
         'tanggal_surat' => 'date',
         'tanggal_arsip' => 'date',
+        'tanggal_retensi' => 'date',
+        'retensi_notif_mendekati_terkirim' => 'boolean',
+        'retensi_notif_kedaluwarsa_terkirim' => 'boolean',
         'is_favorite' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
@@ -128,5 +134,42 @@ class Archive extends Model
     public function getFileUrlAttribute()
     {
         return $this->file_path ? asset('storage/' . $this->file_path) : null;
+    }
+
+    /**
+     * ✅ TAMBAHAN BARU - Status retensi arsip
+     * (fondasi awal, akan disempurnakan saat fitur Jadwal Retensi Arsip dibangun penuh)
+     */
+    public function getStatusRetensiAttribute(): array
+    {
+        if (!$this->tanggal_retensi) {
+            return ['text' => 'Belum diatur', 'color' => 'gray'];
+        }
+
+        $today = now()->startOfDay();
+        $batas = $this->tanggal_retensi->startOfDay();
+
+        if ($today->gt($batas)) {
+            return ['text' => 'Sudah Kedaluwarsa', 'color' => 'red'];
+        }
+
+        if ($today->diffInDays($batas, false) <= 30) {
+            return ['text' => 'Mendekati Retensi', 'color' => 'yellow'];
+        }
+
+        return ['text' => 'Aktif', 'color' => 'green'];
+    }
+
+    public function scopeRetensiMendekati($query, $hari = 30)
+    {
+        return $query->whereNotNull('tanggal_retensi')
+            ->whereDate('tanggal_retensi', '>=', now()->toDateString())
+            ->whereDate('tanggal_retensi', '<=', now()->addDays($hari)->toDateString());
+    }
+
+    public function scopeRetensiKedaluwarsa($query)
+    {
+        return $query->whereNotNull('tanggal_retensi')
+            ->whereDate('tanggal_retensi', '<', now()->toDateString());
     }
 }

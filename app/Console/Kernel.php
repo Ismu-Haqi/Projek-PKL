@@ -20,6 +20,12 @@ class Kernel extends ConsoleKernel
                      ->withoutOverlapping()
                      ->appendOutputTo(storage_path('logs/backup-drive.log'));
         }
+
+        // Cek retensi arsip & kirim notifikasi pengingat — setiap hari jam 07.00
+        $schedule->command('retensi:cek')
+                 ->dailyAt('07:00')
+                 ->withoutOverlapping()
+                 ->appendOutputTo(storage_path('logs/retensi-arsip.log'));
     }
 
     /**

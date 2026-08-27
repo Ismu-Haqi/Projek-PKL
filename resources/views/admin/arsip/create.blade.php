@@ -151,6 +151,16 @@
                     </select>
                 </div>
 
+                {{-- Tanggal Retensi --}}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Tanggal Retensi <span class="text-gray-400 font-normal text-xs">(opsional)</span>
+                    </label>
+                    <input type="date" name="tanggal_retensi" value="{{ old('tanggal_retensi') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-xs text-gray-400 mt-1">Batas waktu arsip aktif sebelum dipindahkan ke inaktif/dimusnahkan.</p>
+                </div>
+
                 {{-- Upload Multiple Files --}}
                 <div class="lg:col-span-2">
                     <label class="block text-sm font-bold text-gray-700 mb-2">

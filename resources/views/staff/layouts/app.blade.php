@@ -500,6 +500,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
                     </svg>
                     <span>Arsip Digital</span>
+                    @php
+                        $retensiPerluTindakStaff = \App\Models\Archive::where('user_id', Auth::id())
+                            ->whereNotNull('tanggal_retensi')
+                            ->whereDate('tanggal_retensi', '<=', now()->addDays(30)->toDateString())
+                            ->count();
+                    @endphp
+                    @if($retensiPerluTindakStaff > 0)
+                    <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {{ $retensiPerluTindakStaff }}
+                    </span>
+                    @endif
                 </a>
                 
                 {{-- Arsip Favorit --}}

@@ -213,6 +213,9 @@ class ArchiveController extends Controller
         if (Schema::hasColumn('archives', 'category_id') && Schema::hasTable('categories')) {
             $rules['category_id'] = 'required|exists:categories,id';
         }
+        if (Schema::hasColumn('archives', 'tanggal_retensi')) {
+            $rules['tanggal_retensi'] = 'nullable|date';
+        }
 
         $validated = $request->validate($rules, [
             'nomor_surat.required' => 'Nomor surat wajib diisi',
@@ -418,6 +421,9 @@ class ArchiveController extends Controller
         if (Schema::hasColumn('archives', 'category_id')) {
             $rules['category_id'] = 'required|exists:categories,id';
         }
+        if (Schema::hasColumn('archives', 'tanggal_retensi')) {
+            $rules['tanggal_retensi'] = 'nullable|date';
+        }
 
         $validated = $request->validate($rules);
 
@@ -451,6 +457,17 @@ class ArchiveController extends Controller
             if (isset($validated['category_id'])) {
                 $category = Category::find($validated['category_id']);
                 $validated['jenis_arsip'] = $category ? $category->name : $archive->jenis_arsip;
+            }
+
+            // Reset flag notifikasi retensi jika tanggal retensi berubah,
+            // supaya sistem mengingatkan ulang sesuai tanggal yang baru.
+            if (array_key_exists('tanggal_retensi', $validated)) {
+                $tanggalLama = $archive->tanggal_retensi ? $archive->tanggal_retensi->format('Y-m-d') : null;
+                $tanggalBaru = $validated['tanggal_retensi'];
+                if ($tanggalLama !== $tanggalBaru) {
+                    $validated['retensi_notif_mendekati_terkirim'] = false;
+                    $validated['retensi_notif_kedaluwarsa_terkirim'] = false;
+                }
             }
 
             unset($validated['files']);
