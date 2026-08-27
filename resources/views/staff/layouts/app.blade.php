@@ -483,6 +483,15 @@
                     </svg>
                     <span>Surat Masuk</span>
                 </a>
+
+                {{-- Surat Keluar --}}
+                <a href="{{ route('staff.surat-keluar.index') }}"
+                   class="sidebar-link {{ Request::routeIs('staff.surat-keluar.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                    <span>Surat Keluar</span>
+                </a>
                 
                 {{-- Arsip Digital --}}
                 <a href="{{ route('staff.arsip.index') }}" 

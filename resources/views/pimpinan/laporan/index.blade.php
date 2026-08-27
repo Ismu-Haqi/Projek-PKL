@@ -249,6 +249,45 @@
             </div>
         </div>
 
+        {{-- 12. Rekap Agenda Surat --}}
+        <div class="bg-white rounded-xl border-2 border-sky-300 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.agenda-surat') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <span class="text-sky-600 font-bold text-sm bg-sky-100 px-2 py-0.5 rounded-full">12</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Rekap Agenda Surat</h4>
+                <p class="text-xs text-gray-500">Buku agenda gabungan surat masuk & keluar</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'agenda-surat']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
+
+        {{-- 11. Beban Kerja Validasi Pimpinan --}}
+        <div class="bg-white rounded-xl border-2 border-indigo-300 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.beban-kerja-pimpinan') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                    </div>
+                    <span class="text-indigo-600 font-bold text-sm bg-indigo-100 px-2 py-0.5 rounded-full">11</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Beban Kerja Validasi Saya</h4>
+                <p class="text-xs text-gray-500">Jumlah &amp; waktu proses persetujuan yang saya tangani</p>
+            </a>
+        </div>
+
     </div>
 </div>
 @endsection

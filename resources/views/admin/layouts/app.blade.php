@@ -485,6 +485,14 @@
                     <span>Surat Masuk</span>
                 </a>
 
+                {{-- Surat Keluar --}}
+                <a href="{{ route('admin.surat-keluar.index') }}" class="sidebar-link {{ Request::routeIs('admin.surat-keluar.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                    <span>Surat Keluar</span>
+                </a>
+
                 <p class="text-xs text-gray-400 font-semibold uppercase mt-4 mb-2 px-2">MANAJEMEN</p>
                 
                 <a href="{{ route('admin.arsip.index') }}" class="sidebar-link {{ Request::routeIs('admin.arsip.index') ? 'active' : '' }}">

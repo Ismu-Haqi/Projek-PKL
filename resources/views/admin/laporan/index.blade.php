@@ -162,6 +162,32 @@
             <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Pemusnahan Aset</h4>
             <p class="text-sm text-gray-600">Rekap usulan & persetujuan pemusnahan aset</p>
         </a>
+
+        <a href="{{ route(Auth::user()->role . '.laporan.agenda-surat') }}" class="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-xl border-2 border-sky-300 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <span class="text-sky-600 font-bold text-sm">11</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Rekap Agenda Surat</h4>
+            <p class="text-sm text-gray-600">Buku agenda gabungan surat masuk & keluar</p>
+        </a>
+
+        <a href="{{ route(Auth::user()->role . '.laporan.beban-kerja-pimpinan') }}" class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl border-2 border-indigo-300 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <span class="text-indigo-600 font-bold text-sm">11</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Beban Kerja Validasi Pimpinan</h4>
+            <p class="text-sm text-gray-600">Jumlah &amp; waktu proses persetujuan pimpinan</p>
+        </a>
         
     </div>
 </div>

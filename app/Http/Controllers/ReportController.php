@@ -10,6 +10,8 @@ use App\Models\AssetBorrow;
 use App\Models\IncomingLetter;
 use App\Models\DocumentSignature;
 use App\Models\AssetDestruction;
+use App\Models\OutgoingLetter;
+use App\Models\LaporanPengajuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -508,11 +510,68 @@ class ReportController extends Controller
         ));
     }
 
+    // ========================
+    // LAPORAN REKAP AGENDA SURAT (MASUK & KELUAR)
+    // ========================
+    public function agendaSurat(Request $request)
+    {
+        $role = Auth::user()->role;
+
+        $masukQuery = IncomingLetter::query();
+        $keluarQuery = OutgoingLetter::query();
+
+        if ($role === 'staff') {
+            $masukQuery->where('uploaded_by', Auth::id());
+            $keluarQuery->where('dibuat_oleh', Auth::id());
+        }
+
+        if ($request->filled('start_date')) {
+            $masukQuery->whereDate('tanggal_diterima', '>=', $request->start_date);
+            $keluarQuery->whereDate('tanggal_surat', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $masukQuery->whereDate('tanggal_diterima', '<=', $request->end_date);
+            $keluarQuery->whereDate('tanggal_surat', '<=', $request->end_date);
+        }
+
+        $masuk = $masukQuery->get()->map(function ($item) {
+            return (object) [
+                'jenis'        => 'masuk',
+                'nomor_agenda' => $item->nomor_agenda,
+                'tanggal'      => $item->tanggal_diterima,
+                'pihak'        => $item->pengirim,
+                'perihal'      => $item->perihal,
+                'status'       => $item->status,
+            ];
+        });
+
+        $keluar = $keluarQuery->get()->map(function ($item) {
+            return (object) [
+                'jenis'        => 'keluar',
+                'nomor_agenda' => $item->nomor_agenda,
+                'tanggal'      => $item->tanggal_surat,
+                'pihak'        => $item->tujuan,
+                'perihal'      => $item->perihal,
+                'status'       => $item->status,
+            ];
+        });
+
+        $agenda = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
+
+        $stats = [
+            'total_masuk'  => $masuk->count(),
+            'total_keluar' => $keluar->count(),
+            'total'        => $agenda->count(),
+        ];
+
+        return view("{$role}.laporan.agenda-surat", compact('agenda', 'stats'));
+    }
+
     public function printPdf(Request $request)
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan', 'agenda-surat'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -537,7 +596,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan', 'agenda-surat'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -555,6 +614,7 @@ class ReportController extends Controller
             'maintenance' => 'Laporan Pemeliharaan Aset',
             'surat-masuk' => 'Laporan Surat Masuk',
             'pemusnahan'  => 'Laporan Pemusnahan Aset',
+            'agenda-surat' => 'Laporan Rekap Agenda Surat',
             'summary'     => 'Laporan Ringkasan',
         ];
         $signature = DocumentSignature::generateFor(
@@ -859,6 +919,31 @@ class ReportController extends Controller
                 $data['period'] = 'Hingga ' . now()->format('d M Y');
                 break;
 
+            case 'agenda-surat':
+                $role = Auth::user()->role;
+                $masukQuery = IncomingLetter::query();
+                $keluarQuery = OutgoingLetter::query();
+
+                if ($role === 'staff') {
+                    $masukQuery->where('uploaded_by', Auth::id());
+                    $keluarQuery->where('dibuat_oleh', Auth::id());
+                }
+
+                $masuk = $masukQuery->get()->map(fn($i) => (object)[
+                    'jenis' => 'masuk', 'nomor_agenda' => $i->nomor_agenda,
+                    'tanggal' => $i->tanggal_diterima, 'pihak' => $i->pengirim,
+                    'perihal' => $i->perihal, 'status' => $i->status,
+                ]);
+                $keluar = $keluarQuery->get()->map(fn($i) => (object)[
+                    'jenis' => 'keluar', 'nomor_agenda' => $i->nomor_agenda,
+                    'tanggal' => $i->tanggal_surat, 'pihak' => $i->tujuan,
+                    'perihal' => $i->perihal, 'status' => $i->status,
+                ]);
+
+                $data['agenda'] = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
+                $data['period'] = 'Hingga ' . now()->format('d M Y');
+                break;
+
             case 'user':
                 $period = $request->input('period', '1month');
                 $dateRange = $this->getDateRangeFromPeriod($period, $request);
@@ -1071,5 +1156,71 @@ class ReportController extends Controller
         ];
 
         return view("{$role}.laporan.pemusnahan", compact('destructions', 'stats'));
+    }
+
+    // ========================
+    // LAPORAN BEBAN KERJA VALIDASI PIMPINAN
+    // ========================
+    public function bebanKerjaPimpinan(Request $request)
+    {
+        $role = Auth::user()->role;
+
+        if (!in_array($role, ['admin', 'pimpinan'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $period = $request->input('period', '1month');
+        $dateRange = $this->getDateRangeFromPeriod($period, $request);
+
+        // ── Validasi Laporan (TTE) oleh Pimpinan ──
+        $laporanQuery = LaporanPengajuan::with(['pengaju', 'validator'])
+            ->whereBetween('diajukan_at', [$dateRange['start'], $dateRange['end']])
+            ->whereNotNull('divalidasi_at');
+
+        $laporanValidasi = $laporanQuery->get()->map(function ($item) {
+            $item->waktu_proses_jam = $item->diajukan_at && $item->divalidasi_at
+                ? round($item->diajukan_at->diffInMinutes($item->divalidasi_at) / 60, 1)
+                : null;
+            return $item;
+        });
+
+        $laporanStats = [
+            'total_divalidasi'  => $laporanValidasi->count(),
+            'disetujui'         => $laporanValidasi->where('status', 'disetujui')->count(),
+            'ditolak'           => $laporanValidasi->where('status', 'ditolak')->count(),
+            'rata_rata_jam'     => $laporanValidasi->whereNotNull('waktu_proses_jam')->avg('waktu_proses_jam'),
+            'tercepat_jam'      => $laporanValidasi->whereNotNull('waktu_proses_jam')->min('waktu_proses_jam'),
+            'terlama_jam'       => $laporanValidasi->whereNotNull('waktu_proses_jam')->max('waktu_proses_jam'),
+        ];
+
+        $laporanPerJenis = $laporanValidasi->groupBy('jenis_laporan')->map(function ($group) {
+            return [
+                'total' => $group->count(),
+                'rata_rata_jam' => round($group->whereNotNull('waktu_proses_jam')->avg('waktu_proses_jam') ?? 0, 1),
+            ];
+        });
+
+        // ── Disposisi yang diterima & diselesaikan Pimpinan ──
+        $pimpinanIds = User::where('role', 'pimpinan')->pluck('id');
+
+        $disposisiQuery = Disposition::whereIn('to_user_id', $pimpinanIds)
+            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
+
+        $disposisiSelesai = (clone $disposisiQuery)->whereNotNull('completed_at')->get()
+            ->map(function ($item) {
+                $item->waktu_proses_jam = round($item->created_at->diffInMinutes($item->completed_at) / 60, 1);
+                return $item;
+            });
+
+        $disposisiStats = [
+            'total_diterima'   => (clone $disposisiQuery)->count(),
+            'total_selesai'    => $disposisiSelesai->count(),
+            'rata_rata_jam'    => round($disposisiSelesai->avg('waktu_proses_jam') ?? 0, 1),
+        ];
+
+        return view("{$role}.laporan.beban-kerja-pimpinan", compact(
+            'laporanValidasi', 'laporanStats', 'laporanPerJenis',
+            'disposisiStats', 'dateRange', 'period'
+        ));
     }
 }

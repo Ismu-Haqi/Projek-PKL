@@ -21,6 +21,7 @@ use App\Http\Controllers\GoogleDriveBackupController;
 use App\Http\Controllers\AssetMutationController;
 use App\Http\Controllers\AssetDestructionController;
 use App\Http\Controllers\DashboardGalleryController;
+use App\Http\Controllers\OutgoingLetterController;
 use App\Http\Controllers\LaporanPengajuanController;
 use App\Models\DocumentSignature;
 
@@ -196,6 +197,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
         Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
+        Route::get('/agenda-surat', [ReportController::class, 'agendaSurat'])->name('agenda-surat');
+        Route::get('/beban-kerja-pimpinan', [ReportController::class, 'bebanKerjaPimpinan'])->name('beban-kerja-pimpinan');
 
         // Pengajuan TTE ke pimpinan
         Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
@@ -241,6 +244,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{id}/download',       [IncomingLetterController::class, 'download'])->name('download');
         Route::get('/{id}/buat-disposisi', [IncomingLetterController::class, 'buatDisposisi'])->name('buat-disposisi');
         Route::post('/{id}/tandai-selesai',[IncomingLetterController::class, 'tandaiSelesai'])->name('tandai-selesai');
+    });
+
+    // Surat Keluar
+    Route::prefix('surat-keluar')->name('surat-keluar.')->group(function () {
+        Route::get('/', [OutgoingLetterController::class, 'index'])->name('index');
+        Route::get('/create', [OutgoingLetterController::class, 'create'])->name('create');
+        Route::post('/', [OutgoingLetterController::class, 'store'])->name('store');
+        Route::get('/{id}', [OutgoingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/download', [OutgoingLetterController::class, 'download'])->name('download');
+        Route::delete('/{id}', [OutgoingLetterController::class, 'destroy'])->name('destroy');
     });
 
     // Kategori
@@ -372,6 +385,7 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/export-pdf', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export-excel', [ReportController::class, 'exportExcel'])->name('export-excel');
         Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
+        Route::get('/agenda-surat', [ReportController::class, 'agendaSurat'])->name('agenda-surat');
 
         // Pengajuan TTE ke pimpinan
         Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
@@ -395,6 +409,16 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/{id}/download',       [IncomingLetterController::class, 'download'])->name('download');
         Route::get('/{id}/buat-disposisi', [IncomingLetterController::class, 'buatDisposisi'])->name('buat-disposisi');
         Route::post('/{id}/tandai-selesai',[IncomingLetterController::class, 'tandaiSelesai'])->name('tandai-selesai');
+    });
+
+    // Surat Keluar
+    Route::prefix('surat-keluar')->name('surat-keluar.')->group(function () {
+        Route::get('/', [OutgoingLetterController::class, 'index'])->name('index');
+        Route::get('/create', [OutgoingLetterController::class, 'create'])->name('create');
+        Route::post('/', [OutgoingLetterController::class, 'store'])->name('store');
+        Route::get('/{id}', [OutgoingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/download', [OutgoingLetterController::class, 'download'])->name('download');
+        Route::delete('/{id}', [OutgoingLetterController::class, 'destroy'])->name('destroy');
     });
 
     // Pengaturan
@@ -505,6 +529,8 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::get('/peminjaman', [ReportController::class, 'peminjaman'])->name('peminjaman');
         Route::get('/maintenance', [ReportController::class, 'maintenance'])->name('maintenance');
         Route::get('/pemusnahan', [ReportController::class, 'pemusnahan'])->name('pemusnahan');
+        Route::get('/agenda-surat', [ReportController::class, 'agendaSurat'])->name('agenda-surat');
+        Route::get('/beban-kerja-pimpinan', [ReportController::class, 'bebanKerjaPimpinan'])->name('beban-kerja-pimpinan');
 
         // Validasi TTE pengajuan laporan
         Route::prefix('validasi')->name('validasi.')->group(function () {

@@ -175,6 +175,29 @@
             </div>
         </div>
 
+        {{-- 07. Rekap Agenda Surat --}}
+        <div class="bg-white rounded-xl border-2 border-sky-300 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('staff.laporan.agenda-surat') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <span class="text-sky-600 font-bold text-sm bg-sky-100 px-2 py-0.5 rounded-full">07</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Rekap Agenda Surat</h4>
+                <p class="text-xs text-gray-500">Agenda gabungan surat masuk & keluar Anda</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('staff.laporan.print-pdf', ['type' => 'agenda-surat']) }}" target="_blank"
+                   class="flex items-center justify-center gap-1.5 w-full bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat Laporan
+                </a>
+            </div>
+        </div>
+
     </div>
 
     {{-- Catatan --}}
