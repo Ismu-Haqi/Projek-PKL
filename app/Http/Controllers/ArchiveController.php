@@ -171,6 +171,21 @@ class ArchiveController extends Controller
         // Generate nomor surat otomatis
         $nomorSurat = $this->generateNomorSurat($user->unit ?? 'UMUM');
 
+        // ✅ TAMBAHAN BARU (Poin 2 - Jadwal Retensi Arsip)
+        // Kirim aturan JRA per kategori ke view untuk preview otomatis di form.
+        $retentionRules = [];
+        if (Schema::hasTable('retention_schedules')) {
+            $retentionRules = \App\Models\RetentionSchedule::where('is_active', true)
+                ->get()
+                ->keyBy('category_id')
+                ->map(fn ($s) => [
+                    'aktif_tahun'   => $s->retensi_aktif_tahun,
+                    'inaktif_tahun' => $s->retensi_inaktif_tahun,
+                    'total_tahun'   => $s->total_retensi_tahun,
+                    'nasib_akhir'   => \App\Models\RetentionSchedule::labelNasibAkhir($s->nasib_akhir),
+                ]);
+        }
+
         // Tentukan view berdasarkan role
         $role = $user->role;
         $viewPrefix = match($role) {
@@ -178,7 +193,7 @@ class ArchiveController extends Controller
             default => 'staff'
         };
 
-        return view("{$viewPrefix}.arsip.create", compact('categories', 'nomorSurat'));
+        return view("{$viewPrefix}.arsip.create", compact('categories', 'nomorSurat', 'retentionRules'));
     }
 
     /**
@@ -281,7 +296,22 @@ class ArchiveController extends Controller
             } else {
                 $validated['jenis_arsip'] = 'Umum';
             }
-            
+
+            // ✅ TAMBAHAN BARU (Poin 2 - Jadwal Retensi Arsip)
+            // Jika kategori memiliki aturan JRA aktif, hitung otomatis tanggal
+            // inaktif & tanggal retensi akhir. Kalau tidak ada aturan, biarkan
+            // input manual tanggal_retensi (jika diisi) tetap berlaku.
+            if (isset($category) && $category && Schema::hasTable('retention_schedules')) {
+                $schedule = $category->retentionSchedule;
+                if ($schedule && $schedule->is_active) {
+                    $tanggalDasar = $validated['tanggal_arsip'];
+                    $validated['retention_schedule_id'] = $schedule->id;
+                    $validated['tanggal_inaktif'] = $schedule->hitungTanggalInaktif($tanggalDasar);
+                    $validated['tanggal_retensi'] = $schedule->hitungTanggalRetensi($tanggalDasar);
+                    $validated['nasib_akhir_arsip'] = $schedule->nasib_akhir;
+                }
+            }
+
             // Set default priority
             if (Schema::hasColumn('archives', 'priority') && !isset($validated['priority'])) {
                 $validated['priority'] = 'Biasa';
@@ -387,7 +417,20 @@ class ArchiveController extends Controller
             $categories = Category::all();
         }
 
-        return view('admin.arsip.edit', compact('archive', 'categories'));
+        $retentionRules = [];
+        if (Schema::hasTable('retention_schedules')) {
+            $retentionRules = \App\Models\RetentionSchedule::where('is_active', true)
+                ->get()
+                ->keyBy('category_id')
+                ->map(fn ($s) => [
+                    'aktif_tahun'   => $s->retensi_aktif_tahun,
+                    'inaktif_tahun' => $s->retensi_inaktif_tahun,
+                    'total_tahun'   => $s->total_retensi_tahun,
+                    'nasib_akhir'   => \App\Models\RetentionSchedule::labelNasibAkhir($s->nasib_akhir),
+                ]);
+        }
+
+        return view('admin.arsip.edit', compact('archive', 'categories', 'retentionRules'));
     }
 
     /**
@@ -457,6 +500,18 @@ class ArchiveController extends Controller
             if (isset($validated['category_id'])) {
                 $category = Category::find($validated['category_id']);
                 $validated['jenis_arsip'] = $category ? $category->name : $archive->jenis_arsip;
+
+                // ✅ TAMBAHAN BARU (Poin 2 - Jadwal Retensi Arsip)
+                if ($category && Schema::hasTable('retention_schedules')) {
+                    $schedule = $category->retentionSchedule;
+                    if ($schedule && $schedule->is_active) {
+                        $tanggalDasar = $validated['tanggal_arsip'] ?? $archive->tanggal_arsip;
+                        $validated['retention_schedule_id'] = $schedule->id;
+                        $validated['tanggal_inaktif'] = $schedule->hitungTanggalInaktif($tanggalDasar);
+                        $validated['tanggal_retensi'] = $schedule->hitungTanggalRetensi($tanggalDasar);
+                        $validated['nasib_akhir_arsip'] = $schedule->nasib_akhir;
+                    }
+                }
             }
 
             // Reset flag notifikasi retensi jika tanggal retensi berubah,

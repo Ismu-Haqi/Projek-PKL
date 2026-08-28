@@ -48,6 +48,7 @@ class SettingController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'current_password' => 'nullable|required_with:password',
             'password' => 'nullable|min:8|confirmed',
@@ -56,6 +57,7 @@ class SettingController extends Controller
             'email.required' => 'Email harus diisi',
             'email.email' => 'Format email tidak valid',
             'email.unique' => 'Email sudah digunakan',
+            'phone.max' => 'Nomor WhatsApp maksimal 20 karakter',
             'avatar.image' => 'File harus berupa gambar',
             'avatar.mimes' => 'Format gambar harus: jpeg, jpg, png, atau gif',
             'avatar.max' => 'Ukuran gambar maksimal 2MB',
@@ -68,6 +70,7 @@ class SettingController extends Controller
             // Update name and email
             $user->name = $request->name;
             $user->email = $request->email;
+            $user->phone = $request->phone; // ✅ TAMBAHAN BARU (Poin 5 revisi) - nomor WhatsApp
 
             // Handle avatar upload
             if ($request->hasFile('avatar')) {

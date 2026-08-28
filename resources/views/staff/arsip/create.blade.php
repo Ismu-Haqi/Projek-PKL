@@ -120,7 +120,7 @@
                     <label class="block text-sm font-bold text-gray-700 mb-2">
                         Kategori <span class="text-red-500">*</span>
                     </label>
-                    <select name="category_id" required
+                    <select name="category_id" id="category_id" required onchange="updateRetensiPreview()"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">-- Pilih Kategori --</option>
                         @foreach($categories ?? [] as $category)
@@ -145,14 +145,45 @@
                     </select>
                 </div>
 
-                <div>
+                <div class="lg:col-span-2" id="retensiWrapper">
                     <label class="block text-sm font-bold text-gray-700 mb-2">
-                        Tanggal Retensi <span class="text-gray-400 font-normal text-xs">(opsional)</span>
+                        Tanggal Retensi <span class="text-gray-400 font-normal text-xs">(opsional, manual)</span>
                     </label>
-                    <input type="date" name="tanggal_retensi" value="{{ old('tanggal_retensi') }}"
+                    <input type="date" name="tanggal_retensi" id="tanggal_retensi" value="{{ old('tanggal_retensi') }}"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <p class="text-xs text-gray-400 mt-1">Batas waktu arsip aktif sebelum dipindahkan ke inaktif/dimusnahkan. Sistem akan mengingatkan otomatis.</p>
+
+                    <div id="retensiJraInfo" class="hidden mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                        📜 Kategori ini memiliki aturan <strong>Jadwal Retensi Arsip (JRA)</strong>: masa aktif
+                        <strong><span id="jraAktif"></span> tahun</strong>, masa inaktif
+                        <strong><span id="jraInaktif"></span> tahun</strong> (total <span id="jraTotal"></span> tahun),
+                        nasib akhir: <strong><span id="jraNasib"></span></strong>.
+                        Tanggal retensi akan <strong>dihitung otomatis</strong> oleh sistem sesuai aturan ini.
+                    </div>
                 </div>
+
+                <script>
+                const retentionRules = @json($retentionRules ?? []);
+
+                function updateRetensiPreview() {
+                    const categoryId = document.getElementById('category_id').value;
+                    const infoBox = document.getElementById('retensiJraInfo');
+                    const rule = retentionRules[categoryId];
+
+                    if (rule) {
+                        document.getElementById('jraAktif').textContent = rule.aktif_tahun;
+                        document.getElementById('jraInaktif').textContent = rule.inaktif_tahun;
+                        document.getElementById('jraTotal').textContent = rule.total_tahun;
+                        document.getElementById('jraNasib').textContent = rule.nasib_akhir;
+                        infoBox.classList.remove('hidden');
+                    } else {
+                        infoBox.classList.add('hidden');
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', updateRetensiPreview);
+                </script>
+
 
                 {{-- Upload Multiple Files --}}
                 <div class="lg:col-span-2">

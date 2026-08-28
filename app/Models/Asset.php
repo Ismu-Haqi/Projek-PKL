@@ -279,6 +279,20 @@ public function getStatusBadgeAttribute()
     }
 
     /**
+     * ✅ TAMBAHAN BARU (Poin 6 - Scan QR Cek Fisik)
+     * Riwayat hasil cek fisik aset (dari fitur scan QR kamera HP).
+     */
+    public function checkHistory()
+    {
+        return $this->hasMany(AssetCheck::class)->orderBy('checked_at', 'desc');
+    }
+
+    public function latestCheck()
+    {
+        return $this->hasOne(AssetCheck::class)->latestOfMany('checked_at');
+    }
+
+    /**
      * ✅ FIXED: Cek apakah aset bisa dipinjam
      */
     public function canBeBorrowed()

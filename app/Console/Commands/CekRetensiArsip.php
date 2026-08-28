@@ -74,13 +74,17 @@ class CekRetensiArsip extends Command
 
         foreach ($arsipList as $arsip) {
             $penerima = $this->tentukanPenerima($arsip);
+            $tindakLanjut = match ($arsip->nasib_akhir_arsip) {
+                'dinilai_kembali' => 'Segera dinilai kembali sesuai Jadwal Retensi Arsip untuk menentukan nasib akhirnya.',
+                default           => 'Segera tindak lanjuti (pindahkan ke gudang/inaktif atau ajukan pemusnahan).',
+            };
 
             foreach ($penerima as $userId) {
                 Notification::create([
                     'user_id' => $userId,
                     'title'   => 'Arsip Sudah Melewati Batas Retensi',
                     'message' => "Arsip \"{$arsip->judul}\" ({$arsip->nomor_surat}) sudah melewati batas retensi sejak " .
-                                 $arsip->tanggal_retensi->translatedFormat('d F Y') . ". Segera tindak lanjuti (pindahkan ke gudang/inaktif atau ajukan pemusnahan).",
+                                 $arsip->tanggal_retensi->translatedFormat('d F Y') . ". {$tindakLanjut}",
                     'type'    => 'error',
                 ]);
             }

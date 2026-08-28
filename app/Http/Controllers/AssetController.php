@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\AssetCheck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -479,6 +480,142 @@ public function show($id)
         return Storage::disk('public')->download($asset->qr_code, $safeFilename);
     }
     
+    // ══════════════════════════════════════════════════════
+    // ✅ TAMBAHAN BARU (Poin 6 - Scan QR Code pakai kamera HP)
+    // ══════════════════════════════════════════════════════
+
+    /**
+     * Halaman scan QR Code aset memakai kamera HP langsung dari browser.
+     */
+    public function scanPage()
+    {
+        $role = Auth::user()->role;
+
+        if (!in_array($role, ['admin', 'staff'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $viewPrefix = $role === 'admin' ? 'admin' : 'staff';
+
+        return view("{$viewPrefix}.aset.scan");
+    }
+
+    /**
+     * Dipanggil via AJAX setelah kamera berhasil membaca QR Code.
+     * Menerima ID aset (diambil dari URL hasil scan) dan mengembalikan
+     * data aset + status peminjaman aktif dalam bentuk JSON.
+     */
+    public function scanLookup(Request $request)
+    {
+        if (!in_array(Auth::user()->role, ['admin', 'staff'])) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate(['kode' => 'required|string']);
+
+        // Hasil scan bisa berupa URL lengkap (mis. /aset/view/12) atau angka ID saja
+        $kode = trim($request->kode);
+        $id   = null;
+
+        if (preg_match('/\\/aset\\/view\\/(\\d+)/', $kode, $m)) {
+            $id = $m[1];
+        } elseif (ctype_digit($kode)) {
+            $id = $kode;
+        }
+
+        if (!$id) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'QR Code tidak dikenali. Pastikan yang di-scan adalah QR Code aset dari sistem GANDARIA.',
+            ], 404);
+        }
+
+        $asset = Asset::with(['activeBorrow.borrower', 'latestCheck'])->find($id);
+
+        if (!$asset) {
+            return response()->json([
+                'status'  => false,
+                'message' => "Aset dengan ID {$id} tidak ditemukan.",
+            ], 404);
+        }
+
+        $activeBorrow = $asset->activeBorrow;
+
+        return response()->json([
+            'status' => true,
+            'asset'  => [
+                'id'             => $asset->id,
+                'kode_asset'     => $asset->kode_asset,
+                'nama'           => $asset->nama,
+                'kategori'       => $asset->kategori,
+                'merk'           => $asset->merk,
+                'tipe'           => $asset->tipe,
+                'lokasi'         => $asset->lokasi,
+                'unit'           => $asset->unit,
+                'status'         => $asset->status,
+                'kondisi'        => $asset->kondisi,
+                'foto_url'       => $asset->foto ? asset('storage/' . $asset->foto) : null,
+            ],
+            'peminjaman' => $activeBorrow ? [
+                'kode_peminjaman' => $activeBorrow->kode_peminjaman,
+                'peminjam'        => $activeBorrow->borrower->name ?? '-',
+                'unit'            => $activeBorrow->borrower_unit,
+                'tanggal_pinjam'  => optional($activeBorrow->tanggal_pinjam)->format('d/m/Y'),
+                'rencana_kembali' => optional($activeBorrow->tanggal_kembali_rencana)->format('d/m/Y'),
+                'status'          => $activeBorrow->status,
+            ] : null,
+            'cek_terakhir' => $asset->latestCheck ? [
+                'oleh'      => $asset->latestCheck->checker->name ?? '-',
+                'tanggal'   => $asset->latestCheck->checked_at->format('d/m/Y H:i'),
+                'kondisi'   => $asset->latestCheck->kondisi_saat_cek,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Simpan hasil pengecekan fisik dari halaman scan QR.
+     */
+    public function scanSave(Request $request)
+    {
+        if (!in_array(Auth::user()->role, ['admin', 'staff'])) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'asset_id'         => 'required|exists:assets,id',
+            'kondisi_saat_cek' => 'required|in:baik,cukup,kurang,rusak',
+            'lokasi_saat_cek'  => 'nullable|string|max:255',
+            'catatan'          => 'nullable|string',
+        ]);
+
+        $asset = Asset::findOrFail($validated['asset_id']);
+        $kondisiBerubah = $asset->kondisi !== $validated['kondisi_saat_cek'];
+
+        AssetCheck::create([
+            'asset_id'         => $asset->id,
+            'checked_by'       => Auth::id(),
+            'kondisi_saat_cek' => $validated['kondisi_saat_cek'],
+            'lokasi_saat_cek'  => $validated['lokasi_saat_cek'] ?? $asset->lokasi,
+            'catatan'          => $validated['catatan'] ?? null,
+            'kondisi_berubah'  => $kondisiBerubah,
+            'checked_at'       => now(),
+        ]);
+
+        // Sinkronkan kondisi terbaru ke data aset
+        $asset->update([
+            'kondisi' => $validated['kondisi_saat_cek'],
+            'status'  => $validated['kondisi_saat_cek'] === 'rusak' && $asset->status !== 'digunakan'
+                         ? 'rusak' : $asset->status,
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => $kondisiBerubah
+                ? "✅ Cek fisik tersimpan. Kondisi diperbarui dari sebelumnya."
+                : '✅ Cek fisik tersimpan. Kondisi sesuai catatan sebelumnya.',
+        ]);
+    }
+
     public function returnAsset(Request $request, $borrowId)
     {
         if (!in_array(Auth::user()->role, ['admin', 'staff'])) {

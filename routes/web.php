@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController; 
 use App\Http\Controllers\SettingController; 
 use App\Http\Controllers\CategoryController; 
+use App\Http\Controllers\RetentionScheduleController;
 use App\Http\Controllers\DispositionController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -159,12 +160,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/', [AssetController::class, 'index'])->name('index');
         Route::get('/create', [AssetController::class, 'create'])->name('create');
         Route::post('/', [AssetController::class, 'store'])->name('store');
+        Route::get('/scan', [AssetController::class, 'scanPage'])->name('scan');
+        Route::post('/scan/lookup', [AssetController::class, 'scanLookup'])->name('scan.lookup');
+        Route::post('/scan/save', [AssetController::class, 'scanSave'])->name('scan.save');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AssetController::class, 'update'])->name('update');
         Route::delete('/{id}', [AssetController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/status', [AssetController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
+    });
+
+    // Jadwal Retensi Arsip (JRA) - Poin 2 revisi, Admin kelola penuh
+    Route::prefix('retensi')->name('retensi.')->group(function () {
+        Route::get('/', [RetentionScheduleController::class, 'index'])->name('index');
+        Route::get('/create', [RetentionScheduleController::class, 'create'])->name('create');
+        Route::post('/', [RetentionScheduleController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [RetentionScheduleController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RetentionScheduleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RetentionScheduleController::class, 'destroy'])->name('destroy');
     });
     
     // Manajemen User
@@ -253,6 +267,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/', [OutgoingLetterController::class, 'store'])->name('store');
         Route::get('/{id}', [OutgoingLetterController::class, 'show'])->name('show');
         Route::get('/{id}/download', [OutgoingLetterController::class, 'download'])->name('download');
+        Route::get('/{id}/download-pdf', [OutgoingLetterController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{id}/ajukan-tte', [OutgoingLetterController::class, 'ajukanTte'])->name('ajukan-tte');
         Route::delete('/{id}', [OutgoingLetterController::class, 'destroy'])->name('destroy');
     });
 
@@ -356,6 +372,9 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::get('/browse', [StaffAssetBorrowController::class, 'browse'])->name('browse');
         Route::get('/create', [AssetController::class, 'create'])->name('create');
         Route::post('/', [AssetController::class, 'store'])->name('store');
+        Route::get('/scan', [AssetController::class, 'scanPage'])->name('scan');
+        Route::post('/scan/lookup', [AssetController::class, 'scanLookup'])->name('scan.lookup');
+        Route::post('/scan/save', [AssetController::class, 'scanSave'])->name('scan.save');
         Route::get('/{id}/edit', [AssetController::class, 'edit'])->name('edit');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
         Route::get('/{id}', [AssetController::class, 'show'])->name('show');
@@ -418,6 +437,8 @@ Route::prefix('disposisi')->name('disposisi.')->group(function () {
         Route::post('/', [OutgoingLetterController::class, 'store'])->name('store');
         Route::get('/{id}', [OutgoingLetterController::class, 'show'])->name('show');
         Route::get('/{id}/download', [OutgoingLetterController::class, 'download'])->name('download');
+        Route::get('/{id}/download-pdf', [OutgoingLetterController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{id}/ajukan-tte', [OutgoingLetterController::class, 'ajukanTte'])->name('ajukan-tte');
         Route::delete('/{id}', [OutgoingLetterController::class, 'destroy'])->name('destroy');
     });
 
@@ -444,6 +465,16 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
     Route::put('profil', [ProfileController::class, 'update'])->name('profil.update');
     Route::put('profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
     Route::delete('profil/avatar', [ProfileController::class, 'removeAvatar'])->name('profil.avatar.remove');
+    
+    // Surat Keluar (lihat & setujui/tolak TTE)
+    Route::prefix('surat-keluar')->name('surat-keluar.')->group(function () {
+        Route::get('/', [OutgoingLetterController::class, 'index'])->name('index');
+        Route::get('/{id}', [OutgoingLetterController::class, 'show'])->name('show');
+        Route::get('/{id}/download', [OutgoingLetterController::class, 'download'])->name('download');
+        Route::get('/{id}/download-pdf', [OutgoingLetterController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{id}/setujui-tte', [OutgoingLetterController::class, 'setujuiTte'])->name('setujui-tte');
+        Route::post('/{id}/tolak-tte', [OutgoingLetterController::class, 'tolakTte'])->name('tolak-tte');
+    });
     
     // Arsip Digital (Read-Only + Favorit)
     Route::prefix('arsip')->name('arsip.')->group(function () {
@@ -494,6 +525,9 @@ Route::middleware(['auth', 'role:pimpinan'])->prefix('pimpinan')->name('pimpinan
         Route::post('/{id}/status', [AssetController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/{id}/qr-download', [AssetController::class, 'downloadQr'])->name('downloadQr');
     });
+
+    // Jadwal Retensi Arsip (JRA) - Read-Only
+    Route::get('/retensi', [RetentionScheduleController::class, 'index'])->name('retensi.index');
     
     Route::prefix('mutasi')->name('mutasi.')->group(function () {
         Route::get('/', [AssetMutationController::class, 'index'])->name('index');

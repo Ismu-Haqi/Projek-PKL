@@ -31,4 +31,16 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Fonnte WhatsApp Gateway (Poin 5 revisi)
+    |--------------------------------------------------------------------------
+    | Daftar & ambil token di https://fonnte.com (ada tier gratis untuk
+    | development). Simpan token di .env sebagai FONNTE_TOKEN.
+    */
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'enabled' => env('FONNTE_ENABLED', true),
+    ],
+
 ];

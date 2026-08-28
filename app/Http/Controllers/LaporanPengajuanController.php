@@ -6,12 +6,20 @@ use App\Models\LaporanPengajuan;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\DocumentSignature;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanPengajuanController extends Controller
 {
+    protected WhatsAppService $whatsapp;
+
+    public function __construct(WhatsAppService $whatsapp)
+    {
+        $this->whatsapp = $whatsapp;
+    }
+
     // ══════════════════════════════════════════════════════
     // ADMIN & STAFF — Daftar pengajuan milik sendiri
     // ══════════════════════════════════════════════════════
@@ -64,7 +72,9 @@ class LaporanPengajuanController extends Controller
         ]);
 
         // Notifikasi ke semua pimpinan
-        User::where('role', 'pimpinan')->each(function ($pimpinan) use ($judul) {
+        $pimpinanList = User::where('role', 'pimpinan')->get();
+
+        $pimpinanList->each(function ($pimpinan) use ($judul) {
             Notification::create([
                 'user_id' => $pimpinan->id,
                 'title'   => '📋 Pengajuan Laporan Baru',
@@ -73,6 +83,15 @@ class LaporanPengajuanController extends Controller
                 'is_read' => false,
             ]);
         });
+
+        // ✅ TAMBAHAN BARU (Poin 5 revisi) — Notifikasi WhatsApp ke pimpinan
+        $pesanWa = "📋 *Pengajuan Laporan Baru*\n\n"
+                 . "{$judul}\n"
+                 . "Diajukan oleh: " . Auth::user()->name . "\n\n"
+                 . "Segera cek & validasi TTE di aplikasi GANDARIA:\n"
+                 . route('pimpinan.laporan.validasi.index');
+
+        $this->whatsapp->sendToMany($pimpinanList->pluck('phone')->all(), $pesanWa);
 
         return back()->with('success', "✅ {$judul} berhasil diajukan ke pimpinan untuk divalidasi TTE.");
     }
@@ -96,7 +115,9 @@ class LaporanPengajuanController extends Controller
             'diajukan_at'     => now(),
         ]);
 
-        User::where('role', 'pimpinan')->each(function ($pimpinan) use ($pengajuan) {
+        $pimpinanList = User::where('role', 'pimpinan')->get();
+
+        $pimpinanList->each(function ($pimpinan) use ($pengajuan) {
             Notification::create([
                 'user_id' => $pimpinan->id,
                 'title'   => '📋 Pengajuan Laporan Ulang',
@@ -105,6 +126,15 @@ class LaporanPengajuanController extends Controller
                 'is_read' => false,
             ]);
         });
+
+        // ✅ TAMBAHAN BARU (Poin 5 revisi) — Notifikasi WhatsApp ke pimpinan
+        $pesanWa = "📋 *Pengajuan Laporan Ulang*\n\n"
+                 . "{$pengajuan->judul}\n"
+                 . "Diajukan ulang oleh: " . Auth::user()->name . "\n\n"
+                 . "Segera cek & validasi TTE di aplikasi GANDARIA:\n"
+                 . route('pimpinan.laporan.validasi.index');
+
+        $this->whatsapp->sendToMany($pimpinanList->pluck('phone')->all(), $pesanWa);
 
         return back()->with('success', 'Pengajuan laporan berhasil dikirim ulang ke pimpinan.');
     }

@@ -161,6 +161,24 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    {{-- ✅ TAMBAHAN BARU (Poin 5 revisi) - Nomor WhatsApp --}}
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fab fa-whatsapp text-gray-400 mr-1"></i>
+                            Nomor WhatsApp
+                        </label>
+                        <input type="text" 
+                               name="phone" 
+                               id="phone" 
+                               value="{{ old('phone', Auth::user()->phone) }}"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                               placeholder="08xxxxxxxxxx">
+                        <p class="text-xs text-gray-400 mt-1">Dipakai sistem untuk mengirim notifikasi WhatsApp saat ada dokumen yang butuh TTE Anda.</p>
+                        @error('phone')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 {{-- Save Button --}}

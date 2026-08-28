@@ -50,6 +50,15 @@ class Category extends Model
     }
 
     /**
+     * ✅ TAMBAHAN BARU (Poin 2 - Jadwal Retensi Arsip)
+     * Relasi ke aturan retensi resmi (JRA) untuk kategori ini.
+     */
+    public function retentionSchedule()
+    {
+        return $this->hasOne(RetentionSchedule::class, 'category_id');
+    }
+
+    /**
      * Get archives count for this category.
      */
     public function getArchivesCountAttribute()

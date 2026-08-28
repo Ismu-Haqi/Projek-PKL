@@ -19,6 +19,9 @@ class Archive extends Model
         'tanggal_retensi',
         'retensi_notif_mendekati_terkirim',
         'retensi_notif_kedaluwarsa_terkirim',
+        'retention_schedule_id',
+        'tanggal_inaktif',
+        'nasib_akhir_arsip',
         'judul',
         'pengirim',
         'unit',
@@ -38,12 +41,22 @@ class Archive extends Model
         'tanggal_surat' => 'date',
         'tanggal_arsip' => 'date',
         'tanggal_retensi' => 'date',
+        'tanggal_inaktif' => 'date',
         'retensi_notif_mendekati_terkirim' => 'boolean',
         'retensi_notif_kedaluwarsa_terkirim' => 'boolean',
         'is_favorite' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    /**
+     * ✅ TAMBAHAN BARU (Poin 2 - Jadwal Retensi Arsip)
+     * Aturan JRA resmi yang dipakai untuk menghitung retensi arsip ini.
+     */
+    public function retentionSchedule()
+    {
+        return $this->belongsTo(RetentionSchedule::class, 'retention_schedule_id');
+    }
 
     /**
      * Relasi ke Category
@@ -137,8 +150,8 @@ class Archive extends Model
     }
 
     /**
-     * ✅ TAMBAHAN BARU - Status retensi arsip
-     * (fondasi awal, akan disempurnakan saat fitur Jadwal Retensi Arsip dibangun penuh)
+     * ✅ Status retensi arsip berbasis Jadwal Retensi Arsip (JRA) resmi.
+     * Arsip dengan nasib akhir "permanen" tidak pernah dianggap kedaluwarsa.
      */
     public function getStatusRetensiAttribute(): array
     {
@@ -146,11 +159,18 @@ class Archive extends Model
             return ['text' => 'Belum diatur', 'color' => 'gray'];
         }
 
+        if ($this->nasib_akhir_arsip === 'permanen') {
+            return ['text' => 'Permanen', 'color' => 'blue'];
+        }
+
         $today = now()->startOfDay();
         $batas = $this->tanggal_retensi->startOfDay();
 
         if ($today->gt($batas)) {
-            return ['text' => 'Sudah Kedaluwarsa', 'color' => 'red'];
+            $label = $this->nasib_akhir_arsip === 'dinilai_kembali'
+                ? 'Waktunya Dinilai Kembali'
+                : 'Sudah Kedaluwarsa';
+            return ['text' => $label, 'color' => 'red'];
         }
 
         if ($today->diffInDays($batas, false) <= 30) {
@@ -163,6 +183,9 @@ class Archive extends Model
     public function scopeRetensiMendekati($query, $hari = 30)
     {
         return $query->whereNotNull('tanggal_retensi')
+            ->where(function ($q) {
+                $q->whereNull('nasib_akhir_arsip')->orWhere('nasib_akhir_arsip', '!=', 'permanen');
+            })
             ->whereDate('tanggal_retensi', '>=', now()->toDateString())
             ->whereDate('tanggal_retensi', '<=', now()->addDays($hari)->toDateString());
     }
@@ -170,6 +193,9 @@ class Archive extends Model
     public function scopeRetensiKedaluwarsa($query)
     {
         return $query->whereNotNull('tanggal_retensi')
+            ->where(function ($q) {
+                $q->whereNull('nasib_akhir_arsip')->orWhere('nasib_akhir_arsip', '!=', 'permanen');
+            })
             ->whereDate('tanggal_retensi', '<', now()->toDateString());
     }
 }
