@@ -176,6 +176,19 @@
             <p class="text-sm text-gray-600">Buku agenda gabungan surat masuk & keluar</p>
         </a>
 
+        <a href="{{ route(Auth::user()->role . '.laporan.surat-keluar') }}" class="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl border-2 border-teal-300 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-lg bg-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </div>
+                <span class="text-teal-600 font-bold text-sm">12</span>
+            </div>
+            <h4 class="font-bold text-gray-800 text-lg mb-2">Laporan Surat Keluar</h4>
+            <p class="text-sm text-gray-600">Rekap surat keluar & status TTE</p>
+        </a>
+
         <a href="{{ route(Auth::user()->role . '.laporan.beban-kerja-pimpinan') }}" class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl border-2 border-indigo-300 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 group">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-lg bg-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">

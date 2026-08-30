@@ -44,6 +44,7 @@
                         <th class="px-6 py-4">Alasan</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4">Disetujui Oleh</th>
+                        <th class="px-6 py-4 text-center">Berita Acara</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -67,9 +68,19 @@
                             @endif
                         </td>
                         <td class="px-6 py-4">{{ $d->penyetuju->name ?? '-' }}</td>
+                        <td class="px-6 py-4 text-center">
+                            @if($d->status === 'disetujui' && $d->berita_acara)
+                                <a href="{{ route(Auth::user()->role . '.pemusnahan.download-ba', $d->id) }}"
+                                   class="inline-flex items-center gap-1 text-teal-600 hover:underline text-xs font-medium">
+                                    📄 Unduh
+                                </a>
+                            @else
+                                <span class="text-gray-300 text-xs">-</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">Belum ada data usulan pemusnahan aset.</td></tr>
+                    <tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">Belum ada data usulan pemusnahan aset.</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Services\WhatsAppService;
 
 class IncomingLetterController extends Controller
 {
+    protected WhatsAppService $whatsapp;
+
+    public function __construct(WhatsAppService $whatsapp)
+    {
+        $this->whatsapp = $whatsapp;
+    }
     // ─── Index ────────────────────────────────────────────────────────────────
 
     public function index(Request $request)
@@ -136,6 +143,31 @@ class IncomingLetterController extends Controller
             }
 
             IncomingLetter::create($data);
+
+            // ✅ TAMBAHAN BARU (Poin 5 revisi) — Notifikasi ke pimpinan
+            // (in-app + WhatsApp) begitu ada surat masuk baru, supaya
+            // pimpinan bisa langsung tahu meski sedang di luar kantor.
+            $pimpinanList = User::where('role', 'pimpinan')->get();
+
+            $pimpinanList->each(function ($pimpinan) use ($request, $nomorAgenda) {
+                Notification::create([
+                    'user_id' => $pimpinan->id,
+                    'title'   => '📨 Surat Masuk Baru',
+                    'message' => "Surat dari {$request->pengirim} — {$request->perihal} ({$nomorAgenda}) baru saja diinput.",
+                    'type'    => 'info',
+                    'is_read' => false,
+                ]);
+            });
+
+            $pesanWa = "📨 *Surat Masuk Baru*\n\n"
+                     . "Dari: {$request->pengirim}\n"
+                     . "Perihal: {$request->perihal}\n"
+                     . "Sifat: " . ucfirst(str_replace('_', ' ', $request->sifat)) . "\n"
+                     . "No. Agenda: {$nomorAgenda}\n\n"
+                     . "Cek detail di aplikasi GANDARIA:\n"
+                     . route('pimpinan.surat-masuk.index');
+
+            $this->whatsapp->sendToMany($pimpinanList->pluck('phone')->all(), $pesanWa);
 
             return redirect()
                 ->route(Auth::user()->role . '.surat-masuk.index')

@@ -21,6 +21,8 @@ class Asset extends Model
         'kondisi',
         'status',
         'lokasi',
+        'posisi_x',
+        'posisi_y',
         'unit',
         'tanggal_pembelian',
         'harga_pembelian',
@@ -279,20 +281,6 @@ public function getStatusBadgeAttribute()
     }
 
     /**
-     * ✅ TAMBAHAN BARU (Poin 6 - Scan QR Cek Fisik)
-     * Riwayat hasil cek fisik aset (dari fitur scan QR kamera HP).
-     */
-    public function checkHistory()
-    {
-        return $this->hasMany(AssetCheck::class)->orderBy('checked_at', 'desc');
-    }
-
-    public function latestCheck()
-    {
-        return $this->hasOne(AssetCheck::class)->latestOfMany('checked_at');
-    }
-
-    /**
      * ✅ FIXED: Cek apakah aset bisa dipinjam
      */
     public function canBeBorrowed()
@@ -358,5 +346,25 @@ public function getStatusBadgeAttribute()
             return 'Kritis (Perlu Perhatian)';
         }
         return 'Layak Pakai';
+    }
+
+    /**
+     * ✅ TAMBAHAN BARU (Poin 8 revisi) - Denah Lokasi Fisik Aset
+     */
+    public function scopeSudahDitempatkan($query)
+    {
+        return $query->whereNotNull('posisi_x')->whereNotNull('posisi_y');
+    }
+
+    public function scopeBelumDitempatkan($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('posisi_x')->orWhereNull('posisi_y');
+        });
+    }
+
+    public function getSudahDiPetakanAttribute(): bool
+    {
+        return $this->posisi_x !== null && $this->posisi_y !== null;
     }
 }

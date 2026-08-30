@@ -75,6 +75,7 @@ class LaporanPengajuan extends Model
             'arsip', 'disposisi', 'aset', 'user',
             'unit', 'penyusutan', 'peminjaman',
             'maintenance', 'surat-masuk', 'pemusnahan', 'agenda-surat',
+            'laporan-surat-keluar',
         ];
     }
 }

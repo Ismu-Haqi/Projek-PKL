@@ -479,6 +479,23 @@
                     </svg>
                     <span>Surat Masuk</span>
                 </a>
+
+                {{-- Surat Keluar (setujui/tolak TTE) --}}
+                <a href="{{ route('pimpinan.surat-keluar.index') }}"
+                   class="sidebar-link {{ Request::routeIs('pimpinan.surat-keluar.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                    <span>Surat Keluar</span>
+                    @php
+                        $menungguTteCount = \App\Models\OutgoingLetter::where('status', 'menunggu_tte')->count();
+                    @endphp
+                    @if($menungguTteCount > 0)
+                    <span class="ml-auto bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {{ $menungguTteCount }}
+                    </span>
+                    @endif
+                </a>
                 
                 {{-- ✅ Arsip Digital --}}
                 <a href="{{ route('pimpinan.arsip.index') }}" 
@@ -496,15 +513,6 @@
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.929 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                     <span>Arsip Favorit</span>
-                </a>
-
-                {{-- ✅ Jadwal Retensi Arsip (JRA) --}}
-                <a href="{{ route('pimpinan.retensi.index') }}" 
-                   class="sidebar-link {{ Request::routeIs('pimpinan.retensi.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <span>Jadwal Retensi Arsip</span>
                 </a>
                 
                 {{-- ✅ Disposisi --}}
@@ -532,6 +540,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                     </svg>
                     <span>Manajemen Aset</span>
+                </a>
+
+                {{-- Denah Lokasi Aset --}}
+                <a href="{{ route('pimpinan.denah-aset.index') }}" class="sidebar-link {{ Request::routeIs('pimpinan.denah-aset.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    <span>Denah Lokasi Aset</span>
                 </a>
 
                 {{-- Mutasi Aset --}}

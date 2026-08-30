@@ -136,16 +136,71 @@
                     </select>
                 </div>
 
-                {{-- Tanggal Retensi --}}
-                <div>
+                {{-- Klasifikasi Jadwal Retensi Arsip (JRA) --}}
+                <div class="lg:col-span-2">
                     <label class="block text-sm font-bold text-gray-700 mb-2">
-                        Tanggal Retensi <span class="text-gray-400 font-normal text-xs">(opsional)</span>
+                        Klasifikasi Retensi Arsip (JRA) <span class="text-gray-400 font-normal text-xs">(opsional, sesuai kaidah kearsipan resmi)</span>
                     </label>
-                    <input type="date" name="tanggal_retensi"
+                    <select name="jadwal_retensi_id" id="jadwal_retensi_id"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- Tidak pakai klasifikasi (isi tanggal retensi manual) --</option>
+                        @foreach(\App\Models\JadwalRetensiArsip::aktif()->orderBy('kode_klasifikasi')->get() as $jra)
+                        <option value="{{ $jra->id }}"
+                                data-aktif="{{ $jra->jangka_aktif_tahun }}"
+                                {{ old('jadwal_retensi_id', $archive->jadwal_retensi_id) == $jra->id ? 'selected' : '' }}>
+                            {{ $jra->kode_klasifikasi }} — {{ $jra->nama_klasifikasi }} (aktif {{ $jra->jangka_aktif_tahun }} th, {{ ucfirst(str_replace('_', ' ', $jra->nasib_akhir)) }})
+                        </option>
+                        @endforeach
+                    </select>
+                    <p id="previewRetensi" class="text-xs text-teal-600 mt-1 font-medium"></p>
+                    @if($archive->jadwalRetensi)
+                    <p class="text-xs text-gray-500 mt-1">
+                        Masa inaktif berakhir: <strong>{{ optional($archive->tanggal_inaktif_berakhir)->translatedFormat('d F Y') ?? '-' }}</strong>
+                        — Nasib akhir: <strong>{{ ucfirst(str_replace('_', ' ', $archive->jadwalRetensi->nasib_akhir)) }}</strong>
+                    </p>
+                    @endif
+                </div>
+
+                {{-- Tanggal Retensi (manual) --}}
+                <div id="manualRetensiWrapper">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Tanggal Retensi Manual <span class="text-gray-400 font-normal text-xs">(opsional)</span>
+                    </label>
+                    <input type="date" name="tanggal_retensi" id="tanggal_retensi"
                            value="{{ old('tanggal_retensi', $archive->tanggal_retensi ? $archive->tanggal_retensi->format('Y-m-d') : '') }}"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <p class="text-xs text-gray-400 mt-1">Batas waktu arsip aktif sebelum dipindahkan ke inaktif/dimusnahkan. Sistem akan mengingatkan otomatis.</p>
+                    <p class="text-xs text-gray-400 mt-1">Kosongkan jika memilih Klasifikasi JRA di atas (dihitung otomatis).</p>
                 </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const jraSelect = document.getElementById('jadwal_retensi_id');
+                    const tglArsipInput = document.querySelector('[name="tanggal_surat"], [name="tanggal_arsip"]');
+                    const manualWrapper = document.getElementById('manualRetensiWrapper');
+                    const preview = document.getElementById('previewRetensi');
+
+                    function updatePreview() {
+                        const opt = jraSelect.options[jraSelect.selectedIndex];
+                        const aktifTahun = opt ? opt.getAttribute('data-aktif') : null;
+
+                        if (aktifTahun && tglArsipInput && tglArsipInput.value) {
+                            const tgl = new Date(tglArsipInput.value);
+                            tgl.setFullYear(tgl.getFullYear() + parseInt(aktifTahun));
+                            preview.textContent = '📅 Tanggal retensi otomatis: ' + tgl.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                            manualWrapper.style.opacity = '0.4';
+                            manualWrapper.querySelector('input').disabled = true;
+                        } else {
+                            preview.textContent = '';
+                            manualWrapper.style.opacity = '1';
+                            manualWrapper.querySelector('input').disabled = false;
+                        }
+                    }
+
+                    jraSelect.addEventListener('change', updatePreview);
+                    if (tglArsipInput) tglArsipInput.addEventListener('change', updatePreview);
+                    updatePreview();
+                });
+                </script>
 
                 {{-- File Saat Ini --}}
                 <div class="lg:col-span-2">

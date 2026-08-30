@@ -511,6 +511,42 @@ class ReportController extends Controller
     }
 
     // ========================
+    // LAPORAN SURAT KELUAR
+    // ========================
+    public function suratKeluar(Request $request)
+    {
+        $role = Auth::user()->role;
+        $query = OutgoingLetter::with(['pembuat', 'penandatangan'])
+            ->orderBy('tanggal_surat', 'desc');
+
+        if ($role === 'staff') {
+            $query->where('dibuat_oleh', Auth::id());
+        }
+        if ($request->filled('status'))     $query->where('status', $request->status);
+        if ($request->filled('sifat'))      $query->where('sifat', $request->sifat);
+        if ($request->filled('start_date')) $query->whereDate('tanggal_surat', '>=', $request->start_date);
+        if ($request->filled('end_date'))   $query->whereDate('tanggal_surat', '<=', $request->end_date);
+
+        $letters = $query->paginate(15)->withQueryString();
+
+        $baseQuery = $role === 'staff'
+            ? OutgoingLetter::where('dibuat_oleh', Auth::id())
+            : OutgoingLetter::query();
+
+        $stats = [
+            'total'          => (clone $baseQuery)->count(),
+            'draft'          => (clone $baseQuery)->where('status', 'draft')->count(),
+            'menunggu_tte'   => (clone $baseQuery)->where('status', 'menunggu_tte')->count(),
+            'ditandatangani' => (clone $baseQuery)->where('status', 'ditandatangani')->count(),
+            'ditolak'        => (clone $baseQuery)->where('status', 'ditolak')->count(),
+            'bulan_ini'      => (clone $baseQuery)->whereMonth('tanggal_surat', now()->month)
+                                                   ->whereYear('tanggal_surat', now()->year)->count(),
+        ];
+
+        return view("{$role}.laporan.surat-keluar", compact('letters', 'stats'));
+    }
+
+    // ========================
     // LAPORAN REKAP AGENDA SURAT (MASUK & KELUAR)
     // ========================
     public function agendaSurat(Request $request)
@@ -571,7 +607,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan', 'agenda-surat'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -596,7 +632,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'pemusnahan', 'agenda-surat'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -615,6 +651,7 @@ class ReportController extends Controller
             'surat-masuk' => 'Laporan Surat Masuk',
             'pemusnahan'  => 'Laporan Pemusnahan Aset',
             'agenda-surat' => 'Laporan Rekap Agenda Surat',
+            'laporan-surat-keluar' => 'Laporan Surat Keluar',
             'summary'     => 'Laporan Ringkasan',
         ];
         $signature = DocumentSignature::generateFor(
@@ -942,6 +979,19 @@ class ReportController extends Controller
 
                 $data['agenda'] = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
                 $data['period'] = 'Hingga ' . now()->format('d M Y');
+                break;
+
+            case 'laporan-surat-keluar':
+                $role = Auth::user()->role;
+                $skQuery = OutgoingLetter::with(['pembuat', 'penandatangan'])
+                    ->orderBy('tanggal_surat', 'desc');
+
+                if ($role === 'staff') {
+                    $skQuery->where('dibuat_oleh', Auth::id());
+                }
+
+                $data['letters'] = $skQuery->get();
+                $data['period']  = 'Hingga ' . now()->format('d M Y');
                 break;
 
             case 'user':

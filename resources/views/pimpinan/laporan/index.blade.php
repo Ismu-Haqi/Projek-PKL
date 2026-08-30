@@ -272,6 +272,29 @@
             </div>
         </div>
 
+        {{-- 13. Laporan Surat Keluar --}}
+        <div class="bg-white rounded-xl border-2 border-teal-300 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <a href="{{ route('pimpinan.laporan.surat-keluar') }}" class="block p-5 group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    </div>
+                    <span class="text-teal-600 font-bold text-sm bg-teal-100 px-2 py-0.5 rounded-full">13</span>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">Laporan Surat Keluar</h4>
+                <p class="text-xs text-gray-500">Rekap surat keluar & status TTE</p>
+            </a>
+            <div class="px-5 pb-4">
+                <a href="{{ route('pimpinan.laporan.export-pdf', ['type' => 'laporan-surat-keluar']) }}"
+                   class="flex items-center justify-center gap-1.5 w-full bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-3-3m0 0l3-3m-3 3h12M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    PDF + TTE
+                </a>
+            </div>
+        </div>
+
         {{-- 11. Beban Kerja Validasi Pimpinan --}}
         <div class="bg-white rounded-xl border-2 border-indigo-300 overflow-hidden hover:shadow-lg transition-all duration-300">
             <a href="{{ route('pimpinan.laporan.beban-kerja-pimpinan') }}" class="block p-5 group">

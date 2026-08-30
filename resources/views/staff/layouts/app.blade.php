@@ -549,12 +549,12 @@
                     <span>Lihat Aset</span>
                 </a>
 
-                {{-- ✅ TAMBAHAN BARU (Poin 6) - Scan QR Aset --}}
-                <a href="{{ route('staff.aset.scan') }}" class="sidebar-link {{ Request::routeIs('staff.aset.scan*') ? 'active' : '' }}">
+                {{-- Denah Lokasi Aset --}}
+                <a href="{{ route('staff.denah-aset.index') }}" class="sidebar-link {{ Request::routeIs('staff.denah-aset.*') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v2m0-2H9m1 0h1m2-1v1m0-3v2m3-2h2m-3-4h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
-                    <span>Scan QR Aset</span>
+                    <span>Denah Lokasi Aset</span>
                 </a>
 
                 {{-- Pemusnahan Aset --}}
