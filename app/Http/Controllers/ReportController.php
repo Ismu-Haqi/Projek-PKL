@@ -607,7 +607,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat', 'beban-kerja-pimpinan'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -632,7 +632,7 @@ class ReportController extends Controller
     {
         $type = $request->input('type', 'summary');
         
-        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat'];
+        $allowedTypes = ['summary', 'arsip', 'disposisi', 'aset', 'user', 'unit', 'penyusutan', 'peminjaman', 'maintenance', 'surat-masuk', 'laporan-surat-keluar', 'pemusnahan', 'agenda-surat', 'beban-kerja-pimpinan'];
         if (!in_array($type, $allowedTypes)) {
             abort(404, 'Report type not found');
         }
@@ -652,6 +652,7 @@ class ReportController extends Controller
             'pemusnahan'  => 'Laporan Pemusnahan Aset',
             'agenda-surat' => 'Laporan Rekap Agenda Surat',
             'laporan-surat-keluar' => 'Laporan Surat Keluar',
+            'beban-kerja-pimpinan' => 'Laporan Beban Kerja Validasi Pimpinan',
             'summary'     => 'Laporan Ringkasan',
         ];
         $signature = DocumentSignature::generateFor(
@@ -979,6 +980,57 @@ class ReportController extends Controller
 
                 $data['agenda'] = $masuk->concat($keluar)->sortByDesc('tanggal')->values();
                 $data['period'] = 'Hingga ' . now()->format('d M Y');
+                break;
+
+            case 'beban-kerja-pimpinan':
+                $period = $request->input('period', '1month');
+                $dateRange = $this->getDateRangeFromPeriod($period, $request);
+
+                $laporanValidasi = LaporanPengajuan::with(['pengaju', 'validator'])
+                    ->whereBetween('diajukan_at', [$dateRange['start'], $dateRange['end']])
+                    ->whereNotNull('divalidasi_at')
+                    ->get()
+                    ->map(function ($item) {
+                        $item->waktu_proses_jam = $item->diajukan_at && $item->divalidasi_at
+                            ? round($item->diajukan_at->diffInMinutes($item->divalidasi_at) / 60, 1)
+                            : null;
+                        return $item;
+                    });
+
+                $data['laporanStats'] = [
+                    'total_divalidasi' => $laporanValidasi->count(),
+                    'disetujui'        => $laporanValidasi->where('status', 'disetujui')->count(),
+                    'ditolak'          => $laporanValidasi->where('status', 'ditolak')->count(),
+                    'rata_rata_jam'    => round($laporanValidasi->whereNotNull('waktu_proses_jam')->avg('waktu_proses_jam') ?? 0, 1),
+                    'tercepat_jam'     => $laporanValidasi->whereNotNull('waktu_proses_jam')->min('waktu_proses_jam'),
+                    'terlama_jam'      => $laporanValidasi->whereNotNull('waktu_proses_jam')->max('waktu_proses_jam'),
+                ];
+
+                $data['laporanPerJenis'] = $laporanValidasi->groupBy('jenis_laporan')->map(function ($group) {
+                    return [
+                        'total'         => $group->count(),
+                        'rata_rata_jam' => round($group->whereNotNull('waktu_proses_jam')->avg('waktu_proses_jam') ?? 0, 1),
+                    ];
+                });
+
+                $pimpinanIds = User::where('role', 'pimpinan')->pluck('id');
+                $disposisiQuery = Disposition::whereIn('to_user_id', $pimpinanIds)
+                    ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']]);
+                $disposisiSelesai = (clone $disposisiQuery)->whereNotNull('completed_at')->get()
+                    ->map(function ($item) {
+                        $item->waktu_proses_jam = round($item->created_at->diffInMinutes($item->completed_at) / 60, 1);
+                        return $item;
+                    });
+
+                $data['disposisiStats'] = [
+                    'total_diterima' => (clone $disposisiQuery)->count(),
+                    'total_selesai'  => $disposisiSelesai->count(),
+                    'rata_rata_jam'  => round($disposisiSelesai->avg('waktu_proses_jam') ?? 0, 1),
+                ];
+
+                $data['laporanValidasi'] = $laporanValidasi;
+                $data['dateRange'] = $dateRange;
+                $data['period']    = $dateRange['label'] ?? ('Periode: ' . $dateRange['start']->format('d M Y') . ' - ' . $dateRange['end']->format('d M Y'));
                 break;
 
             case 'laporan-surat-keluar':

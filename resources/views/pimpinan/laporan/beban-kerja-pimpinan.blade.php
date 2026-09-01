@@ -8,7 +8,9 @@
             <h1 class="text-3xl font-bold text-gray-800">Laporan Beban Kerja Validasi Pimpinan</h1>
             <p class="text-gray-600 mt-1">Jumlah dan waktu proses persetujuan yang ditangani pimpinan — {{ $dateRange['label'] }}</p>
         </div>
-        <form method="GET" class="flex gap-2">
+        <div class="flex gap-2 flex-wrap items-center">
+            @include('partials.laporan-buttons', ['type' => 'beban-kerja-pimpinan', 'extraParams' => ['period' => $period]])
+            <form method="GET" class="flex gap-2">
             <select name="period" onchange="this.form.submit()"
                     class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="1month"  {{ $period === '1month'  ? 'selected' : '' }}>1 Bulan Terakhir</option>
@@ -16,7 +18,8 @@
                 <option value="6months" {{ $period === '6months' ? 'selected' : '' }}>6 Bulan Terakhir</option>
                 <option value="1year"   {{ $period === '1year'   ? 'selected' : '' }}>1 Tahun Terakhir</option>
             </select>
-        </form>
+            </form>
+        </div>
     </div>
 
     {{-- Statistik Validasi Laporan (TTE) --}}

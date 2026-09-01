@@ -24,15 +24,32 @@ class OutgoingLetter extends Model
         'keterangan',
         'status',
         'dibuat_oleh',
+        'tte_token',
+        'diajukan_tte_at',
+        'divalidasi_oleh',
+        'divalidasi_at',
+        'catatan_penolakan',
     ];
 
     protected $casts = [
-        'tanggal_surat' => 'date',
+        'tanggal_surat'   => 'date',
+        'diajukan_tte_at' => 'datetime',
+        'divalidasi_at'   => 'datetime',
     ];
 
     public function pembuat()
     {
         return $this->belongsTo(User::class, 'dibuat_oleh');
+    }
+
+    public function penandatangan()
+    {
+        return $this->belongsTo(User::class, 'divalidasi_oleh');
+    }
+
+    public function signature()
+    {
+        return $this->hasOne(DocumentSignature::class, 'token', 'tte_token');
     }
 
     public static function generateNomorAgenda(): string
@@ -53,11 +70,12 @@ class OutgoingLetter extends Model
     public function getStatusBadgeAttribute(): array
     {
         return match ($this->status) {
-            'draft'          => ['text' => 'Draft',              'color' => 'gray'],
-            'menunggu_tte'   => ['text' => 'Menunggu TTE',       'color' => 'yellow'],
-            'ditandatangani' => ['text' => 'Sudah Ditandatangani', 'color' => 'green'],
-            'terkirim'       => ['text' => 'Terkirim',           'color' => 'blue'],
-            default          => ['text' => '-',                  'color' => 'gray'],
+            'draft'          => ['text' => 'Draft',                 'color' => 'gray'],
+            'menunggu_tte'   => ['text' => 'Menunggu TTE',          'color' => 'yellow'],
+            'ditandatangani' => ['text' => 'Sudah Ditandatangani',  'color' => 'green'],
+            'ditolak'        => ['text' => 'Ditolak',               'color' => 'red'],
+            'terkirim'       => ['text' => 'Terkirim',              'color' => 'blue'],
+            default          => ['text' => '-',                     'color' => 'gray'],
         };
     }
 }
