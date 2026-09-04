@@ -266,7 +266,7 @@ function confirmDeleteAssetShow() {
     }
 
     Swal.fire({
-        title: '⚠️ Hapus Aset?',
+        title: 'Hapus Aset?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Aset <strong class="text-red-600">{{ $asset->nama }}</strong> akan dihapus permanen</p>

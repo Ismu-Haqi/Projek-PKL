@@ -705,7 +705,7 @@ function confirmSaveProfile() {
     const hasPasswordChange = password.length > 0;
     
     Swal.fire({
-        title: '💾 Simpan Perubahan Profil?',
+        title: 'Simpan Perubahan Profil?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Perubahan yang akan disimpan:</p>
@@ -746,7 +746,7 @@ function confirmSaveSystem() {
     const maintenanceMode = document.getElementById('maintenance_mode').checked;
     
     Swal.fire({
-        title: '⚙️ Simpan Pengaturan Sistem?',
+        title: 'Simpan Pengaturan Sistem?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Pengaturan sistem akan diperbarui</p>
@@ -782,7 +782,7 @@ function confirmSaveAppearance() {
     }
 
     Swal.fire({
-        title: '🎨 Simpan Pengaturan Tampilan?',
+        title: 'Simpan Pengaturan Tampilan?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Pengaturan tampilan akan diterapkan:</p>
@@ -824,7 +824,7 @@ function confirmClearCache() {
     }
 
     Swal.fire({
-        title: '🗑️ Bersihkan Cache?',
+        title: 'Bersihkan Cache?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Cache yang akan dibersihkan:</p>
@@ -884,7 +884,7 @@ function clearCacheProcess() {
         if (data.success) {
             Swal.fire({
                 icon: 'success',
-                title: '✅ Cache Berhasil Dibersihkan!',
+                title: 'Cache Berhasil Dibersihkan!',
                 html: `<p class="text-gray-700">${data.message}</p>`,
                 confirmButtonColor: '#22c55e',
                 confirmButtonText: 'OK'
@@ -921,7 +921,7 @@ function confirmCreateBackup() {
     }
 
     Swal.fire({
-        title: '💾 Buat Backup Database?',
+        title: 'Buat Backup Database?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Backup akan menyimpan:</p>
@@ -980,7 +980,7 @@ function createBackupProcess() {
         if (data.success) {
             Swal.fire({
                 icon: 'success',
-                title: '✅ Backup Berhasil Dibuat!',
+                title: 'Backup Berhasil Dibuat!',
                 html: `
                     <div class="text-left">
                         <p class="text-gray-700 mb-2">${data.message}</p>
@@ -1027,7 +1027,7 @@ function confirmResetAppearance() {
     }
 
     Swal.fire({
-        title: '🔄 Reset Pengaturan Tampilan?',
+        title: 'Reset Pengaturan Tampilan?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Pengaturan akan dikembalikan ke default:</p>
@@ -1158,7 +1158,7 @@ function confirmDeleteBackup(filename) {
         return;
     }
     Swal.fire({
-        title: '🗑️ Hapus File Backup?',
+        title: 'Hapus File Backup?',
         html: `<p class="text-gray-700">File <code class="bg-gray-100 px-1 rounded">${filename}</code> akan dihapus permanen dari server.</p>`,
         icon: 'warning',
         showCancelButton: true,
@@ -1262,7 +1262,7 @@ function gdriveBackup(type) {
     const labels={arsip:'file arsip & surat',disposisi:'bukti disposisi',all:'semua file (arsip + disposisi)'};
     if (typeof Swal==='undefined') { if(confirm(`Backup ${labels[type]} ke Google Drive?`)) gdriveBackupProcess(type); return; }
     Swal.fire({
-        title:'☁️ Backup ke Google Drive',
+        title:'Backup ke Google Drive',
         html:`Upload <strong>${labels[type]}</strong> ke Drive akan dimulai.<br><small>Jangan tutup halaman ini.</small>`,
         icon:'question',showCancelButton:true,confirmButtonColor:'#2563eb',cancelButtonColor:'#6b7280',
         confirmButtonText:'Ya, Backup',cancelButtonText:'Batal'
@@ -1289,7 +1289,7 @@ function gdriveBackupProcess(type) {
             if(data.result?.arsip){const a=data.result.arsip;html+=`<br><span class="text-xs block mt-1">📁 Arsip: ${a.success} berhasil, ${a.skipped} dilewati, ${a.failed} gagal</span>`;}
             if(data.result?.disposisi){const d=data.result.disposisi;html+=`<span class="text-xs block">📎 Disposisi: ${d.success} berhasil, ${d.skipped} dilewati, ${d.failed} gagal</span>`;}
             resultEl.innerHTML=html;
-            if(typeof Swal!=='undefined') Swal.fire({icon:'success',title:'✅ Selesai',text:data.message,timer:3000,showConfirmButton:false,toast:true,position:'top-end'});
+            if(typeof Swal!=='undefined') Swal.fire({icon:'success',title:'Selesai',text:data.message,timer:3000,showConfirmButton:false,toast:true,position:'top-end'});
         } else {
             resultEl.className='rounded-lg p-4 text-sm bg-red-50 border border-red-200 text-red-800';
             resultEl.innerHTML=`❌ <strong>Gagal:</strong> ${data.message}`;

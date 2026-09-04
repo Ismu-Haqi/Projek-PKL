@@ -119,7 +119,7 @@ class LoginController extends Controller
                 default => 'User'
             };
             
-            $welcomeMessage = $greeting . ', ' . $user->name . '! Selamat datang di GANDARIA - Sistem Arsip Digital Diskominfo Batola.';
+            $welcomeMessage = $greeting . ', ' . $user->name . '!';
             
             // ✅ UPDATED: Redirect sesuai role dengan intended (termasuk pimpinan)
             if ($user->role === 'admin') {
@@ -151,37 +151,12 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        $userName = Auth::user()->name ?? 'User';
-        $userRole = Auth::user()->role ?? 'user';
-        $currentHour = now()->format('H');
-        
-        // Ucapan sesuai waktu
-        $farewell = '';
-        if ($currentHour >= 5 && $currentHour < 12) {
-            $farewell = 'Selamat beraktivitas';
-        } elseif ($currentHour >= 12 && $currentHour < 15) {
-            $farewell = 'Selamat beristirahat';
-        } elseif ($currentHour >= 15 && $currentHour < 18) {
-            $farewell = 'Semoga hari Anda menyenangkan';
-        } else {
-            $farewell = 'Selamat beristirahat';
-        }
-        
-        // ✅ Role-specific goodbye message (optional)
-        $roleMessage = match($userRole) {
-            'admin' => 'Terima kasih telah mengelola sistem GANDARIA.',
-            'staff' => 'Terima kasih atas kontribusi Anda hari ini.',
-            'pimpinan' => 'Terima kasih telah menggunakan Dashboard Pimpinan.',
-            default => 'Terima kasih telah menggunakan GANDARIA.'
-        };
-        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // ✅ PESAN LOGOUT DENGAN UCAPAN
         return redirect()->route('login')
-            ->with('success', 'Terima kasih, ' . $userName . '! Anda telah berhasil keluar dari sistem. ' . $farewell . '!');
+            ->with('success', 'Anda berhasil keluar.');
     }
 
     /**

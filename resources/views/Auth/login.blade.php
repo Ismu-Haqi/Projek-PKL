@@ -7,6 +7,7 @@
     <title>Login - GANDARIA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
@@ -168,38 +169,77 @@
                 <h2 class="login-title text-2xl md:text-3xl font-bold text-gray-800 text-center mb-4">LOGIN AKUN</h2>
 
                 @if($errors->any() || session('login_error') || session('password_error') || session('warning') || session('success'))
-                    <div class="mb-4">
-                        @if($errors->any())
-                            <div class="p-3 mb-2 text-sm text-red-800 bg-red-100 rounded-xl border border-red-200">
-                                <ul class="list-disc list-inside">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if(session('login_error'))
-                            <div class="p-3 mb-2 text-sm text-red-800 bg-red-100 rounded-xl border border-red-200">
-                                <i class="fas fa-exclamation-circle mr-1"></i> {{ session('login_error') }}
-                            </div>
-                        @endif
-                        @if(session('password_error'))
-                            <div class="p-3 mb-2 text-sm text-red-800 bg-red-100 rounded-xl border border-red-200">
-                                <i class="fas fa-key mr-1"></i> {{ session('password_error') }}
-                            </div>
-                        @endif
-                        @if(session('warning'))
-                            <div class="p-3 mb-2 text-sm text-yellow-800 bg-yellow-100 rounded-xl border border-yellow-200">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('warning') }}
-                            </div>
-                        @endif
-                        @if(session('success'))
-                            <div class="p-3 mb-2 text-sm text-green-800 bg-green-100 rounded-xl border border-green-200">
-                                <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
-                            </div>
-                        @endif
-                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            @if($errors->has('captcha'))
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Captcha Salah',
+                                    text: @json($errors->first('captcha')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Coba Lagi'
+                                });
+                            @elseif($errors->has('email'))
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Username Belum Diisi',
+                                    text: @json($errors->first('email')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Oke'
+                                });
+                            @elseif($errors->has('password'))
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Password Belum Diisi',
+                                    text: @json($errors->first('password')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Oke'
+                                });
+                            @elseif($errors->any())
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Data Belum Lengkap',
+                                    text: @json($errors->first()),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Oke'
+                                });
+                            @elseif(session('login_error'))
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Username Tidak Ditemukan',
+                                    text: @json(session('login_error')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Coba Lagi'
+                                });
+                            @elseif(session('password_error'))
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Password Salah',
+                                    text: @json(session('password_error')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Coba Lagi'
+                                });
+                            @elseif(session('warning'))
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Perhatian',
+                                    text: @json(session('warning')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Mengerti'
+                                });
+                            @elseif(session('success'))
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: @json(session('success')),
+                                    confirmButtonColor: '#0284c7',
+                                    confirmButtonText: 'Oke'
+                                });
+                            @endif
+                        });
+                    </script>
                 @endif
+                
                 
                 <form method="POST" action="{{ route('login') }}" class="form-spacing space-y-4 md:space-y-5">
                     @csrf
@@ -329,7 +369,7 @@
             return false;
         }
         
-        // PENGGANTI SWEETALERT (Menggunakan Native Javascript agar 0 lag)
+        // Validasi captcha sisi klien sebelum submit (SweetAlert)
         document.querySelector('form').addEventListener('submit', function(e) {
             const email = document.querySelector('input[name="email"]').value.trim();
             const password = document.querySelector('input[name="password"]').value;
@@ -337,7 +377,13 @@ const captcha = document.getElementById('captchaInput').value.trim();
             
             if (!validateCaptcha()) {
                 e.preventDefault();
-                alert('Peringatan: Kode captcha yang Anda masukkan salah. Silakan coba lagi.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Captcha Salah',
+                    text: 'Kode captcha yang Anda masukkan salah. Silakan coba lagi.',
+                    confirmButtonColor: '#0284c7',
+                    confirmButtonText: 'Coba Lagi'
+                });
                 return false;
             }
             

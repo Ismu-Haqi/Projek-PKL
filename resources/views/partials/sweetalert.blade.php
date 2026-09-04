@@ -381,6 +381,166 @@
     };
 
     // ========================================
+    // ✅ FUNCTION: CONFIRM TOGGLE FAVORIT (NO STUCK VERSION)
+    // ========================================
+    window.confirmToggleFavorite = function(button, isFavorite, title = 'arsip ini') {
+        if (window.SwalState.isProcessing) return false;
+
+        const form = button?.closest('form');
+        if (!form) {
+            console.error('❌ Form tidak ditemukan');
+            return false;
+        }
+
+        if (typeof Swal === 'undefined') {
+            form.submit();
+            return false;
+        }
+
+        window.SwalState.forceClose();
+
+        setTimeout(() => {
+            Swal.fire({
+                title: isFavorite ? 'Hapus dari Favorit?' : 'Tambahkan ke Favorit?',
+                text: title,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isFavorite ? '#dc2626' : '#eab308',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: isFavorite ? 'Ya, Hapus' : 'Ya, Tambahkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                focusCancel: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                customClass: {
+                    popup: 'animated-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.SwalState.isProcessing = true;
+
+                    Swal.fire({
+                        title: 'Sedang Memproses',
+                        html: `
+                            <div class="loading-smooth-container">
+                                <div class="spinner-wrapper">
+                                    <i class="fas fa-spinner fa-pulse"></i>
+                                </div>
+                                <p class="loading-text">Mohon tunggu...</p>
+                                <div class="loading-progress">
+                                    <div class="loading-progress-bar"></div>
+                                </div>
+                            </div>
+                        `,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        customClass: {
+                            popup: 'loading-popup-smooth'
+                        },
+                        didOpen: () => {
+                            const progressBar = document.querySelector('.loading-progress-bar');
+                            if (progressBar) {
+                                setTimeout(() => { progressBar.style.width = '100%'; }, 100);
+                            }
+                        }
+                    });
+
+                    button.disabled = true;
+
+                    setTimeout(() => {
+                        form.submit();
+                    }, 800);
+                } else {
+                    window.SwalState.forceClose();
+                }
+            }).catch(() => {
+                window.SwalState.forceClose();
+            });
+        }, 100);
+
+        return false;
+    };
+
+    // ========================================
+    // ✅ FUNCTION: CONFIRM DOWNLOAD (SATU LOADING SAJA)
+    // ========================================
+    window.confirmDownload = function(downloadUrl, fileName = 'file') {
+        if (window.SwalState.isProcessing) return false;
+
+        if (typeof Swal === 'undefined') {
+            window.location.href = downloadUrl;
+            return false;
+        }
+
+        window.SwalState.forceClose();
+
+        setTimeout(() => {
+            Swal.fire({
+                title: 'Download File?',
+                text: fileName,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Download',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                customClass: {
+                    popup: 'animated-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.SwalState.isProcessing = true;
+
+                    // Satu loading singkat, lalu langsung tutup setelah file mulai diunduh
+                    Swal.fire({
+                        title: 'Menyiapkan File...',
+                        html: `
+                            <div class="loading-smooth-container">
+                                <div class="spinner-wrapper">
+                                    <i class="fas fa-spinner fa-pulse"></i>
+                                </div>
+                                <p class="loading-text">Mohon tunggu...</p>
+                                <div class="loading-progress">
+                                    <div class="loading-progress-bar"></div>
+                                </div>
+                            </div>
+                        `,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        customClass: {
+                            popup: 'loading-popup-smooth'
+                        },
+                        didOpen: () => {
+                            const progressBar = document.querySelector('.loading-progress-bar');
+                            if (progressBar) {
+                                setTimeout(() => { progressBar.style.width = '100%'; }, 100);
+                            }
+                        }
+                    });
+
+                    window.location.href = downloadUrl;
+
+                    setTimeout(() => {
+                        window.SwalState.forceClose();
+                    }, 1000);
+                } else {
+                    window.SwalState.forceClose();
+                }
+            }).catch(() => {
+                window.SwalState.forceClose();
+            });
+        }, 100);
+
+        return false;
+    };
+
+    // ========================================
     // UTILITY FUNCTIONS
     // ========================================
     

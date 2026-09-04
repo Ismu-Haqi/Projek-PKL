@@ -500,16 +500,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
                     </svg>
                     <span>Arsip Digital</span>
-                    @php
-                        $retensiPerluTindakAdmin = \App\Models\Archive::whereNotNull('tanggal_retensi')
-                            ->whereDate('tanggal_retensi', '<=', now()->addDays(30)->toDateString())
-                            ->count();
-                    @endphp
-                    @if($retensiPerluTindakAdmin > 0)
-                    <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        {{ $retensiPerluTindakAdmin }}
-                    </span>
-                    @endif
                 </a>
                 
                 <a href="{{ route('admin.arsip.favorit') }}" class="sidebar-link {{ Request::routeIs('admin.arsip.favorit') ? 'active' : '' }}">
@@ -524,13 +514,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <span>Disposisi</span>
-                </a>
-                
-                <a href="{{ route('admin.notifikasi.index') }}" class="sidebar-link {{ Request::routeIs('admin.notifikasi.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                    </svg>
-                    <span>Notifikasi</span>
                 </a>
                 
                 <a href="{{ route('admin.aset.index') }}" class="sidebar-link {{ Request::routeIs('admin.aset.*') && !Request::routeIs('admin.peminjaman.*') ? 'active' : '' }}">
@@ -682,10 +665,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                     <span>Pengajuan TTE</span>
-                    @php $disetujui = \App\Models\LaporanPengajuan::where('diajukan_oleh', Auth::id())->where('status','disetujui')->count(); @endphp
-                    @if($disetujui > 0)
-                    <span class="ml-auto bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ $disetujui }}</span>
-                    @endif
                 </a>
                 
                 <a href="{{ route('admin.pengaturan.index') }}" class="sidebar-link {{ Request::routeIs('admin.pengaturan.*') ? 'active' : '' }}">
@@ -869,136 +848,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    {{-- @include('partials.sweetalert') --}}
-    
-    {{-- GLOBAL DELETE & LOGOUT CONFIRMATION FUNCTIONS --}}
-    <script>
-        function confirmDelete(button, message = 'Data akan dihapus permanen!') {
-            const form = button.closest('form');
-            
-            if (!form) {
-                console.error('❌ Error: Form tidak ditemukan!');
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error Sistem',
-                        text: 'Form tidak ditemukan. Silakan refresh halaman atau hubungi administrator.',
-                        confirmButtonColor: '#dc2626',
-                        allowOutsideClick: true
-                    });
-                } else {
-                    alert('Form tidak ditemukan!');
-                }
-                return false;
-            }
-            
-            if (typeof Swal === 'undefined') {
-                if (confirm('Yakin ingin menghapus?\n\n' + message)) {
-                    form.submit();
-                }
-                return;
-            }
-            
-            Swal.fire({
-                title: '⚠️ Konfirmasi Hapus',
-                html: `
-                    <div class="text-left">
-                        <p class="text-gray-700 mb-2">${message}</p>
-                        <p class="text-sm text-red-600 font-semibold">Data yang dihapus <strong>TIDAK DAPAT</strong> dikembalikan!</p>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Ya, Hapus!',
-                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-                reverseButtons: true,
-                focusCancel: true,
-                allowOutsideClick: true,
-                allowEscapeKey: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Menghapus Data...',
-                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
-                    form.submit();
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    Swal.close();
-                } else {
-                    Swal.close();
-                }
-            }).catch((error) => {
-                console.error('SweetAlert Error:', error);
-                Swal.close();
-            });
-            
-            return false;
-        }
-
-        function confirmLogout() {
-            if (typeof Swal === 'undefined') {
-                if (confirm('Keluar dari sistem?')) {
-                    document.getElementById('logoutForm').submit();
-                }
-                return;
-            }
-
-            Swal.fire({
-                title: '🚪 Keluar dari Sistem?',
-                text: 'Anda akan keluar dari GANDARIA - Sistem Arsip Digital Diskominfo Batola',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-sign-out-alt mr-2"></i> Ya, Keluar',
-                cancelButtonText: '<i class="fas fa-times mr-2"></i> Batal',
-                reverseButtons: true,
-                allowOutsideClick: true,
-                allowEscapeKey: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Logging Out...',
-                        html: '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-3"></i><p>Mohon tunggu sebentar</p></div>',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        allowEnterKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    const logoutForm = document.getElementById('logoutForm');
-                    if (logoutForm) {
-                        logoutForm.submit();
-                    } else {
-                        console.error('Logout form not found!');
-                        Swal.close();
-                    }
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    Swal.close();
-                } else {
-                    Swal.close();
-                }
-            }).catch((error) => {
-                console.error('SweetAlert Error:', error);
-                Swal.close();
-            });
-        }
-    </script>
+    @include('partials.sweetalert')
     
     {{-- Toggle Sidebar, Notification, Profile Scripts --}}
     <script>

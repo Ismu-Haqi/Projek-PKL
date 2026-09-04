@@ -352,8 +352,8 @@ class ArchiveController extends Controller
 
             $fileCount = count($uploadedFiles);
             $successMessage = $fileCount > 1 
-                ? "Data arsip berhasil disimpan dengan {$fileCount} file ke sistem Diskominfo Batola!" 
-                : "Data arsip \"{$validated['judul']}\" berhasil disimpan ke sistem Diskominfo Batola!";
+                ? "Arsip berhasil disimpan ({$fileCount} file)." 
+                : "Arsip berhasil disimpan.";
 
             // Redirect based on role
             $routeName = $user->role === 'admin' ? 'admin.arsip.index' : 'staff.arsip.index';
@@ -502,7 +502,7 @@ class ArchiveController extends Controller
             $archive->update($validated);
 
             return redirect()->route('admin.arsip.show', $archive->id)
-                           ->with('success', 'Data arsip "' . $archive->judul . '" berhasil diperbarui dalam sistem!');
+                           ->with('success', 'Arsip berhasil diperbarui.');
         } catch (\Exception $e) {
             return redirect()->back()
                            ->with('error', 'Gagal memperbarui data arsip. Error: ' . $e->getMessage())
@@ -531,7 +531,7 @@ class ArchiveController extends Controller
             $archive->delete();
 
             return redirect()->route('admin.arsip.index')
-                           ->with('success', 'Arsip "' . $judulArsip . '" berhasil dihapus dari sistem Diskominfo Batola!');
+                           ->with('success', 'Arsip berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->back()
                            ->with('error', 'Gagal menghapus arsip dari sistem. Error: ' . $e->getMessage());
@@ -678,6 +678,6 @@ class ArchiveController extends Controller
         $surat->status = 'diarsipkan'; 
         $surat->save();
 
-        return back()->with('success', 'Dokumen berhasil dikunci dan resmi disimpan ke dalam Laci Arsip Negara!');
+        return back()->with('success', 'Dokumen berhasil diarsipkan.');
     }
 }

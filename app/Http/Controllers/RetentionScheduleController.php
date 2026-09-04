@@ -120,7 +120,7 @@ class RetentionScheduleController extends Controller
         $this->hitungUlangArsipTerkait($schedule);
 
         return redirect()->route('admin.retensi.index')
-            ->with('success', 'Jadwal Retensi Arsip berhasil diperbarui, dan retensi arsip terkait telah dihitung ulang.');
+            ->with('success', 'Jadwal retensi berhasil diperbarui.');
     }
 
     public function destroy($id)

@@ -333,7 +333,7 @@ function showResetPasswordModal() {
     }
 
     Swal.fire({
-        title: '🔑 Reset Password User',
+        title: 'Reset Password User',
         html: `
             <form id="resetPasswordForm" action="{{ route('admin.user.reset-password', $user->id) }}" method="POST">
                 @csrf
@@ -462,7 +462,7 @@ function confirmDeleteUserShow(userName, userEmail) {
     }
 
     Swal.fire({
-        title: '⚠️ Hapus User?',
+        title: 'Hapus User?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>

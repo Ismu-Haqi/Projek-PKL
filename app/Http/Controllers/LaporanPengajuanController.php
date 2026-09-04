@@ -93,7 +93,7 @@ class LaporanPengajuanController extends Controller
 
         $this->whatsapp->sendToMany($pimpinanList->pluck('phone')->all(), $pesanWa);
 
-        return back()->with('success', "✅ {$judul} berhasil diajukan ke pimpinan untuk divalidasi TTE.");
+        return back()->with('success', 'Surat berhasil diajukan.');
     }
 
     // ══════════════════════════════════════════════════════
@@ -237,7 +237,7 @@ class LaporanPengajuanController extends Controller
             'is_read' => false,
         ]);
 
-        return back()->with('success', "✅ {$pengajuan->judul} berhasil disetujui dan TTE dibubuhkan.");
+        return back()->with('success', 'Surat berhasil disetujui.');
     }
 
     // ══════════════════════════════════════════════════════

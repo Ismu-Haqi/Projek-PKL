@@ -16,7 +16,7 @@ class SuratController extends Controller
         $surat->status = 'diarsipkan'; 
         $surat->save();
 
-        return back()->with('success', 'Dokumen berhasil disimpan ke dalam Laci Arsip!');
+        return back()->with('success', 'Dokumen berhasil disimpan.');
     }
 
 } 

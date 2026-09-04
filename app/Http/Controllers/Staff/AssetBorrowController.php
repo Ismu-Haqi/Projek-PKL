@@ -151,7 +151,7 @@ class AssetBorrowController extends Controller
             DB::commit();
             
             return redirect()->route('staff.peminjaman.index')
-                ->with('success', 'Pengajuan peminjaman berhasil dikirim! Tunggu persetujuan admin.');
+                ->with('success', 'Pengajuan peminjaman berhasil dikirim.');
             
         } catch (\Exception $e) {
             DB::rollBack();

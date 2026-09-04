@@ -6,10 +6,50 @@
 <div class="p-6">
     
     {{-- MAIN HEADER DASHBOARD --}}
-    <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl text-white mb-6 shadow-lg card-animate">
-        <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! </h1>
-        <p class="text-yellow-100">GANDARIA Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
+    <div id="welcomeBannerWrap" class="welcome-banner-wrap mb-6">
+        <div id="welcomeBanner" class="bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl text-white shadow-lg card-animate welcome-banner-inner">
+            <h1 class="text-3xl font-bold mb-2">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}! </h1>
+            <p class="text-yellow-100">GANDARIA Sistem pengelolaan arsip dan data aset terpadu, terstruktur, informatif, dan akuntabel</p>
+        </div>
     </div>
+
+    <style>
+        /* Animasi menghilang mirip SweetAlert, 2 tahap supaya tidak ada sisa terpotong:
+           1) Isi banner (teks, warna, bayangan) memudar dulu sampai benar-benar transparan
+           2) Baru setelah itu ruangnya ditutup (collapse), saat sudah tidak terlihat sama sekali */
+        .welcome-banner-wrap {
+            overflow: hidden;
+            max-height: 300px;
+            transition: max-height 0.35s ease, margin-bottom 0.35s ease;
+        }
+        .welcome-banner-wrap.welcome-banner-collapse {
+            max-height: 0;
+            margin-bottom: 0;
+        }
+        .welcome-banner-inner {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .welcome-banner-inner.welcome-banner-fade-out {
+            opacity: 0;
+            transform: scale(0.92);
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            const inner = document.getElementById('welcomeBanner');
+            const wrap  = document.getElementById('welcomeBannerWrap');
+            if (!inner || !wrap) return;
+
+            // Tahap 1: memudar sampai benar-benar tidak terlihat
+            inner.classList.add('welcome-banner-fade-out');
+
+            // Tahap 2: setelah benar-benar transparan, baru tutup ruangnya
+            setTimeout(function () {
+                wrap.classList.add('welcome-banner-collapse');
+            }, 260);
+        }, 4000);
+    </script>
 
     {{-- REMINDER PERAWATAN H-7 --}}
     @include('partials.reminder-perawatan')

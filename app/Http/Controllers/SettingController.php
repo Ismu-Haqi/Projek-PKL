@@ -241,7 +241,7 @@ class SettingController extends Controller
             \Artisan::call('view:clear');
             \Artisan::call('cache:clear');
 
-            return back()->with('success', 'Pengaturan tampilan berhasil diperbarui! Refresh halaman (Ctrl+Shift+R) untuk melihat perubahan.');
+            return back()->with('success', 'Pengaturan tampilan berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaturan tampilan: ' . $e->getMessage());
         }

@@ -182,7 +182,7 @@
         }
 
         Swal.fire({
-            title: '🗑️ Hapus Notifikasi?',
+            title: 'Hapus Notifikasi?',
             html: `
                 <div class="text-left">
                     <p class="text-gray-700 mb-2">Notifikasi "<strong>${notificationTitle}</strong>" akan dihapus</p>
@@ -220,7 +220,7 @@
         }
 
         Swal.fire({
-            title: '✅ Tandai Semua Sudah Dibaca?',
+            title: 'Tandai Semua Sudah Dibaca?',
             text: 'Semua notifikasi akan ditandai sebagai sudah dibaca',
             icon: 'question',
             showCancelButton: true,
@@ -252,7 +252,7 @@
         }
 
         Swal.fire({
-            title: '🗑️ Hapus Notifikasi yang Sudah Dibaca?',
+            title: 'Hapus Notifikasi yang Sudah Dibaca?',
             html: `
                 <div class="text-left">
                     <p class="text-gray-700 mb-3">Semua notifikasi yang sudah dibaca akan dihapus</p>

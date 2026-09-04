@@ -24,24 +24,19 @@ class GoogleDriveService
     // ============================================================
 
     /**
-     * Inisialisasi Google Client dengan OAuth 2.0 Refresh Token
+     * Inisialisasi Google Client dengan Service Account
      * Throw exception jika credentials tidak ditemukan / tidak valid
      */
     public function init(): static
     {
-        $oauthCredPath = storage_path('app/oauth-credentials.json');
-        $refreshToken  = env('GOOGLE_OAUTH_REFRESH_TOKEN');
+        $credPath = config('google-drive.credentials_path');
 
-        if (!file_exists($oauthCredPath)) {
+        if (!$credPath || !file_exists($credPath)) {
             throw new \RuntimeException(
-                "File oauth-credentials.json tidak ditemukan di storage/app/.\n" .
-                "Download OAuth Client ID JSON dari Google Cloud Console dan simpan di lokasi tersebut."
-            );
-        }
-
-        if (empty($refreshToken)) {
-            throw new \RuntimeException(
-                "GOOGLE_OAUTH_REFRESH_TOKEN belum diisi di file .env."
+                "File service account JSON tidak ditemukan di {$credPath}.\n" .
+                "Download JSON key dari Google Cloud Console (IAM & Admin > Service Accounts) " .
+                "dan simpan di storage/app/google-credentials.json, atau sesuaikan " .
+                "GOOGLE_SERVICE_ACCOUNT_JSON di file .env."
             );
         }
 
@@ -51,18 +46,10 @@ class GoogleDriveService
             );
         }
 
-        $credentials = json_decode(file_get_contents($oauthCredPath), true);
-        $cred        = $credentials['installed'] ?? $credentials['web'];
-
         $this->client = new \Google\Client();
         $this->client->setApplicationName('GANDARIA-Backup');
-        $this->client->setClientId($cred['client_id']);
-        $this->client->setClientSecret($cred['client_secret']);
+        $this->client->setAuthConfig($credPath);
         $this->client->addScope(\Google\Service\Drive::DRIVE);
-        $this->client->setAccessType('offline');
-
-        // Set token dari refresh token
-        $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
 
         $this->driveService = new \Google\Service\Drive($this->client);
 
@@ -74,8 +61,10 @@ class GoogleDriveService
      */
     public function isConfigured(): bool
     {
-        return file_exists(storage_path('app/oauth-credentials.json'))
-            && !empty(env('GOOGLE_OAUTH_REFRESH_TOKEN'))
+        $credPath = config('google-drive.credentials_path');
+
+        return $credPath
+            && file_exists($credPath)
             && !empty(config('google-drive.folder_id'));
     }
 

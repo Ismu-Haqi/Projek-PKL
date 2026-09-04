@@ -276,7 +276,7 @@ function confirmDeleteUser(button, userName, userEmail) {
     }
 
     Swal.fire({
-        title: '⚠️ Hapus User?',
+        title: 'Hapus User?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">User <strong class="text-red-600">${userName}</strong> akan dihapus permanen</p>

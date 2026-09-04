@@ -129,7 +129,7 @@ class UserController extends Controller
         User::create($validated);
 
         return redirect()->route('admin.user.index')
-            ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan ke sistem!');
+            ->with('success', 'User "' . $validated['name'] . '" berhasil ditambahkan!');
     }
 
     /**
@@ -270,7 +270,7 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.user.index')
-            ->with('success', 'User "' . $userName . '" berhasil dihapus dari sistem!');
+            ->with('success', 'User "' . $userName . '" berhasil dihapus!');
     }
 
     /**

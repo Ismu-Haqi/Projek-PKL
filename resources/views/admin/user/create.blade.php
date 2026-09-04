@@ -257,7 +257,7 @@ function generatePassword() {
     }
 
     Swal.fire({
-        title: '🔐 Generate Password Otomatis?',
+        title: 'Generate Password Otomatis?',
         html: `
             <div class="text-left">
                 <p class="text-gray-700 mb-3">Password akan di-generate secara acak dengan ketentuan:</p>
@@ -292,7 +292,7 @@ function generatePassword() {
             document.getElementById('password_confirmation').type = 'text';
             
             Swal.fire({
-                title: '✅ Password Berhasil Di-generate!',
+                title: 'Password Berhasil Di-generate!',
                 html: `
                     <div class="text-left">
                         <p class="text-gray-700 mb-3">Password yang di-generate:</p>

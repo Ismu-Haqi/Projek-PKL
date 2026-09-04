@@ -101,7 +101,7 @@ class JadwalRetensiArsipController extends Controller
         }
 
         return redirect()->route('admin.jadwal-retensi.index')
-            ->with('success', 'Klasifikasi berhasil diperbarui. Tanggal retensi arsip terkait ikut disesuaikan.');
+            ->with('success', 'Klasifikasi berhasil diperbarui.');
     }
 
     // ========================
